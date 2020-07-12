@@ -1,5 +1,8 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
+import AsyncStorage from '@react-native-community/async-storage';
 import {useNavigation} from '@react-navigation/native';
+
+import api from '../../services/api';
 
 import photo from '../../assets/photo.jpg';
 
@@ -136,35 +139,90 @@ interface IContacts {
   messageDate: string;
 }
 
+interface IPrivateMessages {
+  id: number;
+  username: string;
+  login: string;
+  photo: string;
+  status?: string;
+  message: string;
+  image?: string;
+  created_at: Date;
+}
+
 const Chat = () => {
+  // States
+  const [privateMessages, setPrivateMessages] = useState<IPrivateMessages[]>(
+    [],
+  );
+
   // Navigation
   const navigation = useNavigation();
 
-  function handleNavigateToMessages(contactData: IContacts) {
-    return navigation.navigate('Messages', contactData);
+  function handleNavigateToMessages(privateMessageData: IPrivateMessages[]) {
+    return navigation.navigate('Messages', privateMessageData);
   }
+
+  function handleSerializedPrivateMessage(messageData: IPrivateMessages[]) {
+    const distinctData = messageData.filter(
+      (item, index, array) =>
+        array.map((obj) => obj.id).indexOf(item.id) === index,
+    );
+
+    return distinctData.map((item) => ({
+      id: item.id,
+      username: item.username,
+      login: item.login,
+      photo: item.photo,
+      status: item.status,
+      image: item.image,
+      message:
+        item.message.length < 33
+          ? item.message
+          : item.message.substr(0, 33) + '...',
+      created_at: `${new Date(item.created_at).getHours()}:${new Date(
+        item.created_at,
+      ).getMinutes()}`,
+    }));
+  }
+
+  useEffect(() => {
+    async function handleGetPrivateMessages() {
+      // const getMyData = await AsyncStorage.getItem('@rocketMessages/userData');
+
+      // const [myId] = JSON.parse(String(getMyData));
+
+      // const messages = await api.get(`/privatemessages/${myId}`);
+      const messages = await api.get('/privatemessages/1');
+      const response = handleSerializedPrivateMessage(messages.data);
+
+      setPrivateMessages(response);
+    }
+
+    handleGetPrivateMessages();
+  }, []);
 
   return (
     <Wrapper>
       <Container>
         <Title>Rocket Messages</Title>
         <ListContacts>
-          {contacts.map((item) => (
+          {privateMessages.map((item) => (
             <ContactContainer
-              key={item.key}
+              key={item.id}
               onPress={() => handleNavigateToMessages(item)}>
-              <ContactImage source={photo} />
+              <ContactImage source={{uri: String(item.photo)}} />
               <ContactInfo>
                 <ContactInfoUser>
-                  <ContactName>{item.name}</ContactName>
-                  <ContactLastMessage>{item.lastMessage}</ContactLastMessage>
+                  <ContactName>{item.username}</ContactName>
+                  <ContactLastMessage>{item.message}</ContactLastMessage>
                 </ContactInfoUser>
 
                 <ContactNotificationMessage>
-                  <ContactTotalMessages totalMessage={item.totalMessage}>
-                    {item.totalMessage}
+                  <ContactTotalMessages totalMessage={0}>
+                    {0}
                   </ContactTotalMessages>
-                  <ContactMessageDate>{item.messageDate}</ContactMessageDate>
+                  <ContactMessageDate>{item.created_at}</ContactMessageDate>
                 </ContactNotificationMessage>
               </ContactInfo>
             </ContactContainer>

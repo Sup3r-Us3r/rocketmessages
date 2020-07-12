@@ -12,6 +12,7 @@ const routes = Router();
 
 routes.get('/users', UserController.listUsers);
 routes.post('/createuser', UserController.createUser);
+routes.post('/login', UserController.loginRocketMessages);
 
 routes.get('/rooms', RoomController.listRooms);
 routes.post('/createroom', RoomController.createRoom);

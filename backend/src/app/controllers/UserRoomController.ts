@@ -21,15 +21,15 @@ export default new class UserRoomController {
   async insertUserInRoom(req: Request, res: Response) {
     const { user_id, room_id } = req.body as IBodyData;
 
+    console.log(user_id, room_id);
+
     try {
-      const userInRoomExistsAndRoomExists = await knex('tb_user_room as UR')
-        .join('tb_user as U', 'UR.user_id', '=', 'U.id')
-        .join('tb_room as R', 'UR.room_id', '=', 'R.id')
-        .where('U.id', user_id)
-        .andWhere('R.id', user_id)
+      const userInRoomExists = await knex('tb_user_room as UR')
+        .where('UR.user_id', user_id)
+        .andWhere('UR.room_id', room_id)
         .first();
 
-      if (userInRoomExistsAndRoomExists) {
+      if (userInRoomExists) {
         return res.status(409)
           .json({ error: 'Error inserting user inside the room.' });
       }

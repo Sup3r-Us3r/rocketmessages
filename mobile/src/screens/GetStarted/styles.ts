@@ -1,5 +1,5 @@
 import styled from 'styled-components/native';
-import {Platform} from 'react-native';
+import {Platform, Animated} from 'react-native';
 import {RectButton} from 'react-native-gesture-handler';
 
 export const CloseKeyboard = styled.TouchableWithoutFeedback``;
@@ -13,15 +13,13 @@ export const Wrapper = styled.KeyboardAvoidingView.attrs(() => ({
 
 export const Container = styled.View`
   flex: 1;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: space-around;
 `;
 
-export const BackgroundImage = styled.Image.attrs(() => ({
-  resizeMode: 'cover',
-}))`
-  height: 350px;
-  width: 350px;
+export const ContainerGetInfo = styled(Animated.View)`
+  display: flex;
+  align-items: center;
+  width: 100%;
 `;
 
 export const WelcomeMessage = styled.Text`
@@ -31,29 +29,74 @@ export const WelcomeMessage = styled.Text`
   color: #7159c1;
 `;
 
-export const NameInput = styled.TextInput`
+export const UsernameInput = styled.TextInput`
   font-size: 18px;
   color: #333;
-  padding: 15px;
+  padding: 20px 10px 10px 10px;
   border-bottom-width: 2px;
   border-bottom-color: #7159c1;
   width: 80%;
   border-radius: 8px;
 `;
 
-export const ButtonGetStarted = styled(RectButton)`
+export const EmailInput = styled.TextInput`
+  font-size: 18px;
+  color: #333;
+  padding: 20px 10px 10px 10px;
+  border-bottom-width: 2px;
+  border-bottom-color: #7159c1;
+  width: 80%;
+  border-radius: 8px;
+`;
+
+export const PasswordInput = styled.TextInput`
+  font-size: 18px;
+  color: #333;
+  padding: 20px 10px 10px 10px;
+  border-bottom-width: 2px;
+  border-bottom-color: #7159c1;
+  width: 80%;
+  border-radius: 8px;
+`;
+
+export const ForgotPassword = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.4,
+}))`
+  align-self: flex-end;
+  margin-right: 45px;
+`;
+
+export const ForgotPasswordLabel = styled.Text`
+  font-size: 16px;
+  color: #afafaf;
+  margin-top: -13px;
+`;
+
+export const AuthStartAction = styled(RectButton)`
   background: #7159c1;
   padding: 20px;
   width: 80%;
   border-radius: 50px;
-  margin-bottom: 20px;
+  align-self: center;
 `;
 
-export const GetStartedLabel = styled.Text`
+export const AuthStartActionLabel = styled.Text`
   text-align: center;
   font-size: 16px;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: #fff;
+`;
+
+export const AuthActionButton = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.6,
+}))`
+  align-self: center;
+`;
+
+export const AuthActionLabel = styled.Text`
+  font-size: 16px;
+  font-weight: bold;
+  color: #7159c1;
 `;

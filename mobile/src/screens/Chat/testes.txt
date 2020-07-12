@@ -1,0 +1,36 @@
+    const filtered = Array.from(
+      new Set(messageData.map((item) => item.id)),
+    ).map((id) => ({
+      id: id,
+      username: messageData.find((item) => item.id === id)?.username,
+      photo: messageData.find((item) => item.id === id)?.photo,
+      status: messageData.find((item) => item.id === id)?.status,
+      message: messageData.find((item) => item.id === id)?.message,
+      created_at: messageData.find((item) => item.id === id)?.created_at,
+    }));
+
+    javascript get max date in array of objects
+    https://stackoverflow.com/questions/36577205/what-is-the-elegant-way-to-get-the-latest-date-from-array-of-objects-in-client-s
+
+
+    const filtered = [...new Set(messageData.map((item) => item.id))];
+    const filtered = [
+      ...new Set(
+        messageData.map((item) => ({
+          id: item.id,
+          username: item.username,
+          photo: item.photo,
+          status: item.status,
+          message: item.message,
+          created_at: item.created_at,
+        })),
+      ),
+    ];
+
+    const filtered = messageData.filter((obj, pos, arr) => {
+      return arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos;
+    });
+
+    https://ilikekillnerds.com/2016/05/removing-duplicate-objects-array-property-name-javascript/
+
+    https://dba.stackexchange.com/questions/24327/how-to-select-distinct-for-one-column-and-any-in-another-column

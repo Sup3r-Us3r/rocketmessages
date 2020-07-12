@@ -56,14 +56,16 @@ export default new class MessageController {
       const messages = await knex('tb_message as M')
         .join('tb_user as U', 'M.to_user', '=', 'U.id')
         .where('M.from', String(from))
+        .orderBy('M.created_at', 'desc')
         .select(
           'U.id',
           'U.username',
-          'U.login',
+          'U.email',
           'U.photo',
           'U.status',
           'M.message',
           'M.image',
+          'M.created_at',
         );
 
     if (!messages) {
