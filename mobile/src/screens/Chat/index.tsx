@@ -2,12 +2,18 @@ import React, {useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 import {useNavigation} from '@react-navigation/native';
 
+import Toast from '../../config/toastStyles';
+
 import api from '../../services/api';
 
-import photo from '../../assets/photo.jpg';
+import noData from '../../assets/noData.png';
+// import photo from '../../assets/photo.jpg';
 
 import {
   Wrapper,
+  NoMessage,
+  NoMessageBackground,
+  NoMessageLabel,
   Container,
   Title,
   ListContacts,
@@ -130,28 +136,20 @@ const contacts = [
   },
 ];
 
-interface IContacts {
-  key: number;
-  image: string;
-  name: string;
-  lastMessage: string;
-  totalMessage: number;
-  messageDate: string;
-}
-
 interface IPrivateMessages {
   id: number;
   username: string;
-  login: string;
+  email: string;
   photo: string;
   status?: string;
   message: string;
   image?: string;
-  created_at: Date;
+  created_at: string;
 }
 
 const Chat = () => {
   // States
+  const [noMessage, setNoMessage] = useState<boolean>(false);
   const [privateMessages, setPrivateMessages] = useState<IPrivateMessages[]>(
     [],
   );
@@ -159,7 +157,7 @@ const Chat = () => {
   // Navigation
   const navigation = useNavigation();
 
-  function handleNavigateToMessages(privateMessageData: IPrivateMessages[]) {
+  function handleNavigateToMessages(privateMessageData: IPrivateMessages) {
     return navigation.navigate('Messages', privateMessageData);
   }
 
@@ -169,10 +167,10 @@ const Chat = () => {
         array.map((obj) => obj.id).indexOf(item.id) === index,
     );
 
-    return distinctData.map((item) => ({
+    const serialized = distinctData.map((item) => ({
       id: item.id,
       username: item.username,
-      login: item.login,
+      email: item.email,
       photo: item.photo,
       status: item.status,
       image: item.image,
@@ -184,19 +182,39 @@ const Chat = () => {
         item.created_at,
       ).getMinutes()}`,
     }));
+
+    return serialized;
   }
 
   useEffect(() => {
     async function handleGetPrivateMessages() {
-      // const getMyData = await AsyncStorage.getItem('@rocketMessages/userData');
+      try {
+        const getMyData = await AsyncStorage.getItem(
+          '@rocketMessages/userData',
+        );
 
-      // const [myId] = JSON.parse(String(getMyData));
+        const {data} = JSON.parse(String(getMyData));
 
-      // const messages = await api.get(`/privatemessages/${myId}`);
-      const messages = await api.get('/privatemessages/1');
-      const response = handleSerializedPrivateMessage(messages.data);
+        const messages = await api.get<IPrivateMessages[]>(
+          `/privatemessages/${data.id}`,
+        );
 
-      setPrivateMessages(response);
+        if (!messages) {
+          return Toast.error('Erro ao listar mensagens.');
+        }
+
+        if (messages.data.length === 0) {
+          setNoMessage(true);
+        }
+
+        const response = handleSerializedPrivateMessage(messages.data);
+
+        return setPrivateMessages(response);
+      } catch (err) {
+        const {error} = err.response.data;
+
+        return Toast.error(error);
+      }
     }
 
     handleGetPrivateMessages();
@@ -204,31 +222,38 @@ const Chat = () => {
 
   return (
     <Wrapper>
-      <Container>
-        <Title>Rocket Messages</Title>
-        <ListContacts>
-          {privateMessages.map((item) => (
-            <ContactContainer
-              key={item.id}
-              onPress={() => handleNavigateToMessages(item)}>
-              <ContactImage source={{uri: String(item.photo)}} />
-              <ContactInfo>
-                <ContactInfoUser>
-                  <ContactName>{item.username}</ContactName>
-                  <ContactLastMessage>{item.message}</ContactLastMessage>
-                </ContactInfoUser>
+      {noMessage ? (
+        <NoMessage>
+          <NoMessageBackground source={noData} />
+          <NoMessageLabel>Opps nenhuma conversa encontrada!</NoMessageLabel>
+        </NoMessage>
+      ) : (
+        <Container>
+          <Title>Rocket Messages</Title>
+          <ListContacts>
+            {privateMessages.map((item: IPrivateMessages) => (
+              <ContactContainer
+                key={item.id}
+                onPress={() => handleNavigateToMessages(item)}>
+                <ContactImage source={{uri: String(item.photo)}} />
+                <ContactInfo>
+                  <ContactInfoUser>
+                    <ContactName>{item.username}</ContactName>
+                    <ContactLastMessage>{item.message}</ContactLastMessage>
+                  </ContactInfoUser>
 
-                <ContactNotificationMessage>
-                  <ContactTotalMessages totalMessage={0}>
-                    {0}
-                  </ContactTotalMessages>
-                  <ContactMessageDate>{item.created_at}</ContactMessageDate>
-                </ContactNotificationMessage>
-              </ContactInfo>
-            </ContactContainer>
-          ))}
-        </ListContacts>
-      </Container>
+                  <ContactNotificationMessage>
+                    <ContactTotalMessages totalMessage={0}>
+                      {0}
+                    </ContactTotalMessages>
+                    <ContactMessageDate>{item.created_at}</ContactMessageDate>
+                  </ContactNotificationMessage>
+                </ContactInfo>
+              </ContactContainer>
+            ))}
+          </ListContacts>
+        </Container>
+      )}
     </Wrapper>
   );
 };

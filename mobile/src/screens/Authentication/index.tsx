@@ -8,6 +8,8 @@ import Toast from '../../config/toastStyles';
 
 import api from '../../services/api';
 
+import Loading from '../../components/Loading';
+
 import getStartedBackground from '../../assets/getStartedBackground.png';
 
 import {
@@ -33,8 +35,9 @@ interface IFieldsValidation {
   password: string;
 }
 
-const GetStarted = () => {
+const Authentication = () => {
   // States
+  const [loading, setLoading] = useState<boolean>(true);
   const [changeLayout, setChangeLayout] = useState<string>('login');
   const [usernameInput, setUsernameInput] = useState<string>('');
   const [emailInput, setEmailInput] = useState<string>('');
@@ -45,14 +48,15 @@ const GetStarted = () => {
   // Navigation
   const navigation = useNavigation();
 
-  async function handleFieldsValidation(fields: IFieldsValidation) {
+  function handleFieldsValidation(fields: IFieldsValidation) {
     const validation = Yup.object().shape({
-      username: Yup.string(),
+      username:
+        changeLayout === 'login' ? Yup.string() : Yup.string().required(),
       email: Yup.string().email().required(),
       password: Yup.string().required(),
     });
 
-    return await validation.isValid(fields);
+    return validation.isValid(fields);
   }
 
   async function handleSubmitLogin() {
@@ -62,7 +66,7 @@ const GetStarted = () => {
         password: passwordInput,
       };
 
-      const validation = handleFieldsValidation(userData);
+      const validation = await handleFieldsValidation(userData);
 
       if (!validation) {
         return Toast.error('Preenchimento incorreto.');
@@ -76,7 +80,7 @@ const GetStarted = () => {
 
       await AsyncStorage.setItem(
         '@rocketMessages/userData',
-        JSON.stringify(userData),
+        JSON.stringify(response),
       );
 
       return navigation.navigate('BottomTabs');
@@ -95,7 +99,7 @@ const GetStarted = () => {
         password: passwordInput,
       };
 
-      const validation = handleFieldsValidation(userData);
+      const validation = await handleFieldsValidation(userData);
 
       if (!validation) {
         return Toast.error('Preenchimento incorreto.');
@@ -107,7 +111,7 @@ const GetStarted = () => {
         return Toast.error('Erro ao criar usuário.');
       }
 
-      return navigation.navigate('BottomTabs');
+      return setChangeLayout('login');
     } catch (err) {
       const {error} = err.response.data;
 
@@ -115,7 +119,7 @@ const GetStarted = () => {
     }
   }
 
-  async function handleSubmit() {
+  function handleSubmit() {
     if (changeLayout === 'login') {
       handleSubmitLogin();
     } else {
@@ -163,6 +167,32 @@ const GetStarted = () => {
   // };
 
   useEffect(() => {
+    async function handleUserAlreadyLogged() {
+      try {
+        const userData = await AsyncStorage.getItem('@rocketMessages/userData');
+
+        const {data} = JSON.parse(String(userData));
+
+        if (data) {
+          navigation.navigate('BottomTabs');
+        }
+
+        setInterval(() => {
+          setLoading(false);
+        }, 3000);
+      } catch (err) {
+        setInterval(() => {
+          setLoading(false);
+        }, 3000);
+
+        return false;
+      }
+    }
+
+    handleUserAlreadyLogged();
+  }, [navigation]);
+
+  useEffect(() => {
     function handleKeyboardShow() {
       handleImageAnimation();
       handleUpAnimation();
@@ -184,89 +214,94 @@ const GetStarted = () => {
   return (
     // <DismissKeyboard>
     <Wrapper>
-      <Container>
-        <Animated.Image
-          source={getStartedBackground}
-          resizeMode="cover"
-          // eslint-disable-next-line react-native/no-inline-styles
-          style={{
-            alignSelf: 'center',
-            marginTop: -10,
-            height: 350,
-            width: 350,
-            transform: [
-              {
-                translateY: imageAnimation.interpolate({
-                  inputRange: [0, 150],
-                  outputRange: [0, changeLayout === 'login' ? -10 : -30],
-                }),
-              },
-              {
-                scaleX: imageAnimation.interpolate({
-                  inputRange: [0, 150],
-                  outputRange: [1, changeLayout === 'login' ? 0.8 : 0.6],
-                }),
-              },
-              {
-                scaleY: imageAnimation.interpolate({
-                  inputRange: [0, 150],
-                  outputRange: [1, changeLayout === 'login' ? 0.8 : 0.6],
-                }),
-              },
-            ],
-          }}
-        />
+      {loading ? (
+        <Loading />
+      ) : (
+        <Container>
+          <Animated.Image
+            source={getStartedBackground}
+            resizeMode="cover"
+            // eslint-disable-next-line react-native/no-inline-styles
+            style={{
+              alignSelf: 'center',
+              marginTop: -10,
+              height: 350,
+              width: 350,
+              transform: [
+                {
+                  translateY: imageAnimation.interpolate({
+                    inputRange: [0, 150],
+                    outputRange: [0, changeLayout === 'login' ? -10 : -30],
+                  }),
+                },
+                {
+                  scaleX: imageAnimation.interpolate({
+                    inputRange: [0, 150],
+                    outputRange: [1, changeLayout === 'login' ? 0.8 : 0.6],
+                  }),
+                },
+                {
+                  scaleY: imageAnimation.interpolate({
+                    inputRange: [0, 150],
+                    outputRange: [1, changeLayout === 'login' ? 0.8 : 0.6],
+                  }),
+                },
+              ],
+            }}
+          />
 
-        <ContainerGetInfo
-          style={{
-            translateY: upAnimation,
-          }}>
-          <WelcomeMessage>Rocket Messages</WelcomeMessage>
-          {changeLayout === 'register' && (
-            <UsernameInput
-              placeholder="Digite seu nome"
-              onChangeText={setUsernameInput}
+          <ContainerGetInfo
+            style={{
+              translateY: upAnimation,
+            }}>
+            <WelcomeMessage>Rocket Messages</WelcomeMessage>
+            {changeLayout === 'register' && (
+              <UsernameInput
+                placeholder="Digite seu nome"
+                onChangeText={setUsernameInput}
+                autoCorrect={false}
+                onSubmitEditing={Keyboard.dismiss}
+              />
+            )}
+            <EmailInput
+              placeholder="Digite seu email"
+              onChangeText={setEmailInput}
               autoCorrect={false}
               onSubmitEditing={Keyboard.dismiss}
             />
+            <PasswordInput
+              placeholder="Digite sua senha"
+              onChangeText={setPasswordInput}
+              autoCorrect={false}
+              secureTextEntry
+              onSubmitEditing={Keyboard.dismiss}
+            />
+          </ContainerGetInfo>
+
+          {changeLayout === 'login' && (
+            <ForgotPassword>
+              <ForgotPasswordLabel>Esqueci minha senha</ForgotPasswordLabel>
+            </ForgotPassword>
           )}
-          <EmailInput
-            placeholder="Digite seu email"
-            onChangeText={setEmailInput}
-            autoCorrect={false}
-            onSubmitEditing={Keyboard.dismiss}
-          />
-          <PasswordInput
-            placeholder="Digite sua senha"
-            onChangeText={setPasswordInput}
-            autoCorrect={false}
-            onSubmitEditing={Keyboard.dismiss}
-          />
-        </ContainerGetInfo>
 
-        {changeLayout === 'login' && (
-          <ForgotPassword>
-            <ForgotPasswordLabel>Esqueci minha senha</ForgotPasswordLabel>
-          </ForgotPassword>
-        )}
+          <AuthStartAction onPress={handleSubmit}>
+            <AuthStartActionLabel>
+              {changeLayout === 'login' ? 'Entrar' : 'Registrar'}
+            </AuthStartActionLabel>
+          </AuthStartAction>
 
-        <AuthStartAction onPress={handleSubmit}>
-          <AuthStartActionLabel>
-            {changeLayout === 'login' ? 'Entrar' : 'Registrar'}
-          </AuthStartActionLabel>
-        </AuthStartAction>
-
-        <AuthActionButton onPress={handleChangeLayoutToRegister}>
-          <AuthActionLabel>
-            {changeLayout === 'login'
-              ? 'Criar uma conta'
-              : 'Já possuo uma conta'}
-          </AuthActionLabel>
-        </AuthActionButton>
-      </Container>
+          <AuthActionButton onPress={handleChangeLayoutToRegister}>
+            <AuthActionLabel>
+              {changeLayout === 'login'
+                ? 'Criar uma conta'
+                : 'Já possuo uma conta'}
+            </AuthActionLabel>
+          </AuthActionButton>
+        </Container>
+      )}
     </Wrapper>
     // </DismissKeyboard>
   );
 };
 
-export default GetStarted;
+export default Authentication;

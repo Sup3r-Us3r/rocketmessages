@@ -5,6 +5,28 @@ export const Wrapper = styled.SafeAreaView`
   background: #fff;
 `;
 
+export const NoMessage = styled.View`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+`;
+
+export const NoMessageBackground = styled.Image.attrs(() => ({
+  resizeMode: 'cover',
+}))`
+  height: 200px;
+  width: 200px;
+`;
+
+export const NoMessageLabel = styled.Text`
+  margin-top: 10px;
+  font-size: 20px;
+  text-align: center;
+  font-weight: bold;
+  color: #999;
+`;
+
 export const Container = styled.View`
   margin-top: 20px;
   padding: 0 10px;

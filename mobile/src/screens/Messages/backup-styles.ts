@@ -117,8 +117,9 @@ export const ActionLabel = styled.Text`
 `;
 
 export const ChatContainer = styled.ScrollView`
-  /* background: #f3f8ff; */
-  background: #ff0;
+  flex: 1;
+  margin-bottom: 8px;
+  background: #f3f8ff;
 `;
 
 export const ChatContainerMessageSent = styled.View`
