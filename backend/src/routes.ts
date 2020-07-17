@@ -20,7 +20,14 @@ routes.post('/createroom', RoomController.createRoom);
 routes.get('/userinroom', UserRoomController.listUserInRoom);
 routes.post('/insertuserinroom', UserRoomController.insertUserInRoom);
 
-routes.get('/privatemessages/:from', MessageController.listPrivateMessages);
+routes.get(
+  '/latestmessageofcontact/:from',
+  MessageController.listLatestMessageOfContact
+);
+routes.get(
+  '/privatemessages/:from/:to_user',
+  MessageController.listPrivateMessages
+);
 routes.get('/roommessages/:from', MessageController.listRoomMessages);
 routes.post('/message', MessageController.createMessage);
 

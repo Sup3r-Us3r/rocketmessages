@@ -136,7 +136,7 @@ const contacts = [
   },
 ];
 
-interface IPrivateMessages {
+interface ILatestMessageOfContact {
   id: number;
   username: string;
   email: string;
@@ -150,19 +150,25 @@ interface IPrivateMessages {
 const Chat = () => {
   // States
   const [noMessage, setNoMessage] = useState<boolean>(false);
-  const [privateMessages, setPrivateMessages] = useState<IPrivateMessages[]>(
+  const [
+    latestMessageOfContact, setLatestMessageOfContact
+  ] = useState<ILatestMessageOfContact[]>(
     [],
   );
 
   // Navigation
   const navigation = useNavigation();
 
-  function handleNavigateToMessages(privateMessageData: IPrivateMessages) {
-    return navigation.navigate('Messages', privateMessageData);
+  function handleNavigateToMessages(
+    latestMessageOfContactData: ILatestMessageOfContact
+  ) {
+    return navigation.navigate('Messages', latestMessageOfContactData);
   }
 
-  function handleSerializedPrivateMessage(messageData: IPrivateMessages[]) {
-    const distinctData = messageData.filter(
+  function handleSerializedLatestMessage(
+    latestMessageData: ILatestMessageOfContact[]
+  ) {
+    const distinctData = latestMessageData.filter(
       (item, index, array) =>
         array.map((obj) => obj.id).indexOf(item.id) === index,
     );
@@ -187,7 +193,7 @@ const Chat = () => {
   }
 
   useEffect(() => {
-    async function handleGetPrivateMessages() {
+    async function handleGetLatestMessage() {
       try {
         const getMyData = await AsyncStorage.getItem(
           '@rocketMessages/userData',
@@ -195,21 +201,21 @@ const Chat = () => {
 
         const {data} = JSON.parse(String(getMyData));
 
-        const messages = await api.get<IPrivateMessages[]>(
-          `/privatemessages/${data.id}`,
+        const message = await api.get<ILatestMessageOfContact[]>(
+          `/latestmessageofcontact/${data.id}`,
         );
 
-        if (!messages) {
-          return Toast.error('Erro ao listar mensagens.');
+        if (!message) {
+          return Toast.error('Erro ao listar preview.');
         }
 
-        if (messages.data.length === 0) {
-          setNoMessage(true);
+        if (message.data.length === 0) {
+          return setNoMessage(true);
         }
 
-        const response = handleSerializedPrivateMessage(messages.data);
+        const response = handleSerializedLatestMessage(message.data);
 
-        return setPrivateMessages(response);
+        return setLatestMessageOfContact(response);
       } catch (err) {
         const {error} = err.response.data;
 
@@ -217,7 +223,7 @@ const Chat = () => {
       }
     }
 
-    handleGetPrivateMessages();
+    handleGetLatestMessage();
   }, []);
 
   return (
@@ -231,7 +237,7 @@ const Chat = () => {
         <Container>
           <Title>Rocket Messages</Title>
           <ListContacts>
-            {privateMessages.map((item: IPrivateMessages) => (
+            {latestMessageOfContact.map((item: ILatestMessageOfContact) => (
               <ContactContainer
                 key={item.id}
                 onPress={() => handleNavigateToMessages(item)}>

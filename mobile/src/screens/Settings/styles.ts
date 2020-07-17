@@ -1,6 +1,5 @@
 import styled from 'styled-components/native';
 import {Platform} from 'react-native';
-import {RectButton} from 'react-native-gesture-handler';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
 export const CloseKeyboard = styled.TouchableWithoutFeedback``;
@@ -61,7 +60,9 @@ export const ChangeImage = styled(EvilIcons).attrs(() => ({
   text-align: center;
 `;
 
-export const ButtonApplySettings = styled(RectButton)`
+export const ButtonApplySettings = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.8,
+}))`
   flex-direction: row;
   align-items: center;
   justify-content: center;

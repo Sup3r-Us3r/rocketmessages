@@ -1,6 +1,5 @@
 import styled from 'styled-components/native';
 import {Platform, Animated} from 'react-native';
-import {RectButton} from 'react-native-gesture-handler';
 
 export const CloseKeyboard = styled.TouchableWithoutFeedback``;
 
@@ -72,7 +71,9 @@ export const ForgotPasswordLabel = styled.Text`
   margin-top: -13px;
 `;
 
-export const AuthStartAction = styled(RectButton)`
+export const AuthStartAction = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.8,
+}))`
   background: #7159c1;
   padding: 20px;
   width: 80%;

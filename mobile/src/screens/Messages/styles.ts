@@ -1,14 +1,12 @@
 import styled from 'styled-components/native';
 import {StyleSheet} from 'react-native';
-import {RectButton} from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export const CloseKeyboard = styled.TouchableWithoutFeedback``;
 
 export const Wrapper = styled.SafeAreaView`
   flex: 1;
-  /* background: #f3f8ff; */
-  background: #ff0;
+  background: #f3f8ff;
 `;
 
 export const Container = styled.View`
@@ -24,7 +22,7 @@ export const Header = styled.View`
 `;
 
 export const BackButton = styled.TouchableOpacity.attrs(() => ({
-  opacity: 0.5,
+  activeOpacity: 0.5,
 }))`
   padding: 10px;
 `;
@@ -54,7 +52,9 @@ export const ContactStatus = styled.Text`
   line-height: 20px;
 `;
 
-export const ContactAction = styled(RectButton)`
+export const ContactAction = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.5,
+}))`
   padding: 10px;
 `;
 
@@ -97,14 +97,14 @@ export const shadowContainer = StyleSheet.create({
 });
 
 export const ClearMessages = styled.TouchableOpacity.attrs(() => ({
-  opacity: 0.5,
+  activeOpacity: 0.6,
 }))`
   flex-direction: row;
   padding: 8px 0;
 `;
 
 export const DeleteContact = styled.TouchableOpacity.attrs(() => ({
-  opacity: 0.5,
+  activeOpacity: 0.6,
 }))`
   flex-direction: row;
   padding: 8px 0;
@@ -117,8 +117,7 @@ export const ActionLabel = styled.Text`
 `;
 
 export const ChatContainer = styled.ScrollView`
-  /* background: #f3f8ff; */
-  background: #ff0;
+  background: #f3f8ff;
 `;
 
 export const ChatContainerMessageSent = styled.View`
@@ -175,7 +174,7 @@ export const MessageField = styled.View`
 `;
 
 export const SelectEmoji = styled.TouchableOpacity.attrs(() => ({
-  opacity: 0.5,
+  activeOpacity: 0.5,
 }))`
   margin-right: 10px;
 `;

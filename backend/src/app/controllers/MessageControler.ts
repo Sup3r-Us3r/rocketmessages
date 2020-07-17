@@ -49,13 +49,13 @@ export default new class MessageController {
     }
   }
 
-  async listPrivateMessages(req: Request, res: Response) {
+  async listLatestMessageOfContact(req: Request, res: Response) {
     const { from } = req.params;
 
     try {
       const messages = await knex('tb_message as M')
         .join('tb_user as U', 'M.to_user', '=', 'U.id')
-        .where('M.from', String(from))
+        .where('M.from', Number(from))
         .orderBy('M.created_at', 'desc')
         .select(
           'U.id',
@@ -63,6 +63,35 @@ export default new class MessageController {
           'U.email',
           'U.photo',
           'U.status',
+          'M.message',
+          'M.image',
+          'M.created_at',
+        );
+
+    if (!messages) {
+      return res.status(500).json({ error: 'Error on listing messages.' });
+    }
+
+    return res.json(messages);
+    } catch (err) {
+      return res.status(500).json({ error: 'Error on listing messages.' });
+    }
+  }
+
+  async listPrivateMessages(req: Request, res: Response) {
+    const { from, to_user } = req.params;
+
+    try {
+      const messages = await knex('tb_message as M')
+        .join('tb_user as U', 'M.to_user', '=', 'U.id')
+        .whereIn('M.from', [Number(from), Number(to_user)])
+        .whereIn('M.to_user', [Number(to_user), Number(from)])
+        .orderBy('M.id', 'asc')
+        .select(
+          'U.id',
+          'U.username',
+          'U.email',
+          'U.photo',
           'M.message',
           'M.image',
           'M.created_at',

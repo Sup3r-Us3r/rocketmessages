@@ -6,8 +6,11 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import SimpleLinIcons from 'react-native-vector-icons/SimpleLineIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EmojiSelector, {Categories} from 'react-native-emoji-selector';
+import AsyncStorage from '@react-native-community/async-storage';
 
-import photo from '../../assets/photo.jpg';
+import Toast from '../../config/toastStyles';
+
+import api from '../../services/api';
 
 import {
   // CloseKeyboard,
@@ -41,7 +44,8 @@ import {
   EmojiContainer,
 } from './styles';
 
-interface IContactDataParams {
+interface IContactData {
+  key: string;
   id: number;
   username: string;
   email: string;
@@ -139,12 +143,13 @@ const messages = [
 
 const Messages = () => {
   // States
+  const [messages, setMessages] = useState<IContactData[]>();
   const [showContactActions, setShowContactActions] = useState<boolean>(false);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
 
   // Navigation
   const navigation = useNavigation();
-  const contact = useRoute().params as IContactDataParams;
+  const contact = useRoute().params as IContactData;
 
   function handleNavigateToBack() {
     navigation.navigate('Chat');
@@ -166,7 +171,55 @@ const Messages = () => {
   //   );
   // };
 
-  useEffect(() => {}, []);
+  function handleSerializedMessages(allMessages: IContactData[]) {
+    const serialized = allMessages.map((item) => ({
+      key: Math.random().toString(30),
+      id: item.id,
+      username: item.username,
+      email: item.email,
+      photo: item.photo,
+      status: item.status,
+      image: item.image,
+      message: item.message,
+      created_at: `${new Date(item.created_at).getHours()}:${new Date(
+        item.created_at,
+      ).getMinutes()}`,
+    }));
+
+    return serialized;
+  }
+
+  useEffect(() => {
+    async function handleGetPrivateMessages() {
+      try {
+        const getMyData = await AsyncStorage.getItem(
+          '@rocketMessages/userData',
+        );
+
+        const {data} = JSON.parse(String(getMyData));
+
+        const allMessages = await api.get<IContactData[]>(
+          `/privatemessages/${data.id}/${contact.id}`
+        );
+
+        if (!allMessages) {
+          return Toast.error('Erro ao listar mensagens.');
+        }
+
+        const response = handleSerializedMessages(allMessages.data);
+
+        console.log(response);
+
+        setMessages(response);
+      } catch(err) {
+        const { error } = err.response.data;
+        
+        return Toast.error(error);
+      }
+    }
+
+    handleGetPrivateMessages();
+  }, []);
 
   return (
     // <DismissKeyboard>
@@ -176,9 +229,9 @@ const Messages = () => {
           <BackButton onPress={handleNavigateToBack}>
             <Ionicons name="ios-arrow-back" color="#fff" size={20} />
           </BackButton>
-          <ContactImage source={photo} />
+          <ContactImage source={{ uri: contact.photo }} />
           <ContactInfo>
-            <ContactName>Sup3r Us3r</ContactName>
+            <ContactName>{contact.username}</ContactName>
             <ContactStatus>Online</ContactStatus>
           </ContactInfo>
           <ContactAction onPress={handleToggleContactActions}>
@@ -203,18 +256,18 @@ const Messages = () => {
         )}
 
         <ChatContainer>
-          {messages.map((message) =>
-            message.whoSent === 'me' ? (
-              <ChatContainerMessageSent key={message.key}>
-                <MessageSentHour>{message.messageDate}</MessageSentHour>
-                <MessageSent>{message.message}</MessageSent>
-              </ChatContainerMessageSent>
-            ) : (
-              <ChatContainerMessageReceived key={message.key}>
-                <MessageReceivedHour>{message.messageDate}</MessageReceivedHour>
+          {messages && messages.map((message) =>
+            message.id === contact.id ? (
+              <ChatContainerMessageReceived key={String(message.key)}>
+                <MessageReceivedHour>{message.created_at}</MessageReceivedHour>
                 <MessageReceived>{message.message}</MessageReceived>
               </ChatContainerMessageReceived>
-            ),
+            ) : (
+              <ChatContainerMessageSent key={String(message.key)}>
+                <MessageSentHour>{message.created_at}</MessageSentHour>
+                <MessageSent>{message.message}</MessageSent>
+              </ChatContainerMessageSent>
+            )
           )}
         </ChatContainer>
 
