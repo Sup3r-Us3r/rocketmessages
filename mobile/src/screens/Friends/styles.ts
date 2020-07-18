@@ -6,7 +6,11 @@ export const Wrapper = styled.SafeAreaView`
   background: #fff;
 `;
 
-export const Container = styled.View``;
+export const Container = styled.View`
+  /* align-items: center;
+  justify-content: center; */
+  flex: 1;
+`;
 
 export const Header = styled.View`
   margin: 10px;
@@ -33,9 +37,7 @@ export const SearchIcon = styled.TouchableOpacity.attrs(() => ({
 
 export const ContactsFound = styled.ScrollView.attrs(() => ({
   showsVerticalScrollIndicator: false,
-}))`
-  margin-bottom: 65px;
-`;
+}))``;
 
 export const ContactInfo = styled.View`
   flex-direction: row;
@@ -86,4 +88,25 @@ export const ContactActionLabel = styled.Text`
   color: #fff;
   font-size: 16px;
   font-weight: bold;
+`;
+
+export const NoResearch = styled.View`
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+`;
+
+export const NoResearchBackground = styled.Image.attrs(() => ({
+  resizeMode: 'cover',
+}))`
+  height: 250px;
+  width: 250px;
+`;
+
+export const NoResearchLabel = styled.Text`
+  margin-top: 15px;
+  font-size: 27px;
+  font-weight: bold;
+  color: #7159c1;
+  text-align: center;
 `;

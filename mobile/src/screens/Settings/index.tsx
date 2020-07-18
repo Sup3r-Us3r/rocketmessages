@@ -4,7 +4,6 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import ImagePicker from 'react-native-image-picker';
 
 import {
-  CloseKeyboard,
   Wrapper,
   Container,
   Title,
@@ -64,14 +63,6 @@ const Settings = () => {
 
   function handleKeyboardDown() {}
 
-  const DismissKeyboard: React.FC<{}> = ({children}) => {
-    return (
-      <CloseKeyboard onPress={() => Keyboard.dismiss()}>
-        {children}
-      </CloseKeyboard>
-    );
-  };
-
   useEffect(() => {
     Keyboard.addListener('keyboardDidShow', handleKeyboardUp);
     Keyboard.addListener('keyboardDidHide', handleKeyboardDown);
@@ -83,50 +74,50 @@ const Settings = () => {
   }, []);
 
   return (
-    <DismissKeyboard>
-      <Wrapper>
-        <Container>
-          <Title>Configurações</Title>
-          <ContainerImage>
-            <UserImage
-              source={{
-                uri: selectedImage ? selectedImage : 'https://bit.ly/2AnqPdA',
-              }}
-            />
-            <ContainerChangeImage
-              onPress={() =>
-                ImagePicker.showImagePicker(
-                  {
-                    title: 'Selecione uma imagem',
-                    takePhotoButtonTitle: 'Tirar foto',
-                    chooseFromLibraryButtonTitle: 'Escolher da galeria',
-                    cancelButtonTitle: 'Cancelar',
-                  },
-                  handleUploadImage,
-                )
-              }>
-              <ChangeImage />
-            </ContainerChangeImage>
-          </ContainerImage>
-          <NameInput
-            value={nameInput}
-            onChangeText={setNameInput}
-            autoCorrect={false}
-            onSubmitEditing={Keyboard.dismiss}
+    <Wrapper>
+      <Container>
+        <Title>Configurações</Title>
+        <ContainerImage>
+          <UserImage
+            source={{
+              uri: selectedImage ? selectedImage : 'https://bit.ly/2AnqPdA',
+            }}
           />
-          <StatusMessage
-            value={statusInput}
-            onChangeText={setStatusInput}
-            autoCorrect={false}
-            onSubmitEditing={Keyboard.dismiss}
-          />
-        </Container>
-        <ButtonApplySettings onPress={handleSaveChange}>
-          <AntDesign name="save" color="#fff" size={20} />
-          <ButtonLabel>Salvar alterações</ButtonLabel>
-        </ButtonApplySettings>
-      </Wrapper>
-    </DismissKeyboard>
+          <ContainerChangeImage
+            onPress={() =>
+              ImagePicker.showImagePicker(
+                {
+                  title: 'Selecione uma imagem',
+                  takePhotoButtonTitle: 'Tirar foto',
+                  chooseFromLibraryButtonTitle: 'Escolher da galeria',
+                  cancelButtonTitle: 'Cancelar',
+                },
+                handleUploadImage,
+              )
+            }>
+            <ChangeImage />
+          </ContainerChangeImage>
+        </ContainerImage>
+        <NameInput
+          value={nameInput}
+          onChangeText={setNameInput}
+          autoCorrect={false}
+          onSubmitEditing={Keyboard.dismiss}
+          onBlur={Keyboard.dismiss}
+        />
+        <StatusMessage
+          value={statusInput}
+          onChangeText={setStatusInput}
+          autoCorrect={false}
+          onSubmitEditing={Keyboard.dismiss}
+          onBlur={Keyboard.dismiss}
+        />
+      </Container>
+      <ButtonApplySettings onPress={handleSaveChange}>
+        <AntDesign name="save" color="#fff" size={20} />
+        <ButtonLabel>Salvar alterações</ButtonLabel>
+      </ButtonApplySettings>
+    </Wrapper>
   );
 };
 

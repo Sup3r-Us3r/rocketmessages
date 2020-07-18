@@ -56,6 +56,7 @@ export default new class MessageController {
       const messages = await knex('tb_message as M')
         .join('tb_user as U', 'M.to_user', '=', 'U.id')
         .where('M.from', Number(from))
+        // .orWhere('M.to_user', Number(from))
         .orderBy('M.created_at', 'desc')
         .select(
           'U.id',

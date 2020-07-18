@@ -13,7 +13,6 @@ import Loading from '../../components/Loading';
 import getStartedBackground from '../../assets/getStartedBackground.png';
 
 import {
-  // CloseKeyboard,
   Wrapper,
   Container,
   ContainerGetInfo,
@@ -158,14 +157,6 @@ const Authentication = () => {
     }
   }
 
-  // const DismissKeyboard: React.FC<{}> = ({children}) => {
-  //   return (
-  //     <CloseKeyboard onPress={() => Keyboard.dismiss()}>
-  //       {children}
-  //     </CloseKeyboard>
-  //   );
-  // };
-
   useEffect(() => {
     async function handleUserAlreadyLogged() {
       try {
@@ -212,7 +203,6 @@ const Authentication = () => {
   });
 
   return (
-    // <DismissKeyboard>
     <Wrapper>
       {loading ? (
         <Loading />
@@ -300,7 +290,6 @@ const Authentication = () => {
         </Container>
       )}
     </Wrapper>
-    // </DismissKeyboard>
   );
 };
 

@@ -1,8 +1,6 @@
 import styled from 'styled-components/native';
 import {Platform, Animated} from 'react-native';
 
-export const CloseKeyboard = styled.TouchableWithoutFeedback``;
-
 export const Wrapper = styled.KeyboardAvoidingView.attrs(() => ({
   behavior: Platform.OS === 'android' ? 'height' : 'padding',
 }))`

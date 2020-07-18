@@ -1,6 +1,13 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import {Keyboard} from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
+import {useNavigation} from '@react-navigation/native';
 
+import api from '../../services/api';
+
+import Toast from '../../config/toastStyles';
+
+import searchContact from '../../assets/searchContact.png';
 import image from '../../assets/photo.jpg';
 
 import {
@@ -18,7 +25,21 @@ import {
   ContactLogin,
   ContactAction,
   ContactActionLabel,
+  NoResearch,
+  NoResearchBackground,
+  NoResearchLabel,
 } from './styles';
+
+interface IContactData {
+  id: number;
+  username: string;
+  email: string;
+  photo: string;
+  status?: string;
+  message: string;
+  image?: string;
+  created_at: string;
+}
 
 const contacts = [
   {
@@ -103,7 +124,54 @@ const contacts = [
 
 const Friends = () => {
   // States
-  const [searchText, setSearchText] = useState<string>('');
+  const [typing, setTyping] = useState<boolean>(false);
+  const [searchInput, setSearchInput] = useState<string>('');
+  const [searchResult, setSearchResult] = useState<IContactData[]>([]);
+
+  // Navigation
+  const navigation = useNavigation();
+
+  async function handleSearchContact() {
+    try {
+      const response = await api.get<IContactData[]>('/users', {
+        params: {
+          search: searchInput,
+        }
+      });
+
+      if (!response) {
+        return Toast.error('Erro ao pesquisar usuários.');
+      }
+
+      console.log('RESPONSE: ', response.data);
+
+      setSearchResult(response.data);
+
+      return setSearchInput('');
+    } catch(err) {
+      const {error} = err.response.data;
+
+      return Toast.error(error);
+    }
+  }
+
+  useEffect(() => {
+    function handleKeyboardDidShow() {
+      setTyping(true);
+    }
+
+    function handleKeyboardDidHide() {
+      setTyping(false);
+    }
+
+    Keyboard.addListener('keyboardDidShow', handleKeyboardDidShow);
+    Keyboard.addListener('keyboardDidHide', handleKeyboardDidHide);
+
+    return () => {
+      Keyboard.removeListener('keyboardDidShow', handleKeyboardDidShow);
+      Keyboard.removeListener('keyboardDidHide', handleKeyboardDidHide);
+    }
+  }, []);
 
   return (
     <Wrapper>
@@ -112,29 +180,40 @@ const Friends = () => {
           <SearchInput
             placeholder="Pesquisar..."
             autoCorrect={false}
-            onChangeText={setSearchText}
+            onChangeText={setSearchInput}
+            onBlur={Keyboard.dismiss}
+            value={searchInput}
           />
-          <SearchIcon>
+          <SearchIcon onPress={handleSearchContact}>
             <Feather name="search" color="#7159c1" size={20} />
           </SearchIcon>
         </Header>
 
-        <ContactsFound>
-          {contacts.map((contact) => (
-            <ContactInfo key={contact.key}>
-              <ContactContainer>
-                <ContactImage source={image} />
-                <ContactLabels>
-                  <ContactName>{contact.name}</ContactName>
-                  <ContactLogin>{contact.login}</ContactLogin>
-                </ContactLabels>
-              </ContactContainer>
-              <ContactAction>
-                <ContactActionLabel>Adicionar</ContactActionLabel>
-              </ContactAction>
-            </ContactInfo>
-          ))}
-        </ContactsFound>
+        {typing ? (
+          <ContactsFound>
+            {searchResult?.map((contact) => (
+              <ContactInfo key={Number(contact.id)}>
+                <ContactContainer>
+                  <ContactImage source={{ uri: contact.photo }} />
+                  <ContactLabels>
+                    <ContactName>{contact.username}</ContactName>
+                    <ContactLogin>{contact.email}</ContactLogin>
+                  </ContactLabels>
+                </ContactContainer>
+                <ContactAction>
+                  <ContactActionLabel>Conversar</ContactActionLabel>
+                </ContactAction>
+              </ContactInfo>
+            ))}
+          </ContactsFound>
+        ) : (
+          <NoResearch>
+            <NoResearchBackground source={searchContact} />
+            <NoResearchLabel>
+              Encontre seus contatos e comece o bate-papo
+            </NoResearchLabel>
+          </NoResearch>
+        )}
       </Container>
     </Wrapper>
   );

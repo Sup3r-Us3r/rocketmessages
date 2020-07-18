@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, raw } from 'express';
 import knex from '../../database/connection';
 import { hashSync, compareSync } from 'bcryptjs';
 
@@ -71,6 +71,9 @@ export default new class UserController {
 
   async listUsers(req: Request, res: Response) {
     try {
+      const { search } = req.query;
+
+      // This query finds a record by username or email, if it does not find returns all data.
       const users = await knex('tb_user as U')
         .select(
           'U.id',
@@ -79,9 +82,23 @@ export default new class UserController {
           'U.photo',
           'U.status',
           'U.created_at',
-        );
-
-      console.log(users);
+        )
+        .whereNotExists(
+          knex
+            .select(
+              'U.id',
+              'U.username',
+              'U.email',
+              'U.photo',
+              'U.status',
+              'U.created_at',
+            )
+            .from('tb_user as U')
+            .where('U.email', 'like', `%${String(search)}%`)
+            .orWhere('U.username', 'like', `%${String(search)}%`)
+        )
+        .where('U.email', 'like', `%${String(search)}%`)
+        .orWhere('U.username', 'like', `%${String(search)}%`);
 
       if (!users) {
         return res.status(500).json({ error: 'Error on listing users.' });
@@ -89,6 +106,7 @@ export default new class UserController {
 
       return res.json(users);
     } catch (err) {
+      console.log(err);
       return res.status(500).json({ error: 'Error on listing users.' });
     }
   }

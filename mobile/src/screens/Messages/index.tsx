@@ -1,10 +1,11 @@
-import React, {useState, useEffect} from 'react';
-// import {Keyboard} from 'react-native';
+import React, {useState, useEffect, useRef} from 'react';
+import {Keyboard, ScrollView} from 'react-native';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import SimpleLinIcons from 'react-native-vector-icons/SimpleLineIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import EmojiSelector, {Categories} from 'react-native-emoji-selector';
 import AsyncStorage from '@react-native-community/async-storage';
 
@@ -13,7 +14,6 @@ import Toast from '../../config/toastStyles';
 import api from '../../services/api';
 
 import {
-  // CloseKeyboard,
   Wrapper,
   Container,
   Header,
@@ -38,8 +38,9 @@ import {
   MessageReceived,
   WrapperMessage,
   MessageField,
-  SelectEmoji,
   InputMessage,
+  SendMessage,
+  SelectEmoji,
   AudioRecord,
   EmojiContainer,
 } from './styles';
@@ -142,8 +143,12 @@ const messages = [
 ];
 
 const Messages = () => {
+  // Ref
+  const scrollViewRef = useRef<ScrollView>(null);
+
   // States
-  const [messages, setMessages] = useState<IContactData[]>();
+  const [messages, setMessages] = useState<IContactData[]>([]);
+  const [messageInput, setMessageInput] = useState<string>('');
   const [showContactActions, setShowContactActions] = useState<boolean>(false);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
 
@@ -163,14 +168,6 @@ const Messages = () => {
     setShowEmojis(!showEmojis);
   }
 
-  // const DismissKeyboard: React.FC<{}> = ({children}) => {
-  //   return (
-  //     <CloseKeyboard onPress={() => Keyboard.dismiss()}>
-  //       {children}
-  //     </CloseKeyboard>
-  //   );
-  // };
-
   function handleSerializedMessages(allMessages: IContactData[]) {
     const serialized = allMessages.map((item) => ({
       key: Math.random().toString(30),
@@ -187,6 +184,29 @@ const Messages = () => {
     }));
 
     return serialized;
+  }
+
+  async function handleSubmit() {
+    try {
+      const data = {
+        from: 2,
+        to_user: 1,
+        to_room: null,
+        message: messageInput,
+      }
+
+      const sendMessage = await api.post('/message', data);
+
+      if (!sendMessage) {
+        return Toast.error('Erro ao enviar mensagem.');
+      }
+
+      return setMessageInput('');
+    } catch(err) {
+      const {error} = err.response.data;
+
+      return Toast.error(error);
+    }
   }
 
   useEffect(() => {
@@ -208,8 +228,6 @@ const Messages = () => {
 
         const response = handleSerializedMessages(allMessages.data);
 
-        console.log(response);
-
         setMessages(response);
       } catch(err) {
         const { error } = err.response.data;
@@ -222,7 +240,6 @@ const Messages = () => {
   }, []);
 
   return (
-    // <DismissKeyboard>
     <Wrapper>
       <Container>
         <Header>
@@ -255,18 +272,23 @@ const Messages = () => {
           </>
         )}
 
-        <ChatContainer>
-          {messages && messages.map((message) =>
+        <ChatContainer
+          ref={scrollViewRef}
+          onContentSizeChange={() => scrollViewRef?.current?.scrollToEnd({
+            animated: true
+          })}
+        >
+          {messages?.map((message) =>
             message.id === contact.id ? (
-              <ChatContainerMessageReceived key={String(message.key)}>
-                <MessageReceivedHour>{message.created_at}</MessageReceivedHour>
-                <MessageReceived>{message.message}</MessageReceived>
-              </ChatContainerMessageReceived>
-            ) : (
               <ChatContainerMessageSent key={String(message.key)}>
                 <MessageSentHour>{message.created_at}</MessageSentHour>
                 <MessageSent>{message.message}</MessageSent>
               </ChatContainerMessageSent>
+            ) : (
+              <ChatContainerMessageReceived key={String(message.key)}>
+                <MessageReceivedHour>{message.created_at}</MessageReceivedHour>
+                <MessageReceived>{message.message}</MessageReceived>
+              </ChatContainerMessageReceived>
             )
           )}
         </ChatContainer>
@@ -277,13 +299,24 @@ const Messages = () => {
               placeholder="Digite uma mensagem"
               autoCorrect={false}
               multiline
+              onBlur={Keyboard.dismiss}
+              onSubmitEditing={() => null}
+              onChangeText={setMessageInput}
+              value={messageInput}
             />
+            {messageInput.length > 0 && (
+              <SendMessage onPress={handleSubmit}>
+                <MaterialCommunityIcons name="send" color="#7159c1" size={23} />
+              </SendMessage>
+            )}
             <SelectEmoji onPress={handleShowEmojis}>
               <MaterialIcons name="insert-emoticon" color="#7159c1" size={23} />
             </SelectEmoji>
-            <AudioRecord>
-              <SimpleLinIcons name="microphone" color="#7159c1" size={23} />
-            </AudioRecord>
+            {messageInput.length === 0 && (
+              <AudioRecord>
+                <SimpleLinIcons name="microphone" color="#7159c1" size={23} />
+              </AudioRecord>
+            )}
           </MessageField>
 
           {showEmojis && (
@@ -301,7 +334,6 @@ const Messages = () => {
         </WrapperMessage>
       </Container>
     </Wrapper>
-    // </DismissKeyboard>
   );
 };
 

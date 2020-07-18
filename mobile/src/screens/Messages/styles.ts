@@ -2,8 +2,6 @@ import styled from 'styled-components/native';
 import {StyleSheet} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-export const CloseKeyboard = styled.TouchableWithoutFeedback``;
-
 export const Wrapper = styled.SafeAreaView`
   flex: 1;
   background: #f3f8ff;
@@ -173,12 +171,6 @@ export const MessageField = styled.View`
   justify-content: space-around;
 `;
 
-export const SelectEmoji = styled.TouchableOpacity.attrs(() => ({
-  activeOpacity: 0.5,
-}))`
-  margin-right: 10px;
-`;
-
 export const InputMessage = styled.TextInput`
   flex: 1;
   background: #f3f4f6;
@@ -186,6 +178,18 @@ export const InputMessage = styled.TextInput`
   padding: 10px 20px;
   margin: 0 10px;
   font-size: 16px;
+`;
+
+export const SendMessage =styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.5,
+}))`
+  margin-right: 10px;
+`;
+
+export const SelectEmoji = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.5,
+}))`
+  margin-right: 10px;
 `;
 
 export const AudioRecord = styled.View`

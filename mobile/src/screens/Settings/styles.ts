@@ -2,8 +2,6 @@ import styled from 'styled-components/native';
 import {Platform} from 'react-native';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
-export const CloseKeyboard = styled.TouchableWithoutFeedback``;
-
 export const Wrapper = styled.KeyboardAvoidingView.attrs(() => ({
   behavior: Platform.OS === 'android' ? 'height' : 'padding',
 }))`
