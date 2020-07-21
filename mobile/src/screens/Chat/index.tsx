@@ -2,12 +2,11 @@ import React, {useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 import {useNavigation} from '@react-navigation/native';
 
-import Toast from '../../config/toastStyles';
-
 import api from '../../services/api';
 
+import Toast from '../../config/toastStyles';
+
 import noData from '../../assets/noData.png';
-// import photo from '../../assets/photo.jpg';
 
 import {
   Wrapper,
@@ -28,114 +27,6 @@ import {
   ContactTotalMessages,
 } from './styles';
 
-const date = new Date();
-const contacts = [
-  {
-    key: 1,
-    image: '',
-    name: 'Sup3r Us3r',
-    lastMessage: 'Lorem ipsum dolor sit amet',
-    totalMessage: 1,
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 2,
-    image: '',
-    name: 'Sup3r Us3r',
-    lastMessage: 'Lorem ipsum dolor sit amet',
-    totalMessage: 210,
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 3,
-    image: '',
-    name: 'Sup3r Us3r',
-    lastMessage: 'Lorem ipsum dolor sit amet',
-    totalMessage: 2100,
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 4,
-    image: '',
-    name: 'Sup3r Us3r',
-    lastMessage: 'Lorem ipsum dolor sit amet',
-    totalMessage: 21000,
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 5,
-    image: '',
-    name: 'Sup3r Us3r',
-    lastMessage: 'Lorem ipsum dolor sit amet',
-    totalMessage: 223121,
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 6,
-    image: '',
-    name: 'Sup3r Us3r',
-    lastMessage: 'Lorem ipsum dolor sit amet',
-    totalMessage: 21,
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 7,
-    image: '',
-    name: 'Sup3r Us3r',
-    lastMessage: 'Lorem ipsum dolor sit amet',
-    totalMessage: 21,
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 8,
-    image: '',
-    name: 'Sup3r Us3r',
-    lastMessage: 'Lorem ipsum dolor sit amet',
-    totalMessage: 21,
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 9,
-    image: '',
-    name: 'Sup3r Us3r',
-    lastMessage: 'Lorem ipsum dolor sit amet',
-    totalMessage: 21,
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 10,
-    image: '',
-    name: 'Sup3r Us3r',
-    lastMessage: 'Lorem ipsum dolor sit amet',
-    totalMessage: 21,
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 11,
-    image: '',
-    name: 'Sup3r Us3r',
-    lastMessage: 'Lorem ipsum dolor sit amet',
-    totalMessage: 21,
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 12,
-    image: '',
-    name: 'Sup3r Us3r',
-    lastMessage: 'Lorem ipsum dolor sit amet',
-    totalMessage: 21,
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 13,
-    image: '',
-    name: 'Sup3r Us3r',
-    lastMessage: 'Lorem ipsum dolor sit amet',
-    totalMessage: 21,
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-];
-
 interface ILatestMessageOfContact {
   id: number;
   username: string;
@@ -150,30 +41,26 @@ interface ILatestMessageOfContact {
 const Chat = () => {
   // States
   const [noMessage, setNoMessage] = useState<boolean>(false);
-  const [
-    latestMessageOfContact, setLatestMessageOfContact
-  ] = useState<ILatestMessageOfContact[]>(
-    [],
-  );
+  const [latestMessageOfContact, setLatestMessageOfContact] = useState<
+    ILatestMessageOfContact[]
+  >([]);
 
   // Navigation
   const navigation = useNavigation();
 
-  function handleNavigateToMessages(
-    latestMessageOfContactData: ILatestMessageOfContact
-  ) {
-    return navigation.navigate('Messages', latestMessageOfContactData);
+  function handleNavigateToMessages(contactData: ILatestMessageOfContact) {
+    return navigation.navigate('Messages', contactData);
   }
 
   function handleSerializedLatestMessage(
-    latestMessageData: ILatestMessageOfContact[]
+    latestMessageData: ILatestMessageOfContact[],
   ) {
-    const distinctData = latestMessageData.filter(
-      (item, index, array) =>
-        array.map((obj) => obj.id).indexOf(item.id) === index,
-    );
+    // const distinctData = latestMessageData.filter(
+    //   (item, index, array) =>
+    //     array.map((obj) => obj.id).indexOf(item.id) === index,
+    // );
 
-    const serialized = distinctData.map((item) => ({
+    const serialized = latestMessageData.map((item) => ({
       id: item.id,
       username: item.username,
       email: item.email,
@@ -239,7 +126,7 @@ const Chat = () => {
           <ListContacts>
             {latestMessageOfContact.map((item: ILatestMessageOfContact) => (
               <ContactContainer
-                key={item.id}
+                key={Number(item.id)}
                 onPress={() => handleNavigateToMessages(item)}>
                 <ContactImage source={{uri: String(item.photo)}} />
                 <ContactInfo>

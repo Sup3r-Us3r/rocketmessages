@@ -9,9 +9,9 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import EmojiSelector, {Categories} from 'react-native-emoji-selector';
 import AsyncStorage from '@react-native-community/async-storage';
 
-import Toast from '../../config/toastStyles';
-
 import api from '../../services/api';
+
+import Toast from '../../config/toastStyles';
 
 import {
   Wrapper,
@@ -56,91 +56,6 @@ interface IContactData {
   image?: string;
   created_at: string;
 }
-
-const date = new Date();
-const messages = [
-  {
-    key: 1,
-    message: 'Test message',
-    whoSent: 'me',
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 2,
-    message:
-      'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Numquam suscipit soluta totam id libero aut sint. Laborum eveniet ipsa omnis quisquam iure.',
-    whoSent: 'me',
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 3,
-    message: 'Test message',
-    whoSent: 'other',
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 4,
-    message: 'Illum omnis esse, iste cumque consequuntur eveniet eaque!',
-    whoSent: 'other',
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 5,
-    message: ' Illum omnis esse, iste cumque',
-    whoSent: 'other',
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 6,
-    message: 'consequuntur eveniet eaque!',
-    whoSent: 'me',
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 7,
-    message: 'Test message',
-    whoSent: 'other',
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 8,
-    message: 'Lorem, ipsum dolor.',
-    whoSent: 'other',
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 9,
-    message: 'Lorem ipsum dolor sit amet consectetur.',
-    whoSent: 'me',
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 10,
-    message:
-      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae quis labore rerum delectus reprehenderit nemo quaerat ut porro at dolorem.',
-    whoSent: 'me',
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 11,
-    message: 'Test message',
-    whoSent: 'me',
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 12,
-    message: 'Test message',
-    whoSent: 'other',
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-  {
-    key: 13,
-    message:
-      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae quis',
-    whoSent: 'me',
-    messageDate: `${date.getHours()}:${date.getMinutes()}`,
-  },
-];
 
 const Messages = () => {
   // Ref
@@ -189,11 +104,11 @@ const Messages = () => {
   async function handleSubmit() {
     try {
       const data = {
-        from: 2,
-        to_user: 1,
+        from: 1,
+        to_user: 4,
         to_room: null,
         message: messageInput,
-      }
+      };
 
       const sendMessage = await api.post('/message', data);
 
@@ -202,7 +117,7 @@ const Messages = () => {
       }
 
       return setMessageInput('');
-    } catch(err) {
+    } catch (err) {
       const {error} = err.response.data;
 
       return Toast.error(error);
@@ -219,7 +134,7 @@ const Messages = () => {
         const {data} = JSON.parse(String(getMyData));
 
         const allMessages = await api.get<IContactData[]>(
-          `/privatemessages/${data.id}/${contact.id}`
+          `/privatemessages/${data.id}/${contact.id}`,
         );
 
         if (!allMessages) {
@@ -228,16 +143,16 @@ const Messages = () => {
 
         const response = handleSerializedMessages(allMessages.data);
 
-        setMessages(response);
-      } catch(err) {
-        const { error } = err.response.data;
-        
+        return setMessages(response);
+      } catch (err) {
+        const {error} = err.response.data;
+
         return Toast.error(error);
       }
     }
 
     handleGetPrivateMessages();
-  }, []);
+  }, [contact]);
 
   return (
     <Wrapper>
@@ -246,7 +161,7 @@ const Messages = () => {
           <BackButton onPress={handleNavigateToBack}>
             <Ionicons name="ios-arrow-back" color="#fff" size={20} />
           </BackButton>
-          <ContactImage source={{ uri: contact.photo }} />
+          <ContactImage source={{uri: contact.photo}} />
           <ContactInfo>
             <ContactName>{contact.username}</ContactName>
             <ContactStatus>Online</ContactStatus>
@@ -274,10 +189,9 @@ const Messages = () => {
 
         <ChatContainer
           ref={scrollViewRef}
-          onContentSizeChange={() => scrollViewRef?.current?.scrollToEnd({
-            animated: true
-          })}
-        >
+          onContentSizeChange={() =>
+            scrollViewRef?.current?.scrollToEnd({animated: true})
+          }>
           {messages?.map((message) =>
             message.id === contact.id ? (
               <ChatContainerMessageSent key={String(message.key)}>
@@ -289,7 +203,7 @@ const Messages = () => {
                 <MessageReceivedHour>{message.created_at}</MessageReceivedHour>
                 <MessageReceived>{message.message}</MessageReceived>
               </ChatContainerMessageReceived>
-            )
+            ),
           )}
         </ChatContainer>
 

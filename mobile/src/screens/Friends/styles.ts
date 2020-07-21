@@ -1,5 +1,4 @@
 import styled from 'styled-components/native';
-import {RectButton} from 'react-native-gesture-handler';
 
 export const Wrapper = styled.SafeAreaView`
   flex: 1;
@@ -78,7 +77,9 @@ export const ContactLogin = styled.Text`
   font-weight: bold;
 `;
 
-export const ContactAction = styled(RectButton)`
+export const ContactAction = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.8,
+}))`
   background: #7159c1;
   padding: 7px 10px;
   border-radius: 5px;

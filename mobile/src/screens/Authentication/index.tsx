@@ -4,11 +4,11 @@ import AsyncStorage from '@react-native-community/async-storage';
 import {useNavigation} from '@react-navigation/native';
 import * as Yup from 'yup';
 
-import Toast from '../../config/toastStyles';
+import Loading from '../../components/Loading';
 
 import api from '../../services/api';
 
-import Loading from '../../components/Loading';
+import Toast from '../../config/toastStyles';
 
 import getStartedBackground from '../../assets/getStartedBackground.png';
 
@@ -200,7 +200,7 @@ const Authentication = () => {
       Keyboard.removeListener('keyboardDidShow', handleKeyboardShow);
       Keyboard.removeListener('keyboardDidHide', handleKeyboardHide);
     };
-  });
+  }, []);
 
   return (
     <Wrapper>

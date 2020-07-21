@@ -21,13 +21,24 @@ export default new class MessageController {
     } = req.body as IMessageData;
 
     try {
-      const userOrRoomExists = await knex('tb_user_room as UR')
-        .where('UR.user_id', Number(to_user))
-        .orWhere('UR.room_id', Number(to_room))
-        .first();
+      if (to_user) {
+        const userExists = await knex('tb_user as U')
+          .where('U.id', Number(to_user))
+          .first();
 
-      if (!userOrRoomExists) {
-        return res.status(409).json({ error: 'Error on creating message.' });
+        if (!userExists) {
+          return res.status(409).json({ error: 'Recipient does not exist.' });
+        }
+      }
+
+      if (to_room) {
+        const roomExists = await knex('tb_room as R')
+          .where('R.id', Number(to_room))
+          .first();
+
+        if (!roomExists) {
+          return res.status(409).json({ error: 'Room does not exist.' });
+        }
       }
 
       const messageSent = await knex('tb_message').insert({
@@ -53,21 +64,41 @@ export default new class MessageController {
     const { from } = req.params;
 
     try {
-      const messages = await knex('tb_message as M')
-        .join('tb_user as U', 'M.to_user', '=', 'U.id')
-        .where('M.from', Number(from))
-        // .orWhere('M.to_user', Number(from))
-        .orderBy('M.created_at', 'desc')
-        .select(
-          'U.id',
-          'U.username',
-          'U.email',
-          'U.photo',
-          'U.status',
-          'M.message',
-          'M.image',
-          'M.created_at',
-        );
+      const messages = await knex.with('CTE_RN', knex.raw(
+        `
+          SELECT
+            *,
+            ROW_NUMBER() OVER(
+              PARTITION BY CASE WHEN M."from" = ${from}
+              THEN M."to_user" ELSE M."from" END
+              ORDER BY M."created_at" DESC) AS RN
+          FROM tb_message as M
+          WHERE M."to_user" IS NOT NULL AND
+          M."from" = ${from} OR M."to_user" = ${from}
+        `
+      ))
+      .select(
+        'U.id',
+        'U.username',
+        'U.email',
+        'U.photo',
+        'U.status',
+        'CTE_RN.from',
+        'CTE_RN.to_user',
+        'CTE_RN.message',
+        'CTE_RN.image',
+        'CTE_RN.created_at',
+      )
+      .from('CTE_RN')
+      .join(knex.raw(
+        `
+          tb_user as U ON CASE
+          WHEN CTE_RN."from" = ${from} THEN CTE_RN."to_user" = U.id
+          WHEN CTE_RN."to_user" = ${from} THEN CTE_RN."from" = U.id
+          END
+        `
+      ))
+      .where('RN', 1);
 
     if (!messages) {
       return res.status(500).json({ error: 'Error on listing messages.' });
