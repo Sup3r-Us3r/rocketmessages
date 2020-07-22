@@ -14,7 +14,7 @@ import getStartedBackground from '../../assets/getStartedBackground.png';
 
 import {
   Wrapper,
-  Container,
+  // Container,
   ContainerGetInfo,
   WelcomeMessage,
   UsernameInput,
@@ -43,6 +43,7 @@ const Authentication = () => {
   const [passwordInput, setPasswordInput] = useState<string>('');
   const [imageAnimation] = useState(new Animated.Value(0));
   const [upAnimation] = useState(new Animated.Value(0));
+  const [keyboardUp, setKeyboardUp] = useState<boolean>(false);
 
   // Navigation
   const navigation = useNavigation();
@@ -187,10 +188,12 @@ const Authentication = () => {
     function handleKeyboardShow() {
       handleImageAnimation();
       handleUpAnimation();
+      setKeyboardUp(true);
     }
 
     function handleKeyboardHide() {
       resetAnimations();
+      setKeyboardUp(false);
     }
 
     Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
@@ -207,7 +210,7 @@ const Authentication = () => {
       {loading ? (
         <Loading />
       ) : (
-        <Container>
+        <>
           <Animated.Image
             source={getStartedBackground}
             resizeMode="cover"
@@ -250,14 +253,12 @@ const Authentication = () => {
                 placeholder="Digite seu nome"
                 onChangeText={setUsernameInput}
                 autoCorrect={false}
-                onSubmitEditing={Keyboard.dismiss}
               />
             )}
             <EmailInput
               placeholder="Digite seu email"
               onChangeText={setEmailInput}
               autoCorrect={false}
-              onSubmitEditing={Keyboard.dismiss}
             />
             <PasswordInput
               placeholder="Digite sua senha"
@@ -269,25 +270,27 @@ const Authentication = () => {
           </ContainerGetInfo>
 
           {changeLayout === 'login' && (
-            <ForgotPassword>
+            <ForgotPassword keyboardUp={keyboardUp}>
               <ForgotPasswordLabel>Esqueci minha senha</ForgotPasswordLabel>
             </ForgotPassword>
           )}
 
-          <AuthStartAction onPress={handleSubmit}>
+          <AuthStartAction onPress={handleSubmit} keyboardUp={keyboardUp}>
             <AuthStartActionLabel>
               {changeLayout === 'login' ? 'Entrar' : 'Registrar'}
             </AuthStartActionLabel>
           </AuthStartAction>
 
-          <AuthActionButton onPress={handleChangeLayoutToRegister}>
+          <AuthActionButton
+            onPress={handleChangeLayoutToRegister}
+            keyboardUp={keyboardUp}>
             <AuthActionLabel>
               {changeLayout === 'login'
                 ? 'Criar uma conta'
                 : 'Já possuo uma conta'}
             </AuthActionLabel>
           </AuthActionButton>
-        </Container>
+        </>
       )}
     </Wrapper>
   );
