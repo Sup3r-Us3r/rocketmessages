@@ -2,19 +2,24 @@ import styled from 'styled-components/native';
 import {Platform} from 'react-native';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
+// export const Wrapper = styled.View`
+//   flex: 1;
+//   justify-content: space-between;
+//   align-items: center;
+//   background: #fff;
+// `;
+
 export const Wrapper = styled.KeyboardAvoidingView.attrs(() => ({
   behavior: Platform.OS === 'android' ? 'height' : 'padding',
 }))`
   flex: 1;
   justify-content: space-between;
-  align-items: center;
   background: #fff;
 `;
 
 export const Container = styled.View`
   align-items: center;
-  margin-top: 20px;
-  padding: 0 10px;
+  padding: 20px 10px;
 `;
 
 export const Title = styled.Text`
@@ -61,9 +66,8 @@ export const ChangeImage = styled(EvilIcons).attrs(() => ({
 export const ButtonApplySettings = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.8,
 }))`
-  flex-direction: row;
   align-items: center;
-  justify-content: center;
+  align-self: center;
   width: 70%;
   padding: 20px;
   background: #7159c1;
@@ -72,7 +76,6 @@ export const ButtonApplySettings = styled.TouchableOpacity.attrs(() => ({
 `;
 
 export const ButtonLabel = styled.Text`
-  margin-left: 7px;
   font-size: 16px;
   text-transform: uppercase;
   color: #fff;
@@ -80,7 +83,7 @@ export const ButtonLabel = styled.Text`
   letter-spacing: 0.5px;
 `;
 
-export const NameInput = styled.TextInput.attrs(() => ({
+export const UsernameInput = styled.TextInput.attrs(() => ({
   autoCorrect: false,
 }))`
   margin: 10px 0;
@@ -96,4 +99,8 @@ export const StatusMessage = styled.TextInput.attrs(() => ({
 }))`
   font-size: 16px;
   text-align: center;
+  border-color: #edf2f8;
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  max-width: 330px;
 `;

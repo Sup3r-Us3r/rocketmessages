@@ -42,6 +42,61 @@ export default new class UserController {
     }
   }
 
+  async updateUserData(req: Request, res: Response) {
+    const { id } = req.params;
+    const { username, photo, status } = req.body as IBodyData;
+
+    try {
+      const userExists = await knex('tb_user')
+        .where('id', Number(id))
+        .first();
+
+      if (!userExists) {
+        return res.status(400).json({ error: 'User does not exist.' });
+      }
+
+      const updateInfo = await knex('tb_user').update({
+        photo,
+        username,
+        status,
+      }).where('id', Number(id));
+
+      if (!updateInfo) {
+        return res.status(400).json({ error: 'Error updating data.' });
+      }
+
+      return res.json(updateInfo);
+    } catch(err) {
+      return res.status(500).json({ error: 'Error on updating user.' });
+    }
+  }
+
+  async deleteUser(req: Request, res: Response) {
+    const { id } = req.params;
+
+    try {
+      const userExists = await knex('tb_user')
+        .where('id', Number(id))
+        .first();
+
+      if (!userExists) {
+        return res.status(400).json({ error: 'User does not exist.' });
+      }
+
+      const user = await knex('tb_user')
+        .where('id', Number(id))
+        .del();
+
+      if (!user) {
+        return res.status(400).json({ error: 'Error deleting user.' });
+      }
+
+      return res.json(user);
+    } catch(err) {
+      return res.status(500).json({ error: 'Error on updating user.' });
+    }
+  }
+
   async loginRocketMessages(req: Request, res: Response) {
     const { email, password } = req.body as IBodyData;
 

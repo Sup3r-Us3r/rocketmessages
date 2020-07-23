@@ -13,6 +13,8 @@ const routes = Router();
 routes.get('/users', UserController.listUsers);
 routes.post('/createuser', UserController.createUser);
 routes.post('/login', UserController.loginRocketMessages);
+routes.put('/updateuser/:id', UserController.updateUserData);
+routes.delete('/deleteuser/:id', UserController.deleteUser);
 
 routes.get('/rooms', RoomController.listRooms);
 routes.post('/createroom', RoomController.createRoom);

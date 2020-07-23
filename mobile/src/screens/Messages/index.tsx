@@ -57,11 +57,21 @@ interface IContactData {
   created_at: string;
 }
 
+interface IUserData {
+  id?: number;
+  username?: string;
+  email?: string;
+  photo?: string;
+  status?: string;
+  created_at?: Date;
+}
+
 const Messages = () => {
   // Ref
   const scrollViewRef = useRef<ScrollView>(null);
 
   // States
+  const [userData, setUserData] = useState<IUserData>({});
   const [messages, setMessages] = useState<IContactData[]>([]);
   const [messageInput, setMessageInput] = useState<string>('');
   const [showContactActions, setShowContactActions] = useState<boolean>(false);
@@ -104,8 +114,8 @@ const Messages = () => {
   async function handleSubmit() {
     try {
       const data = {
-        from: 1,
-        to_user: 4,
+        from: userData?.id,
+        to_user: contact?.id,
         to_room: null,
         message: messageInput,
       };
@@ -132,6 +142,8 @@ const Messages = () => {
         );
 
         const {data} = JSON.parse(String(getMyData));
+
+        setUserData(data);
 
         const allMessages = await api.get<IContactData[]>(
           `/privatemessages/${data.id}/${contact.id}`,

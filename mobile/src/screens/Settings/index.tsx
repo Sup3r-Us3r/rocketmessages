@@ -1,7 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import {Keyboard} from 'react-native';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import ImagePicker from 'react-native-image-picker';
+import AsyncStorage from '@react-native-community/async-storage';
+
+import Toast from '../../config/toastStyles';
+
+import api from '../../services/api';
 
 import {
   Wrapper,
@@ -13,7 +17,7 @@ import {
   ChangeImage,
   ButtonApplySettings,
   ButtonLabel,
-  NameInput,
+  UsernameInput,
   StatusMessage,
 } from './styles';
 
@@ -25,14 +29,21 @@ interface IImagePickerResponse {
   fileName?: string;
 }
 
+interface IUserData {
+  id?: number;
+  username?: string;
+  email?: string;
+  photo?: string;
+  status?: string;
+  created_at?: Date;
+}
+
 const Settings = () => {
   // States
+  const [userData, setUserData] = useState<IUserData>({});
   const [selectedImage, setSelectedImage] = useState<string>('');
-  const [nameInput, setNameInput] = useState<string>('Sup3r Us3r');
-  const [statusInput, setStatusInput] = useState<string>(
-    'VOU INVADIR SEU CORAÇÃO, FORMATAR TODO RANCOR, INSTALAR MINHA PAIXÃO ESOLTAR O WORM DO AMOR ❤',
-  );
-  const [buttonHide, setButtonHide] = useState<boolean>(false);
+  const [usernameInput, setUsernameInput] = useState<string>('');
+  const [statusInput, setStatusInput] = useState<string>('');
 
   function handleUploadImage(image: IImagePickerResponse) {
     if (image.error) {
@@ -50,13 +61,46 @@ const Settings = () => {
     setSelectedImage(image.uri);
   }
 
-  function handleSaveChange() {
-    const data = {
-      name: nameInput,
-      status: statusInput,
-    };
+  async function handleSaveChange() {
+    try {
+      const dataa = {
+        photo: selectedImage ? selectedImage : userData?.photo,
+        username: usernameInput,
+        status: statusInput,
+      };
 
-    console.log(data);
+      console.log('DADOS: ', dataa);
+
+      await AsyncStorage.clear();
+
+      await AsyncStorage.setItem(
+        '@rocketMessages/userData',
+        JSON.stringify({
+          ...userData,
+          ...dataa,
+        }),
+      ).then((dados) => {
+        console.log(dados);
+      });
+
+      const getMyData = await AsyncStorage.getItem('@rocketMessages/userData');
+
+      const {data} = JSON.parse(String(getMyData));
+
+      console.log('LOCAL: ', data);
+
+      // const updateUser = await api.put(`/updateuser/${userData.id}`, data);
+
+      // if (!updateUser) {
+      //   return Toast.error('Erro ao atualizar informações.');
+      // }
+
+      // return Toast.success('Informações alteradas com sucesso.');
+    } catch (err) {
+      const {error} = err.response.data;
+
+      return Toast.error(error);
+    }
   }
 
   function handleKeyboardUp() {}
@@ -73,16 +117,31 @@ const Settings = () => {
     };
   }, []);
 
+  useEffect(() => {
+    async function handleGetUserData() {
+      const getMyData = await AsyncStorage.getItem('@rocketMessages/userData');
+
+      const {data} = JSON.parse(String(getMyData));
+
+      if (data) {
+        setUserData(data);
+      }
+
+      setUsernameInput(data?.username);
+      setStatusInput(data?.status);
+    }
+
+    handleGetUserData();
+  }, []);
+
   return (
     <Wrapper>
       <Container>
         <Title>Configurações</Title>
+
         <ContainerImage>
-          <UserImage
-            source={{
-              uri: selectedImage ? selectedImage : 'https://bit.ly/2AnqPdA',
-            }}
-          />
+          <UserImage source={{uri: userData?.photo}} />
+
           <ContainerChangeImage
             onPress={() =>
               ImagePicker.showImagePicker(
@@ -98,23 +157,25 @@ const Settings = () => {
             <ChangeImage />
           </ContainerChangeImage>
         </ContainerImage>
-        <NameInput
-          value={nameInput}
-          onChangeText={setNameInput}
+
+        <UsernameInput
+          onChangeText={setUsernameInput}
           autoCorrect={false}
           onSubmitEditing={Keyboard.dismiss}
           onBlur={Keyboard.dismiss}
+          value={usernameInput}
         />
         <StatusMessage
-          value={statusInput}
           onChangeText={setStatusInput}
           autoCorrect={false}
           onSubmitEditing={Keyboard.dismiss}
           onBlur={Keyboard.dismiss}
+          value={statusInput}
+          maxLength={255}
         />
       </Container>
+
       <ButtonApplySettings onPress={handleSaveChange}>
-        <AntDesign name="save" color="#fff" size={20} />
         <ButtonLabel>Salvar alterações</ButtonLabel>
       </ButtonApplySettings>
     </Wrapper>
