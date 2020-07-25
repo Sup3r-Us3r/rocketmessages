@@ -141,7 +141,7 @@ const Messages = () => {
           '@rocketMessages/userData',
         );
 
-        const {data} = JSON.parse(String(getMyData));
+        const data = JSON.parse(String(getMyData));
 
         setUserData(data);
 

@@ -80,7 +80,7 @@ const Authentication = () => {
 
       await AsyncStorage.setItem(
         '@rocketMessages/userData',
-        JSON.stringify(response),
+        JSON.stringify(response.data),
       );
 
       return navigation.navigate('BottomTabs');
@@ -163,7 +163,7 @@ const Authentication = () => {
       try {
         const userData = await AsyncStorage.getItem('@rocketMessages/userData');
 
-        const {data} = JSON.parse(String(userData));
+        const data = JSON.parse(String(userData));
 
         if (data) {
           navigation.navigate('BottomTabs');

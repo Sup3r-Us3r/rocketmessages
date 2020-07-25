@@ -1,4 +1,4 @@
-import { Request, Response, raw } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import knex from '../../database/connection';
 import { hashSync, compareSync } from 'bcryptjs';
 
@@ -42,9 +42,11 @@ export default new class UserController {
     }
   }
 
-  async updateUserData(req: Request, res: Response) {
+  async updateUserData(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
-    const { username, photo, status } = req.body as IBodyData;
+    const { username, status } = req.body as IBodyData;
+
+    console.log('ID: ', id, 'USERNAME: ', username, 'STATUS: ', status, 'PHOTO: ', req.file);
 
     try {
       const userExists = await knex('tb_user')
@@ -54,12 +56,18 @@ export default new class UserController {
       if (!userExists) {
         return res.status(400).json({ error: 'User does not exist.' });
       }
-
-      const updateInfo = await knex('tb_user').update({
-        photo,
+      
+      const serializedUserInfo = {
+        photo: `${process.env.BASE_URL}/uploads/${req.file.filename}`,
         username,
         status,
-      }).where('id', Number(id));
+      };
+
+      console.log(serializedUserInfo);
+
+      const updateInfo = await knex('tb_user')
+        .update(serializedUserInfo)
+        .where('id', Number(id));
 
       if (!updateInfo) {
         return res.status(400).json({ error: 'Error updating data.' });
@@ -67,6 +75,7 @@ export default new class UserController {
 
       return res.json(updateInfo);
     } catch(err) {
+      console.log(err);
       return res.status(500).json({ error: 'Error on updating user.' });
     }
   }

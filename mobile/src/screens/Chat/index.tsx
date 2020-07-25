@@ -86,7 +86,7 @@ const Chat = () => {
           '@rocketMessages/userData',
         );
 
-        const {data} = JSON.parse(String(getMyData));
+        const data = JSON.parse(String(getMyData));
 
         const message = await api.get<ILatestMessageOfContact[]>(
           `/latestmessageofcontact/${data.id}`,
