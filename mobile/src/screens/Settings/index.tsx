@@ -28,8 +28,7 @@ interface IImagePickerResponse {
   fileSize: number;
   type?: string;
   uri: string;
-  data: string;
-  path?: string;
+  // data: string;
 }
 
 interface IImageProperties {
@@ -37,8 +36,7 @@ interface IImageProperties {
   fileSize?: number;
   type?: string;
   uri?: string;
-  data?: string;
-  path?: string;
+  // data?: string;
 }
 
 interface IUserData {
@@ -75,8 +73,7 @@ const Settings = () => {
       fileSize: image.fileSize,
       type: image.type,
       uri: image.uri,
-      data: image.data,
-      path: image.path,
+      // data: image.data,
     });
   }
 
@@ -95,55 +92,34 @@ const Settings = () => {
 
       const formData = new FormData();
 
+      formData.append('username', usernameInput);
+      formData.append('status', statusInput);
       formData.append('userphoto', {
         uri:
           Platform.OS === 'android'
             ? selectedImage?.uri
             : selectedImage?.uri?.replace('file://', ''),
-        type: selectedImage?.type,
         name: selectedImage?.fileName,
+        type: selectedImage?.type,
         // data: selectedImage?.data,
       });
-      formData.append('username', usernameInput);
-      formData.append('status', statusInput);
 
-      await api.put(`/updateuser/${userData?.id}`, formData, {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'multipart/form-data',
+      const updateUser = await api.put(
+        `/updateuser/${userData?.id}`,
+        formData,
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      });
+      );
 
-      // const updateUser = await fetch('http://192.168.2.8:3333/updateuser/1', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'multipart/form-data',
-      //   },
-      //   body: formData,
-      // })
-      //   .then((response) => {
-      //     response.json();
-      //   })
-      //   .then((response) => {
-      //     console.log(response);
-      //   })
-      //   .catch((err) => console.log(err));
+      if (!updateUser) {
+        return Toast.error('Erro ao atualizar informações.');
+      }
 
-      // const updateUser = await api.put(
-      //   `/updateuser/${userData?.id}`,
-      //   formData,
-      //   {
-      //     headers: {
-      //       'Content-Type': 'multipart/form-data',
-      //     },
-      //   },
-      // );
-
-      // if (!updateUser) {
-      //   return Toast.error('Erro ao atualizar informações.');
-      // }
-
-      // return Toast.success('Informações alteradas com sucesso.');
+      return Toast.success('Informações alteradas com sucesso.');
     } catch (err) {
       const {error} = err.response.data;
 
@@ -198,17 +174,13 @@ const Settings = () => {
                   takePhotoButtonTitle: 'Tirar foto',
                   chooseFromLibraryButtonTitle: 'Escolher da galeria',
                   cancelButtonTitle: 'Cancelar',
+                  // noData: true,
                   storageOptions: {
-                    skipBackup: true,
+                    // skipBackup: true,
                     path: 'images',
                     cameraRoll: true,
                     waitUntilSaved: true,
                   },
-                  // noData: true,
-                  // storageOptions: {
-                  //   skipBackup: true,
-                  //   path: 'images',
-                  // },
                 },
                 handleUploadImage,
               )
