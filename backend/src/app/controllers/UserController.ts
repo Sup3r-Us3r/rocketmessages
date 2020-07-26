@@ -46,8 +46,6 @@ export default new class UserController {
     const { id } = req.params;
     const { username, status } = req.body as IBodyData;
 
-    console.log('ID: ', id, 'USERNAME: ', username, 'STATUS: ', status, 'PHOTO: ', req.file);
-
     try {
       const userExists = await knex('tb_user')
         .where('id', Number(id))
@@ -62,8 +60,6 @@ export default new class UserController {
         username,
         status,
       };
-
-      console.log(serializedUserInfo);
 
       const updateInfo = await knex('tb_user')
         .update(serializedUserInfo)

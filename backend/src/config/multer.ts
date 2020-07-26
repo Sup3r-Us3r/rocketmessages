@@ -11,8 +11,6 @@ export default {
       'image/pjpeg',
       'image/png',
     ];
-    
-    console.log('oiiiiiiii');
 
     if (!allowedMimes.includes(file.mimetype)) {
       return cb(new Error('Invalid file type.'));

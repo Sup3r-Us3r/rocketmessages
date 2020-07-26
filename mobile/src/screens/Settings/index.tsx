@@ -28,7 +28,6 @@ interface IImagePickerResponse {
   fileSize: number;
   type?: string;
   uri: string;
-  // data: string;
 }
 
 interface IImageProperties {
@@ -36,7 +35,6 @@ interface IImageProperties {
   fileSize?: number;
   type?: string;
   uri?: string;
-  // data?: string;
 }
 
 interface IUserData {
@@ -73,7 +71,6 @@ const Settings = () => {
       fileSize: image.fileSize,
       type: image.type,
       uri: image.uri,
-      // data: image.data,
     });
   }
 
@@ -92,8 +89,6 @@ const Settings = () => {
 
       const formData = new FormData();
 
-      formData.append('username', usernameInput);
-      formData.append('status', statusInput);
       formData.append('userphoto', {
         uri:
           Platform.OS === 'android'
@@ -101,8 +96,9 @@ const Settings = () => {
             : selectedImage?.uri?.replace('file://', ''),
         name: selectedImage?.fileName,
         type: selectedImage?.type,
-        // data: selectedImage?.data,
       });
+      formData.append('username', usernameInput);
+      formData.append('status', statusInput);
 
       const updateUser = await api.put(
         `/updateuser/${userData?.id}`,
@@ -147,10 +143,11 @@ const Settings = () => {
 
       const data = JSON.parse(String(getMyData));
 
-      if (data) {
-        setUserData(data);
+      if (!data) {
+        return Toast.error('Erro ao obter informações.');
       }
 
+      setUserData(data);
       setUsernameInput(data?.username);
       setStatusInput(data?.status);
     }
@@ -164,7 +161,11 @@ const Settings = () => {
         <Title>Configurações</Title>
 
         <ContainerImage>
-          <UserImage source={{uri: userData?.photo}} />
+          <UserImage
+            source={{
+              uri: selectedImage?.uri ? selectedImage?.uri : userData?.photo,
+            }}
+          />
 
           <ContainerChangeImage
             onPress={() =>
