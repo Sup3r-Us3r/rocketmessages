@@ -1,43 +1,29 @@
 import styled from 'styled-components/native';
-import {Platform, Animated, Dimensions} from 'react-native';
+import {Platform, Dimensions} from 'react-native';
 
-interface IKeyboardUpProps {
-  keyboardUp: boolean;
-}
+// const {height} = Dimensions.get('window');
+// const getHeight = `${Math.round((15 / 100) * Math.round(height))}px`;
 
-const {height} = Dimensions.get('window');
-const getHeight = `-${Math.round((50 / 100) * Math.round(height))}px`;
-
-export const Wrapper = styled.View`
+export const Wrapper = styled.KeyboardAvoidingView.attrs(() => ({
+  behavior: Platform.OS === 'android' ? undefined : 'padding',
+  enabled: true,
+}))`
   flex: 1;
   background: #fff;
-  justify-content: space-around;
 `;
 
-// export const Wrapper = styled.KeyboardAvoidingView.attrs(() => ({
-//   behavior: Platform.OS === 'android' ? 'height' : 'padding',
-// }))`
-//   flex: 1;
-//   background: #fff;
-// `;
-
-// export const Wrapper = styled.ScrollView.attrs(() => ({
-//   contentContainerStyle: {
-//     flexGrow: 1,
-//   },
-// }))`
-//   flex: 1;
-//   background: #fff;
-// `;
+export const ScrollView = styled.ScrollView.attrs(() => ({
+  contentContainerStyle: {
+    flex: 1,
+  },
+  keyboardShouldPersistTaps: 'handled',
+}))``;
 
 export const Container = styled.View`
   flex: 1;
-  justify-content: space-around;
-`;
-
-export const ContainerGetInfo = styled(Animated.View)`
   align-items: center;
-  width: 100%;
+  justify-content: center;
+  padding: 0 0 150px 0;
 `;
 
 export const WelcomeMessage = styled.Text`
@@ -81,8 +67,7 @@ export const ForgotPassword = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.4,
 }))`
   align-self: flex-end;
-  margin-right: 45px;
-  bottom: ${({keyboardUp}: IKeyboardUpProps) => (keyboardUp ? getHeight : 0)};
+  margin: 30px 45px 0 0;
 `;
 
 export const ForgotPasswordLabel = styled.Text`
@@ -95,11 +80,11 @@ export const AuthStartAction = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.8,
 }))`
   background: #7159c1;
+  margin: 20px 0;
   padding: 20px;
   width: 80%;
   border-radius: 50px;
   align-self: center;
-  bottom: ${({keyboardUp}: IKeyboardUpProps) => (keyboardUp ? getHeight : 0)};
 `;
 
 export const AuthStartActionLabel = styled.Text`
@@ -114,11 +99,16 @@ export const AuthStartActionLabel = styled.Text`
 export const AuthActionButton = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.6,
 }))`
+  padding: 10px;
+  margin-top: 10px;
+  border-top-width: 1px;
+  border-color: #eee;
   align-self: center;
-  bottom: ${({keyboardUp}: IKeyboardUpProps) => (keyboardUp ? getHeight : 0)};
+  width: 100%;
 `;
 
 export const AuthActionLabel = styled.Text`
+  text-align: center;
   font-size: 16px;
   font-weight: bold;
   color: #7159c1;

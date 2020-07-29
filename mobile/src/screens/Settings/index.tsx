@@ -1,7 +1,9 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {Keyboard, Platform} from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import AsyncStorage from '@react-native-community/async-storage';
+import {Modalize} from 'react-native-modalize';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import Toast from '../../config/toastStyles';
 
@@ -10,15 +12,23 @@ import api from '../../services/api';
 import {
   Wrapper,
   Container,
-  Title,
   ContainerImage,
-  UserImage,
-  ContainerChangeImage,
-  ChangeImage,
-  ButtonApplySettings,
-  ButtonLabel,
+  ChangeImageButton,
+  ChangeImageIcon,
+  WrapperText,
+  ContainerUsernameField,
+  UsernameLabel,
+  ContainerStatusMessageField,
+  StatusMessageLabel,
+  TextInfoGroup,
+  IndicatorLabel,
   UsernameInput,
-  StatusMessage,
+  StatusMessageInput,
+  ShowModalEditTextInput,
+  shadowContainer,
+  ModalActions,
+  ModalButton,
+  ModalButtonLabel,
 } from './styles';
 
 interface IImagePickerResponse {
@@ -47,13 +57,43 @@ interface IUserData {
 }
 
 const Settings = () => {
+  // Ref
+  const modalizeRef = useRef<Modalize>(null);
+
   // States
   const [userData, setUserData] = useState<IUserData>({});
   const [selectedImage, setSelectedImage] = useState<IImageProperties>({});
   const [usernameInput, setUsernameInput] = useState<string>('');
   const [statusInput, setStatusInput] = useState<string>('');
+  const [oldValueUsernameInput, setOldValueUsernameInput] = useState<string>(
+    '',
+  );
+  const [oldValueStatusInput, setOldValueStatusInput] = useState<string>('');
+  const [toggleModal, setToggleModal] = useState<boolean>(false);
+  const [showModalOf, setShowModalOf] = useState<string>('');
 
-  function handleUploadImage(image: IImagePickerResponse) {
+  async function handleRequestUpdateUserApi(data: FormData) {
+    try {
+      const response = await api.put(`/updateuser/${userData?.id}`, data, {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (!response) {
+        return Toast.error('Erro ao atualizar informação.');
+      }
+
+      return Toast.success('Informação alterada com sucesso.');
+    } catch (err) {
+      const error = err.response.data;
+
+      return Toast.error(error);
+    }
+  }
+
+  async function handleUploadImage(image: IImagePickerResponse) {
     if (image.error) {
       return;
     }
@@ -67,75 +107,86 @@ const Settings = () => {
     }
 
     setSelectedImage({
-      fileName: image.fileName,
-      fileSize: image.fileSize,
-      type: image.type,
-      uri: image.uri,
+      uri: image?.uri,
     });
+
+    const formData = new FormData();
+
+    formData.append('userphoto', {
+      uri:
+        Platform.OS === 'android'
+          ? image?.uri
+          : image?.uri?.replace('file://', ''),
+      name: image?.fileName,
+      type: image?.type,
+    });
+
+    await handleRequestUpdateUserApi(formData);
+
+    return await handleSaveLocalStorageChange();
   }
 
-  async function handleSaveChange() {
-    try {
-      const localData = {
-        photo: selectedImage ? selectedImage?.uri : userData?.photo,
-        username: usernameInput,
-        status: statusInput,
-      };
+  async function handleUpdateUsername() {
+    setOldValueUsernameInput(usernameInput);
 
-      await AsyncStorage.setItem(
-        '@rocketMessages/userData',
-        JSON.stringify(Object.assign(userData, localData)),
-      );
+    const formData = new FormData();
 
-      const formData = new FormData();
+    formData.append('username', usernameInput);
 
-      formData.append('userphoto', {
-        uri:
-          Platform.OS === 'android'
-            ? selectedImage?.uri
-            : selectedImage?.uri?.replace('file://', ''),
-        name: selectedImage?.fileName,
-        type: selectedImage?.type,
-      });
-      formData.append('username', usernameInput);
-      formData.append('status', statusInput);
+    await handleRequestUpdateUserApi(formData);
+    await handleSaveLocalStorageChange();
 
-      const updateUser = await api.put(
-        `/updateuser/${userData?.id}`,
-        formData,
-        {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
-
-      if (!updateUser) {
-        return Toast.error('Erro ao atualizar informações.');
-      }
-
-      return Toast.success('Informações alteradas com sucesso.');
-    } catch (err) {
-      const {error} = err.response.data;
-
-      return Toast.error(error);
-    }
+    return setToggleModal(false);
   }
 
-  function handleKeyboardUp() {}
+  async function handleUpdateStatus() {
+    setOldValueStatusInput(statusInput);
 
-  function handleKeyboardDown() {}
+    const formData = new FormData();
 
-  useEffect(() => {
-    Keyboard.addListener('keyboardDidShow', handleKeyboardUp);
-    Keyboard.addListener('keyboardDidHide', handleKeyboardDown);
+    formData.append('status', statusInput);
 
-    return () => {
-      Keyboard.removeListener('keyboardDidShow', handleKeyboardUp);
-      Keyboard.removeListener('keyboardDidHide', handleKeyboardDown);
+    await handleRequestUpdateUserApi(formData);
+    await handleSaveLocalStorageChange();
+
+    return setToggleModal(false);
+  }
+
+  async function handleSaveLocalStorageChange() {
+    const localData = {
+      photo: selectedImage?.uri,
+      username: usernameInput ? usernameInput : oldValueUsernameInput,
+      status: statusInput ? statusInput : oldValueStatusInput,
     };
-  }, []);
+
+    await AsyncStorage.setItem(
+      '@rocketMessages/userData',
+      JSON.stringify(Object.assign(userData, localData)),
+    );
+  }
+
+  function handleShowModalEditUsername() {
+    setUsernameInput(oldValueUsernameInput);
+    setShowModalOf('username');
+
+    return setToggleModal(true);
+  }
+
+  function handleShowModalEditStatus() {
+    setStatusInput(oldValueStatusInput);
+    setShowModalOf('status');
+
+    return setToggleModal(true);
+  }
+
+  function handleCloseModal() {
+    console.log('VERIFICAR AQUI CLOSE: ', userData);
+    return setToggleModal(false);
+  }
+
+  function handleLimitStatusCharacters(text: string) {
+    return text.length >= 35 ? text.substr(0, 35) + '...' : text;
+  }
 
   useEffect(() => {
     async function handleGetUserData() {
@@ -148,8 +199,11 @@ const Settings = () => {
       }
 
       setUserData(data);
-      setUsernameInput(data?.username);
-      setStatusInput(data?.status);
+      setSelectedImage({
+        uri: data?.photo,
+      });
+      setOldValueUsernameInput(data?.username);
+      setOldValueStatusInput(data?.status);
     }
 
     handleGetUserData();
@@ -157,59 +211,140 @@ const Settings = () => {
 
   return (
     <Wrapper>
-      <Container>
-        <Title>Configurações</Title>
-
-        <ContainerImage>
-          <UserImage
-            source={{
-              uri: selectedImage?.uri ? selectedImage?.uri : userData?.photo,
-            }}
-          />
-
-          <ContainerChangeImage
-            onPress={() =>
-              ImagePicker.showImagePicker(
-                {
-                  title: 'Selecione uma imagem',
-                  takePhotoButtonTitle: 'Tirar foto',
-                  chooseFromLibraryButtonTitle: 'Escolher da galeria',
-                  cancelButtonTitle: 'Cancelar',
-                  // noData: true,
-                  storageOptions: {
-                    // skipBackup: true,
-                    path: 'images',
-                    cameraRoll: true,
-                    waitUntilSaved: true,
-                  },
+      <ContainerImage
+        source={{
+          uri: selectedImage?.uri,
+        }}>
+        <ChangeImageButton
+          onPress={() =>
+            ImagePicker.showImagePicker(
+              {
+                title: 'Selecione uma imagem',
+                takePhotoButtonTitle: 'Tirar foto',
+                chooseFromLibraryButtonTitle: 'Escolher da galeria',
+                cancelButtonTitle: 'Cancelar',
+                // noData: true,
+                storageOptions: {
+                  // skipBackup: true,
+                  path: 'images',
+                  cameraRoll: true,
+                  waitUntilSaved: true,
                 },
-                handleUploadImage,
-              )
-            }>
-            <ChangeImage />
-          </ContainerChangeImage>
-        </ContainerImage>
+              },
+              handleUploadImage,
+            )
+          }>
+          <ChangeImageIcon />
+        </ChangeImageButton>
+      </ContainerImage>
 
-        <UsernameInput
-          onChangeText={setUsernameInput}
-          autoCorrect={false}
-          onSubmitEditing={Keyboard.dismiss}
-          onBlur={Keyboard.dismiss}
-          value={usernameInput}
-        />
-        <StatusMessage
-          onChangeText={setStatusInput}
-          autoCorrect={false}
-          onSubmitEditing={Keyboard.dismiss}
-          onBlur={Keyboard.dismiss}
-          value={statusInput}
-          maxLength={255}
-        />
+      <Container>
+        <WrapperText>
+          <ContainerUsernameField onPress={handleShowModalEditUsername}>
+            <AntDesign name="user" color="#7159c1" size={18} />
+            <TextInfoGroup>
+              <IndicatorLabel>Nome</IndicatorLabel>
+              <UsernameLabel>{oldValueUsernameInput}</UsernameLabel>
+            </TextInfoGroup>
+          </ContainerUsernameField>
+
+          <ContainerStatusMessageField onPress={handleShowModalEditStatus}>
+            <AntDesign name="infocirlceo" color="#7159c1" size={18} />
+            <TextInfoGroup>
+              <IndicatorLabel>Recado</IndicatorLabel>
+              <StatusMessageLabel>
+                {handleLimitStatusCharacters(oldValueStatusInput)}
+              </StatusMessageLabel>
+            </TextInfoGroup>
+          </ContainerStatusMessageField>
+        </WrapperText>
       </Container>
 
-      <ButtonApplySettings onPress={handleSaveChange}>
-        <ButtonLabel>Salvar alterações</ButtonLabel>
-      </ButtonApplySettings>
+      {toggleModal && (
+        <ShowModalEditTextInput style={shadowContainer.shadowBox}>
+          {showModalOf === 'username' && (
+            <UsernameInput
+              autoFocus
+              placeholder="Digite seu nome"
+              onChangeText={setUsernameInput}
+              autoCorrect={false}
+              onSubmitEditing={Keyboard.dismiss}
+              onBlur={Keyboard.dismiss}
+              value={usernameInput}
+            />
+          )}
+
+          {showModalOf === 'status' && (
+            <StatusMessageInput
+              autoFocus
+              placeholder="Digite seu status"
+              onChangeText={setStatusInput}
+              autoCorrect={false}
+              onSubmitEditing={Keyboard.dismiss}
+              onBlur={Keyboard.dismiss}
+              value={statusInput}
+            />
+          )}
+
+          <ModalActions>
+            <ModalButton onPress={handleCloseModal}>
+              <ModalButtonLabel>Cancelar</ModalButtonLabel>
+            </ModalButton>
+
+            <ModalButton
+              onPress={
+                showModalOf === 'username'
+                  ? handleUpdateUsername
+                  : handleUpdateStatus
+              }>
+              <ModalButtonLabel>Salvar</ModalButtonLabel>
+            </ModalButton>
+          </ModalActions>
+        </ShowModalEditTextInput>
+      )}
+
+      {/* <Modalize
+        FloatingComponent
+        ref={modalizeRef}
+        adjustToContentHeight
+        avoidKeyboardLikeIOS={false}>
+        {showModalOf === 'username' && (
+          <>
+            <UsernameInput
+              autoFocus
+              placeholder="Digite seu nome"
+              onChangeText={setUsernameInput}
+              autoCorrect={false}
+              onSubmitEditing={Keyboard.dismiss}
+              onBlur={Keyboard.dismiss}
+              value={usernameInput}
+            />
+          </>
+        )}
+
+        {showModalOf === 'status' && (
+          <StatusMessageInput
+            autoFocus
+            placeholder="Digite seu status"
+            onChangeText={setStatusInput}
+            autoCorrect={false}
+            onSubmitEditing={Keyboard.dismiss}
+            onBlur={Keyboard.dismiss}
+            value={statusInput}
+          />
+        )}
+
+        <ModalActions>
+          <ModalButton onPress={handleCloseModal}>
+            <ModalButtonLabel>Cancelar</ModalButtonLabel>
+          </ModalButton>
+
+          <ModalButton onPress={handleCloseModal}>
+            <ModalButtonLabel>Salvar</ModalButtonLabel>
+          </ModalButton>
+        </ModalActions>
+      </Modalize> */}
+      {/* </ScrollView> */}
     </Wrapper>
   );
 };

@@ -1,25 +1,48 @@
+import {Platform, StyleSheet} from 'react-native';
 import styled from 'styled-components/native';
-import {Platform} from 'react-native';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
-// export const Wrapper = styled.View`
-//   flex: 1;
-//   justify-content: space-between;
-//   align-items: center;
-//   background: #fff;
-// `;
-
 export const Wrapper = styled.KeyboardAvoidingView.attrs(() => ({
-  behavior: Platform.OS === 'android' ? 'height' : 'padding',
+  behavior: Platform.OS === 'android' ? undefined : 'padding',
+  enabled: true,
 }))`
   flex: 1;
-  justify-content: space-between;
   background: #fff;
 `;
 
+export const ContainerImage = styled.ImageBackground.attrs(() => ({
+  resizeMode: 'cover',
+}))`
+  position: relative;
+  flex: 1;
+`;
+
+export const ChangeImageButton = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.5,
+}))`
+  position: absolute;
+  justify-content: center;
+  right: 10px;
+  bottom: -25px;
+  height: 60px;
+  width: 60px;
+  background: #7159c1;
+  border-radius: 55px;
+`;
+
+export const ChangeImageIcon = styled(EvilIcons).attrs(() => ({
+  name: 'camera',
+  color: '#fff',
+  size: 45,
+}))`
+  text-align: center;
+`;
+
 export const Container = styled.View`
+  flex: 1;
+  justify-content: space-between;
   align-items: center;
-  padding: 20px 10px;
+  margin-top: 30px;
 `;
 
 export const Title = styled.Text`
@@ -30,77 +53,122 @@ export const Title = styled.Text`
   align-self: flex-start;
 `;
 
-export const ContainerImage = styled.View`
-  position: relative;
+export const WrapperText = styled.View`
+  width: 90%;
+  justify-content: flex-start;
+  align-items: flex-start;
 `;
 
-export const UserImage = styled.Image.attrs(() => ({
-  resizeMode: 'cover',
+export const ContainerUsernameField = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.6,
 }))`
-  height: 250px;
-  width: 250px;
-  border-radius: 125px;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: baseline;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 5px;
 `;
 
-export const ContainerChangeImage = styled.TouchableOpacity.attrs(() => ({
-  activeOpacity: 0.5,
-}))`
-  justify-content: center;
-  position: absolute;
-  right: 20px;
-  bottom: 10px;
-  background: #7159c1;
-  height: 45px;
-  width: 45px;
-  border-radius: 55px;
+export const UsernameLabel = styled.Text`
+  font-size: 18px;
+  line-height: 25px;
+  text-align: left;
+  color: #333;
 `;
 
-export const ChangeImage = styled(EvilIcons).attrs(() => ({
-  name: 'camera',
-  color: '#fff',
-  size: 40,
-}))`
-  text-align: center;
+export const ContainerStatusMessageField = styled.TouchableOpacity.attrs(
+  () => ({
+    activeOpacity: 0.6,
+  }),
+)`
+  flex-direction: row;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 10px;
+  align-items: baseline;
 `;
 
-export const ButtonApplySettings = styled.TouchableOpacity.attrs(() => ({
-  activeOpacity: 0.8,
-}))`
-  align-items: center;
-  align-self: center;
-  width: 70%;
-  padding: 20px;
-  background: #7159c1;
-  border-radius: 50px;
-  margin-bottom: 50px;
+export const StatusMessageLabel = styled.Text`
+  font-size: 18px;
+  line-height: 25px;
+  text-align: left;
+  color: #333;
 `;
 
-export const ButtonLabel = styled.Text`
-  font-size: 16px;
-  text-transform: uppercase;
-  color: #fff;
-  font-weight: bold;
-  letter-spacing: 0.5px;
+export const TextInfoGroup = styled.View`
+  margin-left: 5px;
+  justify-content: flex-start;
+`;
+
+export const IndicatorLabel = styled.Text`
+  font-size: 15px;
+  margin-bottom: 3px;
+  color: #aaa;
 `;
 
 export const UsernameInput = styled.TextInput.attrs(() => ({
   autoCorrect: false,
 }))`
-  margin: 10px 0;
-  font-size: 25px;
-  border-color: #edf2f8;
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #333;
+  border-color: #7159c1;
   border-bottom-width: 2px;
-  border-radius: 3px;
 `;
 
-export const StatusMessage = styled.TextInput.attrs(() => ({
+export const StatusMessageInput = styled.TextInput.attrs(() => ({
   multiline: true,
   autoCorrect: false,
 }))`
+  margin-top: 10px;
+  padding: 10px 20px;
   font-size: 16px;
-  text-align: center;
-  border-color: #edf2f8;
+  color: #333;
+  border-color: #7159c1;
   border-bottom-width: 2px;
-  border-radius: 3px;
-  max-width: 330px;
+`;
+
+export const ShowModalEditTextInput = styled.View`
+  position: absolute;
+  bottom: 0;
+  height: 120px;
+  width: 100%;
+  background: #fff;
+  border-top-left-radius: 25px;
+  border-top-right-radius: 25px;
+`;
+
+export const shadowContainer = StyleSheet.create({
+  shadowBox: {
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 12,
+    },
+    shadowOpacity: 0.58,
+    shadowRadius: 16.0,
+    elevation: 24,
+  },
+});
+
+export const ModalActions = styled.View`
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+`;
+
+export const ModalButton = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.8,
+}))`
+  margin: 10px 15px 10px 0;
+`;
+
+export const ModalButtonLabel = styled.Text`
+  font-size: 15px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #999;
+  padding: 10px;
 `;

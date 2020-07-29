@@ -1,7 +1,7 @@
 import React from 'react';
 // import {createStackNavigator} from '@react-navigation/stack';
 import {createNativeStackNavigator} from 'react-native-screens/native-stack';
-import { enableScreens } from 'react-native-screens';
+import {enableScreens} from 'react-native-screens';
 
 import Authentication from './Authentication';
 import BottomTabs from './BottomTabs';

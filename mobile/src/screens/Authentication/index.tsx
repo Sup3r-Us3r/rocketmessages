@@ -14,8 +14,8 @@ import getStartedBackground from '../../assets/getStartedBackground.png';
 
 import {
   Wrapper,
-  // Container,
-  ContainerGetInfo,
+  ScrollView,
+  Container,
   WelcomeMessage,
   UsernameInput,
   EmailInput,
@@ -43,7 +43,6 @@ const Authentication = () => {
   const [passwordInput, setPasswordInput] = useState<string>('');
   const [imageAnimation] = useState(new Animated.Value(0));
   const [upAnimation] = useState(new Animated.Value(0));
-  const [keyboardUp, setKeyboardUp] = useState<boolean>(false);
 
   // Navigation
   const navigation = useNavigation();
@@ -129,9 +128,9 @@ const Authentication = () => {
 
   function handleImageAnimation() {
     return Animated.timing(imageAnimation, {
-      toValue: 150,
+      toValue: 120,
       duration: 300,
-      easing: Easing.ease,
+      easing: Easing.linear,
       useNativeDriver: true,
     }).start();
   }
@@ -188,12 +187,10 @@ const Authentication = () => {
     function handleKeyboardShow() {
       handleImageAnimation();
       handleUpAnimation();
-      setKeyboardUp(true);
     }
 
     function handleKeyboardHide() {
       resetAnimations();
-      setKeyboardUp(false);
     }
 
     Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
@@ -211,83 +208,78 @@ const Authentication = () => {
         <Loading />
       ) : (
         <>
-          <Animated.Image
-            source={getStartedBackground}
-            resizeMode="cover"
-            // eslint-disable-next-line react-native/no-inline-styles
-            style={{
-              alignSelf: 'center',
-              marginTop: -10,
-              height: 350,
-              width: 350,
-              transform: [
-                {
-                  translateY: imageAnimation.interpolate({
-                    inputRange: [0, 150],
-                    outputRange: [0, changeLayout === 'login' ? -10 : -30],
-                  }),
-                },
-                {
-                  scaleX: imageAnimation.interpolate({
-                    inputRange: [0, 150],
-                    outputRange: [1, changeLayout === 'login' ? 0.8 : 0.6],
-                  }),
-                },
-                {
-                  scaleY: imageAnimation.interpolate({
-                    inputRange: [0, 150],
-                    outputRange: [1, changeLayout === 'login' ? 0.8 : 0.6],
-                  }),
-                },
-              ],
-            }}
-          />
+          <ScrollView>
+            <Container>
+              <Animated.Image
+                source={getStartedBackground}
+                resizeMode="cover"
+                // eslint-disable-next-line react-native/no-inline-styles
+                style={{
+                  height: 250,
+                  width: 250,
+                  // transform: [
+                  //   {
+                  //     translateY: imageAnimation.interpolate({
+                  //       inputRange: [0, 120],
+                  //       outputRange: [0, 70],
+                  //     }),
+                  //   },
+                  //   {
+                  //     scaleX: imageAnimation.interpolate({
+                  //       inputRange: [0, 120],
+                  //       outputRange: [1, 0.5],
+                  //     }),
+                  //   },
+                  //   {
+                  //     scaleY: imageAnimation.interpolate({
+                  //       inputRange: [0, 120],
+                  //       outputRange: [1, 0.5],
+                  //     }),
+                  //   },
+                  // ],
+                }}
+              />
 
-          <ContainerGetInfo
-            style={{
-              translateY: upAnimation,
-            }}>
-            <WelcomeMessage>Rocket Messages</WelcomeMessage>
-            {changeLayout === 'register' && (
-              <UsernameInput
-                placeholder="Digite seu nome"
-                onChangeText={setUsernameInput}
+              <WelcomeMessage>Rocket Messages</WelcomeMessage>
+              {changeLayout === 'register' && (
+                <UsernameInput
+                  placeholder="Digite seu nome"
+                  onChangeText={setUsernameInput}
+                  autoCorrect={false}
+                />
+              )}
+              <EmailInput
+                placeholder="Digite seu email"
+                onChangeText={setEmailInput}
                 autoCorrect={false}
               />
-            )}
-            <EmailInput
-              placeholder="Digite seu email"
-              onChangeText={setEmailInput}
-              autoCorrect={false}
-            />
-            <PasswordInput
-              placeholder="Digite sua senha"
-              onChangeText={setPasswordInput}
-              autoCorrect={false}
-              secureTextEntry
-              onSubmitEditing={Keyboard.dismiss}
-            />
-          </ContainerGetInfo>
+              <PasswordInput
+                placeholder="Digite sua senha"
+                onChangeText={setPasswordInput}
+                autoCorrect={false}
+                secureTextEntry
+                onSubmitEditing={Keyboard.dismiss}
+              />
 
-          {changeLayout === 'login' && (
-            <ForgotPassword keyboardUp={keyboardUp}>
-              <ForgotPasswordLabel>Esqueci minha senha</ForgotPasswordLabel>
-            </ForgotPassword>
-          )}
+              {changeLayout === 'login' && (
+                <ForgotPassword>
+                  <ForgotPasswordLabel>Esqueci minha senha</ForgotPasswordLabel>
+                </ForgotPassword>
+              )}
 
-          <AuthStartAction onPress={handleSubmit} keyboardUp={keyboardUp}>
-            <AuthStartActionLabel>
-              {changeLayout === 'login' ? 'Entrar' : 'Registrar'}
-            </AuthStartActionLabel>
-          </AuthStartAction>
+              <AuthStartAction onPress={handleSubmit}>
+                <AuthStartActionLabel>
+                  {changeLayout === 'login' ? 'Entrar' : 'Registrar'}
+                </AuthStartActionLabel>
+              </AuthStartAction>
+            </Container>
+          </ScrollView>
 
-          <AuthActionButton
-            onPress={handleChangeLayoutToRegister}
-            keyboardUp={keyboardUp}>
+          <AuthActionButton onPress={handleChangeLayoutToRegister}>
             <AuthActionLabel>
               {changeLayout === 'login'
                 ? 'Criar uma conta'
-                : 'Já possuo uma conta'}
+                : 'Já tenho uma conta'}
             </AuthActionLabel>
           </AuthActionButton>
         </>
