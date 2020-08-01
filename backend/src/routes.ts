@@ -10,6 +10,8 @@ import MessageController from './app/controllers/MessageControler';
 
 const routes = Router();
 
+// User
+routes.get('/user/:id', UserController.listUser);
 routes.get('/users', UserController.listUsers);
 routes.post('/createuser', UserController.createUser);
 routes.post('/login', UserController.loginRocketMessages);
@@ -20,12 +22,15 @@ routes.put(
 );
 routes.delete('/deleteuser/:id', UserController.deleteUser);
 
+// Room
 routes.get('/rooms', RoomController.listRooms);
 routes.post('/createroom', RoomController.createRoom);
 
+// User - Room
 routes.get('/userinroom', UserRoomController.listUserInRoom);
 routes.post('/insertuserinroom', UserRoomController.insertUserInRoom);
 
+// Message
 routes.get(
   '/latestmessageofcontact/:from',
   MessageController.listLatestMessageOfContact

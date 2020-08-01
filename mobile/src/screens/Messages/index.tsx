@@ -240,7 +240,7 @@ const Messages = () => {
             </SelectEmoji>
             {messageInput.length === 0 && (
               <AudioRecord>
-                <SimpleLinIcons name="microphone" color="#7159c1" size={23} />
+                <SimpleLinIcons name="microphone" color="#fff" size={23} />
               </AudioRecord>
             )}
           </MessageField>

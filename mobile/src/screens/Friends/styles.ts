@@ -6,8 +6,6 @@ export const Wrapper = styled.SafeAreaView`
 `;
 
 export const Container = styled.View`
-  /* align-items: center;
-  justify-content: center; */
   flex: 1;
 `;
 
@@ -79,17 +77,7 @@ export const ContactLogin = styled.Text`
 
 export const ContactAction = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.8,
-}))`
-  background: #7159c1;
-  padding: 7px 10px;
-  border-radius: 5px;
-`;
-
-export const ContactActionLabel = styled.Text`
-  color: #fff;
-  font-size: 16px;
-  font-weight: bold;
-`;
+}))``;
 
 export const NoResearch = styled.View`
   align-items: center;
@@ -101,13 +89,13 @@ export const NoResearchBackground = styled.Image.attrs(() => ({
   resizeMode: 'cover',
 }))`
   height: 250px;
-  width: 250px;
+  width: 300px;
+  /* border-radius: 125px; */
 `;
 
 export const NoResearchLabel = styled.Text`
   margin-top: 15px;
-  font-size: 27px;
-  font-weight: bold;
-  color: #7159c1;
+  font-size: 18px;
+  color: #ccc;
   text-align: center;
 `;

@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {Keyboard} from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import {useNavigation} from '@react-navigation/native';
 
 import api from '../../services/api';
@@ -23,7 +24,6 @@ import {
   ContactName,
   ContactLogin,
   ContactAction,
-  ContactActionLabel,
   NoResearch,
   NoResearchBackground,
   NoResearchLabel,
@@ -80,7 +80,12 @@ const Friends = () => {
       setTyping(true);
     }
 
+    function handleKeyboardDidHide() {
+      setTyping(false);
+    }
+
     Keyboard.addListener('keyboardDidShow', handleKeyboardDidShow);
+    Keyboard.addListener('keyboardDidHide', handleKeyboardDidHide);
 
     return () => {
       Keyboard.removeListener('keyboardDidShow', handleKeyboardDidShow);
@@ -104,31 +109,32 @@ const Friends = () => {
           </SearchIcon>
         </Header>
 
-        {typing ? (
+        {typing && (
           <ContactsFound>
             {searchResult?.map((contact) => (
-              <ContactInfo key={Number(contact.id)}>
+              <ContactInfo key={Number(contact?.id)}>
                 <ContactContainer>
-                  <ContactImage source={{uri: contact.photo}} />
+                  <ContactImage source={{uri: contact?.photo}} />
                   <ContactLabels>
-                    <ContactName>{contact.username}</ContactName>
-                    <ContactLogin>{contact.email}</ContactLogin>
+                    <ContactName>{contact?.username}</ContactName>
+                    <ContactLogin>{contact?.email}</ContactLogin>
                   </ContactLabels>
                 </ContactContainer>
-                <ContactAction>
-                  <ContactActionLabel
-                    onPress={() => handleNavigateToMessages(contact)}>
-                    Conversar
-                  </ContactActionLabel>
+                <ContactAction
+                  onPress={() => handleNavigateToMessages(contact)}>
+                  <AntDesign name="message1" color="#7159c1" size={25} />
                 </ContactAction>
               </ContactInfo>
             ))}
           </ContactsFound>
-        ) : (
+        )}
+
+        {!typing && (
           <NoResearch>
             <NoResearchBackground source={searchContact} />
             <NoResearchLabel>
-              Encontre seus contatos e comece o bate-papo
+              {/* Encontre seus contatos e comece o bate-papo */}
+              Encontre seus contatos
             </NoResearchLabel>
           </NoResearch>
         )}

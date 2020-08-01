@@ -4,7 +4,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export const Wrapper = styled.SafeAreaView`
   flex: 1;
-  background: #f3f8ff;
+  background: #fff;
+  /* background: #ff0; */
 `;
 
 export const Container = styled.View`
@@ -114,9 +115,7 @@ export const ActionLabel = styled.Text`
   margin-left: 5px;
 `;
 
-export const ChatContainer = styled.ScrollView`
-  background: #f3f8ff;
-`;
+export const ChatContainer = styled.ScrollView``;
 
 export const ChatContainerMessageSent = styled.View`
   align-self: flex-end;
@@ -161,8 +160,8 @@ export const MessageReceived = styled.Text`
 `;
 
 export const WrapperMessage = styled.View`
-  padding: 13px 0;
-  background: #fefffe;
+  padding: 5px 0px;
+  background: transparent;
 `;
 
 export const MessageField = styled.View`
@@ -172,27 +171,36 @@ export const MessageField = styled.View`
 `;
 
 export const InputMessage = styled.TextInput`
+  position: relative;
   flex: 1;
-  background: #f3f4f6;
-  border-radius: 50px;
-  padding: 10px 20px;
+  background: #eee;
+  border-radius: 20px;
+  padding: 10px 20px 10px 40px;
   margin: 0 10px;
   font-size: 16px;
 `;
 
-export const SendMessage =styled.TouchableOpacity.attrs(() => ({
+export const SendMessage = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.5,
 }))`
   margin-right: 10px;
 `;
 
 export const SelectEmoji = styled.TouchableOpacity.attrs(() => ({
-  activeOpacity: 0.5,
+  activeOpacity: 0.9,
 }))`
-  margin-right: 10px;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  margin: 0 20px 11px 20px;
 `;
 
-export const AudioRecord = styled.View`
+export const AudioRecord = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.9,
+}))`
+  background: #7159c1;
+  padding: 12px;
+  border-radius: 30px;
   margin-right: 10px;
 `;
 

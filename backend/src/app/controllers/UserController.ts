@@ -72,8 +72,7 @@ export default new class UserController {
       }
 
       return res.json(updateInfo);
-    } catch(err) {
-      console.log(err);
+    } catch (err) {
       return res.status(500).json({ error: 'Error on updating user.' });
     }
   }
@@ -99,7 +98,7 @@ export default new class UserController {
       }
 
       return res.json(user);
-    } catch(err) {
+    } catch (err) {
       return res.status(500).json({ error: 'Error on updating user.' });
     }
   }
@@ -113,7 +112,7 @@ export default new class UserController {
         .first();
 
       if (!accountExists) {
-        return res.status(409).json({ error: 'Email not found' });
+        return res.status(409).json({ error: 'Email not found.' });
       }
 
       const passwordCompare = compareSync(password, accountExists.password);
@@ -126,8 +125,29 @@ export default new class UserController {
       accountExists.password = undefined;
 
       return res.json(accountExists);
-    } catch(err) {
+    } catch (err) {
       return res.status(500).json({ error: 'Error logging in user.' });
+    }
+  }
+
+  async listUser(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const user = await knex('tb_user as U')
+        .where('U.id', Number(id))
+        .first();
+
+      if (!user) {
+        return res.status(400).json({ error: 'User not found.' });
+      }
+      
+      // Exclude passworld field
+      user.password = undefined;
+
+      return res.json(user);
+    } catch (err) {
+      return res.status(500).json({ error: 'Error on listing user.' });
     }
   }
 
@@ -168,9 +188,7 @@ export default new class UserController {
 
       return res.json(users);
     } catch (err) {
-      console.log(err);
       return res.status(500).json({ error: 'Error on listing users.' });
     }
   }
 }
-
