@@ -8,6 +8,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import EmojiSelector, {Categories} from 'react-native-emoji-selector';
 import AsyncStorage from '@react-native-community/async-storage';
+import {Modalize} from 'react-native-modalize';
+
+import ContactDetails from '../../components/ContactDetails';
 
 import api from '../../services/api';
 
@@ -43,6 +46,8 @@ import {
   SelectEmoji,
   AudioRecord,
   EmojiContainer,
+  handleStyle,
+  overlayStyle,
 } from './styles';
 
 interface IContactData {
@@ -69,6 +74,7 @@ interface IUserData {
 const Messages = () => {
   // Ref
   const scrollViewRef = useRef<ScrollView>(null);
+  const modalizeRef = useRef<Modalize>(null);
 
   // States
   const [userData, setUserData] = useState<IUserData>({});
@@ -82,15 +88,19 @@ const Messages = () => {
   const contact = useRoute().params as IContactData;
 
   function handleNavigateToBack() {
-    navigation.navigate('Chat');
+    return navigation.navigate('Chat');
   }
 
   function handleToggleContactActions() {
-    setShowContactActions(!showContactActions);
+    return setShowContactActions(!showContactActions);
   }
 
   function handleShowEmojis() {
-    setShowEmojis(!showEmojis);
+    return setShowEmojis(!showEmojis);
+  }
+
+  function handleShowModal() {
+    return modalizeRef.current?.open();
   }
 
   function handleSerializedMessages(allMessages: IContactData[]) {
@@ -173,9 +183,9 @@ const Messages = () => {
           <BackButton onPress={handleNavigateToBack}>
             <Ionicons name="ios-arrow-back" color="#fff" size={20} />
           </BackButton>
-          <ContactImage source={{uri: contact.photo}} />
-          <ContactInfo>
-            <ContactName>{contact.username}</ContactName>
+          <ContactImage source={{uri: contact?.photo}} />
+          <ContactInfo onPress={handleShowModal}>
+            <ContactName>{contact?.username}</ContactName>
             <ContactStatus>Online</ContactStatus>
           </ContactInfo>
           <ContactAction onPress={handleToggleContactActions}>
@@ -205,15 +215,15 @@ const Messages = () => {
             scrollViewRef?.current?.scrollToEnd({animated: true})
           }>
           {messages?.map((message) =>
-            message.id === contact.id ? (
+            message?.id === contact?.id ? (
               <ChatContainerMessageSent key={String(message.key)}>
-                <MessageSentHour>{message.created_at}</MessageSentHour>
-                <MessageSent>{message.message}</MessageSent>
+                <MessageSentHour>{message?.created_at}</MessageSentHour>
+                <MessageSent>{message?.message}</MessageSent>
               </ChatContainerMessageSent>
             ) : (
-              <ChatContainerMessageReceived key={String(message.key)}>
-                <MessageReceivedHour>{message.created_at}</MessageReceivedHour>
-                <MessageReceived>{message.message}</MessageReceived>
+              <ChatContainerMessageReceived key={String(message?.key)}>
+                <MessageReceivedHour>{message?.created_at}</MessageReceivedHour>
+                <MessageReceived>{message?.message}</MessageReceived>
               </ChatContainerMessageReceived>
             ),
           )}
@@ -258,6 +268,16 @@ const Messages = () => {
             </EmojiContainer>
           )}
         </WrapperMessage>
+
+        <Modalize
+          ref={modalizeRef}
+          snapPoint={480}
+          modalHeight={480}
+          handlePosition="inside"
+          handleStyle={handleStyle.background}
+          overlayStyle={overlayStyle.background}>
+          <ContactDetails contact={contact} />
+        </Modalize>
       </Container>
     </Wrapper>
   );

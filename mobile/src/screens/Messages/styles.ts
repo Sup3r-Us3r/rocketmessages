@@ -2,10 +2,13 @@ import styled from 'styled-components/native';
 import {StyleSheet} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-export const Wrapper = styled.SafeAreaView`
+import defaultChatBackground from '../../assets/defaultChatBackground.png';
+
+export const Wrapper = styled.ImageBackground.attrs(() => ({
+  source: defaultChatBackground,
+}))`
   flex: 1;
-  background: #fff;
-  /* background: #ff0; */
+  background: #fcfcfc;
 `;
 
 export const Container = styled.View`
@@ -35,7 +38,9 @@ export const ContactImage = styled.Image.attrs(() => ({
   margin: 0 10px;
 `;
 
-export const ContactInfo = styled.View`
+export const ContactInfo = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.6,
+}))`
   flex: 1;
 `;
 
@@ -121,10 +126,12 @@ export const ChatContainerMessageSent = styled.View`
   align-self: flex-end;
   margin-top: 5px;
   margin-left: 20%;
+  margin-right: 2%;
   padding: 12px;
   background: #7159c1;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  border-top-right-radius: 20px;
 `;
 
 export const MessageSentHour = styled.Text`
@@ -142,10 +149,12 @@ export const ChatContainerMessageReceived = styled.View`
   align-self: flex-start;
   margin-top: 5px;
   margin-right: 20%;
+  margin-left: 2%;
   padding: 12px;
-  background: #eee;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
+  background: #f8f8f7;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  border-top-left-radius: 20px;
 `;
 
 export const MessageReceivedHour = styled.Text`
@@ -156,7 +165,7 @@ export const MessageReceivedHour = styled.Text`
 
 export const MessageReceived = styled.Text`
   font-size: 16px;
-  color: #0a0a11;
+  color: #5f5c60;
 `;
 
 export const WrapperMessage = styled.View`
@@ -209,3 +218,15 @@ export const EmojiContainer = styled.View`
   height: 300px;
   margin-top: 15px;
 `;
+
+export const handleStyle = StyleSheet.create({
+  background: {
+    backgroundColor: 'rgba(113, 89, 193, 0.8)',
+  },
+});
+
+export const overlayStyle = StyleSheet.create({
+  background: {
+    backgroundColor: 'rgba(113, 89, 193, 0.3)',
+  },
+});

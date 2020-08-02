@@ -96,11 +96,11 @@ const Chat = () => {
           return Toast.error('Erro ao listar preview.');
         }
 
-        if (message.data.length === 0) {
+        if (message?.data?.length === 0) {
           return setNoMessage(true);
         }
 
-        const response = handleSerializedLatestMessage(message.data);
+        const response = handleSerializedLatestMessage(message?.data);
 
         return setLatestMessageOfContact(response);
       } catch (err) {
