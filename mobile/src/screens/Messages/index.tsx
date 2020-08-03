@@ -242,7 +242,7 @@ const Messages = () => {
             />
             {messageInput.length > 0 && (
               <SendMessage onPress={handleSubmit}>
-                <MaterialCommunityIcons name="send" color="#7159c1" size={23} />
+                <MaterialCommunityIcons name="send" color="#fff" size={23} />
               </SendMessage>
             )}
             <SelectEmoji onPress={handleShowEmojis}>

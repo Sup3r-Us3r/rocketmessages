@@ -8,7 +8,7 @@ interface IBodyData {
 
 interface IUserInRoomData {
   username: string;
-  login: string;
+  email: string;
   status?: string;
   photo?: string;
   name: string;
@@ -20,8 +20,6 @@ interface IUserInRoomData {
 export default new class UserRoomController {
   async insertUserInRoom(req: Request, res: Response) {
     const { user_id, room_id } = req.body as IBodyData;
-
-    console.log(user_id, room_id);
 
     try {
       const userInRoomExists = await knex('tb_user_room as UR')
@@ -38,7 +36,7 @@ export default new class UserRoomController {
         user_id,
         room_id,
       });
-  
+
       if (!userInRoom) {
         return res.status(400)
           .json({ error: 'Error inserting user inside the room.' });
@@ -51,20 +49,23 @@ export default new class UserRoomController {
     }
   }
 
-  async listUserInRoom(req: Request, res: Response) {
-    // const { nickname } = req.query;
+  async listUsersInRoom(req: Request, res: Response) {
+    const { nickname } = req.query;
 
     try {
       const usersInRooms = await knex('tb_user_room as UR')
         .join('tb_user as U', 'UR.user_id', '=', 'U.id')
         .join('tb_room as R', 'UR.room_id', '=', 'R.id')
+        .where('R.nickname', String(nickname))
         .select(
           'U.username',
-          'U.login',
+          'U.email',
           'U.photo',
+          'U.status',
           'R.name',
           'R.nickname',
           'R.avatar',
+          'R.created_at',
         );
 
       if (!usersInRooms) {
@@ -76,7 +77,7 @@ export default new class UserRoomController {
         .map((item: IUserInRoomData) => ({
           user: {
             username: item.username,
-            login: item.login,
+            email: item.email,
             status: item.status,
             photo: item.photo,
           },

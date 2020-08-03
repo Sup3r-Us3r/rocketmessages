@@ -151,6 +151,8 @@ export default new class MessageController {
           'R.name',
           'R.nickname',
           'R.avatar',
+          'M.from',
+          'M.to_room',
           'M.message',
           'M.image',
         );

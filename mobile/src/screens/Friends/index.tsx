@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {Keyboard} from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -62,6 +62,8 @@ const Friends = () => {
       }
 
       setSearchResult(response.data);
+      console.log('searchResult: ', searchResult);
+      setTyping(true);
 
       return setSearchInput('');
     } catch (err) {
@@ -74,23 +76,6 @@ const Friends = () => {
   function handleNavigateToMessages(contactData: IContactData) {
     return navigation.navigate('Messages', contactData);
   }
-
-  useEffect(() => {
-    function handleKeyboardDidShow() {
-      setTyping(true);
-    }
-
-    function handleKeyboardDidHide() {
-      setTyping(false);
-    }
-
-    Keyboard.addListener('keyboardDidShow', handleKeyboardDidShow);
-    Keyboard.addListener('keyboardDidHide', handleKeyboardDidHide);
-
-    return () => {
-      Keyboard.removeListener('keyboardDidShow', handleKeyboardDidShow);
-    };
-  }, []);
 
   return (
     <Wrapper>
@@ -129,13 +114,10 @@ const Friends = () => {
           </ContactsFound>
         )}
 
-        {!typing && (
+        {searchResult.length === 0 && (
           <NoResearch>
             <NoResearchBackground source={searchContact} />
-            <NoResearchLabel>
-              {/* Encontre seus contatos e comece o bate-papo */}
-              Encontre seus contatos
-            </NoResearchLabel>
+            <NoResearchLabel>Encontre seus contatos</NoResearchLabel>
           </NoResearch>
         )}
       </Container>

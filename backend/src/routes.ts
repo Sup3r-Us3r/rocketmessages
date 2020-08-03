@@ -27,7 +27,7 @@ routes.get('/rooms', RoomController.listRooms);
 routes.post('/createroom', RoomController.createRoom);
 
 // User - Room
-routes.get('/userinroom', UserRoomController.listUserInRoom);
+routes.get('/usersinroom', UserRoomController.listUsersInRoom);
 routes.post('/insertuserinroom', UserRoomController.insertUserInRoom);
 
 // Message

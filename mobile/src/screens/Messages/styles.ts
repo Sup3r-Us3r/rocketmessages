@@ -3,6 +3,7 @@ import {StyleSheet} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import defaultChatBackground from '../../assets/defaultChatBackground.png';
+// import defaultChatBackground2 from '../../assets/defaultChatBackground2.jpg';
 
 export const Wrapper = styled.ImageBackground.attrs(() => ({
   source: defaultChatBackground,
@@ -192,6 +193,9 @@ export const InputMessage = styled.TextInput`
 export const SendMessage = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.5,
 }))`
+  background: #7159c1;
+  padding: 12px;
+  border-radius: 30px;
   margin-right: 10px;
 `;
 
