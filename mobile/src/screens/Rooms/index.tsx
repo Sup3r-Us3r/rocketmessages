@@ -1,6 +1,10 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 import {useNavigation} from '@react-navigation/native';
+import {Modalize} from 'react-native-modalize';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+
+import CreateRoom from '../../components/CreateRoom';
 
 import api from '../../services/api';
 
@@ -15,19 +19,20 @@ import {
   NoMessageLabel,
   Container,
   Title,
-  ListContacts,
-  ContactContainer,
-  ContactImage,
-  ContactInfo,
-  ContactInfoUser,
-  ContactNotificationMessage,
-  ContactName,
-  ContactLastMessage,
-  ContactMessageDate,
-  ContactTotalMessages,
+  ListRooms,
+  RoomContainer,
+  RoomImage,
+  RoomInfoData,
+  RoomInfo,
+  RoomNotificationMessage,
+  RoomName,
+  RoomLastMessage,
+  RoomMessageDate,
+  RoomTotalMessages,
+  ContainerCreateRoom,
 } from './styles';
 
-interface ILatestMessageOfContact {
+interface ILatestMessageOfRoom {
   id: number;
   username: string;
   email: string;
@@ -38,28 +43,31 @@ interface ILatestMessageOfContact {
   created_at: string;
 }
 
-const Chat = () => {
+const Rooms = () => {
+  // Ref
+  const modalizeRef = useRef<Modalize>(null);
+
   // States
   const [noMessage, setNoMessage] = useState<boolean>(false);
-  const [latestMessageOfContact, setLatestMessageOfContact] = useState<
-    ILatestMessageOfContact[]
+  const [latestMessageOfRoom, setLatestMessageOfRoom] = useState<
+    ILatestMessageOfRoom[]
   >([]);
+  const [createRoom, setCreateRoom] = useState<boolean>(false);
 
   // Navigation
   const navigation = useNavigation();
 
-  function handleNavigateToMessages(contactData: ILatestMessageOfContact) {
-    return navigation.navigate('Messages', contactData);
+  function handleOpenModal() {
+    return modalizeRef.current?.open();
+  }
+
+  function handleNavigateToMessages(roomData: ILatestMessageOfRoom) {
+    return navigation.navigate('Messages', roomData);
   }
 
   function handleSerializedLatestMessage(
-    latestMessageData: ILatestMessageOfContact[],
+    latestMessageData: ILatestMessageOfRoom[],
   ) {
-    // const distinctData = latestMessageData.filter(
-    //   (item, index, array) =>
-    //     array.map((obj) => obj.id).indexOf(item.id) === index,
-    // );
-
     const serialized = latestMessageData.map((item) => ({
       id: item.id,
       username: item.username,
@@ -88,7 +96,7 @@ const Chat = () => {
 
         const data = JSON.parse(String(getMyData));
 
-        const message = await api.get<ILatestMessageOfContact[]>(
+        const message = await api.get<ILatestMessageOfRoom[]>(
           `/latestmessageofcontact/${data?.id}`,
         );
 
@@ -102,7 +110,7 @@ const Chat = () => {
 
         const response = handleSerializedLatestMessage(message?.data);
 
-        return setLatestMessageOfContact(response);
+        return setLatestMessageOfRoom(response);
       } catch (err) {
         const {error} = err.response.data;
 
@@ -122,33 +130,39 @@ const Chat = () => {
         </NoMessage>
       ) : (
         <Container>
-          <Title>Rocket Messages</Title>
-          <ListContacts>
-            {latestMessageOfContact.map((item: ILatestMessageOfContact) => (
-              <ContactContainer
+          <Title>Rocket Grupos</Title>
+          <ListRooms>
+            {latestMessageOfRoom.map((item: ILatestMessageOfRoom) => (
+              <RoomContainer
                 key={Number(item.id)}
                 onPress={() => handleNavigateToMessages(item)}>
-                <ContactImage source={{uri: String(item.photo)}} />
-                <ContactInfo>
-                  <ContactInfoUser>
-                    <ContactName>{item.username}</ContactName>
-                    <ContactLastMessage>{item.message}</ContactLastMessage>
-                  </ContactInfoUser>
+                <RoomImage source={{uri: String(item.photo)}} />
+                <RoomInfoData>
+                  <RoomInfo>
+                    <RoomName>{item.username}</RoomName>
+                    <RoomLastMessage>{item.message}</RoomLastMessage>
+                  </RoomInfo>
 
-                  <ContactNotificationMessage>
-                    <ContactTotalMessages totalMessage={0}>
-                      {0}
-                    </ContactTotalMessages>
-                    <ContactMessageDate>{item.created_at}</ContactMessageDate>
-                  </ContactNotificationMessage>
-                </ContactInfo>
-              </ContactContainer>
+                  <RoomNotificationMessage>
+                    <RoomTotalMessages totalMessage={0}>{0}</RoomTotalMessages>
+                    <RoomMessageDate>{item.created_at}</RoomMessageDate>
+                  </RoomNotificationMessage>
+                </RoomInfoData>
+              </RoomContainer>
             ))}
-          </ListContacts>
+          </ListRooms>
         </Container>
       )}
+
+      <ContainerCreateRoom onPress={handleOpenModal}>
+        <AntDesign name="addusergroup" color="#fff" size={27} />
+      </ContainerCreateRoom>
+
+      <Modalize ref={modalizeRef}>
+        <CreateRoom />
+      </Modalize>
     </Wrapper>
   );
 };
 
-export default Chat;
+export default Rooms;

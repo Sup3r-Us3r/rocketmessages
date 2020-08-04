@@ -4,6 +4,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Feather from 'react-native-vector-icons/Feather';
 
 import Chat from './Chat';
+import Rooms from './Rooms';
 import Friends from './Friends';
 import Settings from './Settings';
 
@@ -24,6 +25,7 @@ const BottomTabs = () => {
         activeTintColor: '#7159c1',
         inactiveTintColor: '#999',
         showIcon: true,
+        showLabel: false,
         indicatorStyle: {
           backgroundColor: '#7159c1',
         },
@@ -45,12 +47,22 @@ const BottomTabs = () => {
         }}
       />
       <Tabs.Screen
+        name="Rooms"
+        component={Rooms}
+        options={{
+          title: 'Grupos',
+          tabBarIcon: ({color}) => (
+            <Feather name="users" color={color} size={20} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="Friends"
         component={Friends}
         options={{
           title: 'Amigos',
           tabBarIcon: ({color}) => (
-            <Feather name="users" color={color} size={20} />
+            <MaterialIcons name="location-searching" color={color} size={20} />
           ),
         }}
       />
