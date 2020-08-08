@@ -68,9 +68,9 @@ const Chat = () => {
       status: item.status,
       image: item.image,
       message:
-        item.message.length < 33
+        item.message.length < 28
           ? item.message
-          : item.message.substr(0, 33) + '...',
+          : item.message.substr(0, 28) + '...',
       created_at: `${new Date(item.created_at).getHours()}:${new Date(
         item.created_at,
       ).getMinutes()}`,
@@ -122,24 +122,24 @@ const Chat = () => {
         </NoMessage>
       ) : (
         <Container>
-          <Title>Rocket Messages</Title>
+          <Title>Mensagens</Title>
           <ListContacts>
             {latestMessageOfContact.map((item: ILatestMessageOfContact) => (
               <ContactContainer
-                key={Number(item.id)}
+                key={Number(item?.id)}
                 onPress={() => handleNavigateToMessages(item)}>
-                <ContactImage source={{uri: String(item.photo)}} />
+                <ContactImage source={{uri: String(item?.photo)}} />
                 <ContactInfo>
                   <ContactInfoUser>
-                    <ContactName>{item.username}</ContactName>
-                    <ContactLastMessage>{item.message}</ContactLastMessage>
+                    <ContactName>{item?.username}</ContactName>
+                    <ContactLastMessage>{item?.message}</ContactLastMessage>
                   </ContactInfoUser>
 
                   <ContactNotificationMessage>
+                    <ContactMessageDate>{item?.created_at}</ContactMessageDate>
                     <ContactTotalMessages totalMessage={0}>
                       {0}
                     </ContactTotalMessages>
-                    <ContactMessageDate>{item.created_at}</ContactMessageDate>
                   </ContactNotificationMessage>
                 </ContactInfo>
               </ContactContainer>

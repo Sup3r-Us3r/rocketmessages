@@ -1,10 +1,10 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 import {useNavigation} from '@react-navigation/native';
-import {Modalize} from 'react-native-modalize';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
-import CreateRoom from '../../components/CreateRoom';
+// import CreateRoom from '../../components/CreateRoom';
+import ShowModalRoom from '../../components/ShowModalRoom';
 
 import api from '../../services/api';
 
@@ -44,21 +44,18 @@ interface ILatestMessageOfRoom {
 }
 
 const Rooms = () => {
-  // Ref
-  const modalizeRef = useRef<Modalize>(null);
-
   // States
   const [noMessage, setNoMessage] = useState<boolean>(false);
   const [latestMessageOfRoom, setLatestMessageOfRoom] = useState<
     ILatestMessageOfRoom[]
   >([]);
-  const [createRoom, setCreateRoom] = useState<boolean>(false);
+  const [toggleModal, setToggleModal] = useState<boolean>(false);
 
   // Navigation
   const navigation = useNavigation();
 
   function handleOpenModal() {
-    return modalizeRef.current?.open();
+    return setToggleModal(true);
   }
 
   function handleNavigateToMessages(roomData: ILatestMessageOfRoom) {
@@ -76,9 +73,9 @@ const Rooms = () => {
       status: item.status,
       image: item.image,
       message:
-        item.message.length < 33
+        item.message.length < 28
           ? item.message
-          : item.message.substr(0, 33) + '...',
+          : item.message.substr(0, 28) + '...',
       created_at: `${new Date(item.created_at).getHours()}:${new Date(
         item.created_at,
       ).getMinutes()}`,
@@ -130,22 +127,22 @@ const Rooms = () => {
         </NoMessage>
       ) : (
         <Container>
-          <Title>Rocket Grupos</Title>
+          <Title>Grupos</Title>
           <ListRooms>
             {latestMessageOfRoom.map((item: ILatestMessageOfRoom) => (
               <RoomContainer
-                key={Number(item.id)}
+                key={Number(item?.id)}
                 onPress={() => handleNavigateToMessages(item)}>
-                <RoomImage source={{uri: String(item.photo)}} />
+                <RoomImage source={{uri: String(item?.photo)}} />
                 <RoomInfoData>
                   <RoomInfo>
-                    <RoomName>{item.username}</RoomName>
-                    <RoomLastMessage>{item.message}</RoomLastMessage>
+                    <RoomName>{item?.username}</RoomName>
+                    <RoomLastMessage>{item?.message}</RoomLastMessage>
                   </RoomInfo>
 
                   <RoomNotificationMessage>
+                    <RoomMessageDate>{item?.created_at}</RoomMessageDate>
                     <RoomTotalMessages totalMessage={0}>{0}</RoomTotalMessages>
-                    <RoomMessageDate>{item.created_at}</RoomMessageDate>
                   </RoomNotificationMessage>
                 </RoomInfoData>
               </RoomContainer>
@@ -158,9 +155,12 @@ const Rooms = () => {
         <AntDesign name="addusergroup" color="#fff" size={27} />
       </ContainerCreateRoom>
 
-      <Modalize ref={modalizeRef}>
-        <CreateRoom />
-      </Modalize>
+      {toggleModal && (
+        <ShowModalRoom
+          toggleModal={toggleModal}
+          setToggleModal={setToggleModal}
+        />
+      )}
     </Wrapper>
   );
 };

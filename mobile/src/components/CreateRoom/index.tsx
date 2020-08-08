@@ -91,45 +91,43 @@ const CreateRoom: React.FC = ({}) => {
 
   return (
     <Wrapper>
-      <ScrollView>
-        <Title>Criar grupo</Title>
-        <AvatarContainer>
-          <Avatar
-            source={{uri: selectedImage?.uri || 'https://bit.ly/3fqFao7'}}
-          />
-          <ChooseAvatar
-            onPress={() =>
-              ImagePicker.launchImageLibrary(
-                {
-                  // noData: true,
-                  storageOptions: {
-                    cameraRoll: true,
-                    path: 'images',
-                    waitUntilSaved: true,
-                  },
+      <Title>Criar grupo</Title>
+      <AvatarContainer>
+        <Avatar
+          source={{uri: selectedImage?.uri || 'https://bit.ly/3fqFao7'}}
+        />
+        <ChooseAvatar
+          onPress={() =>
+            ImagePicker.launchImageLibrary(
+              {
+                // noData: true,
+                storageOptions: {
+                  cameraRoll: true,
+                  path: 'images',
+                  waitUntilSaved: true,
                 },
-                handleSelectAvatar,
-              )
-            }>
-            <ChooseAvatarIcon />
-          </ChooseAvatar>
-        </AvatarContainer>
-        <Name
-          placeholder="Nome do grupo"
-          autoCorrect={false}
-          onChangeText={setNameInput}
-          value={nameInput}
-        />
-        <Nickname
-          placeholder="Nome de identificação do grupo"
-          autoCorrect={false}
-          onChangeText={setNicknameInput}
-          value={nicknameInput}
-        />
-        <CreateRoomButton>
-          <CreateRoomLabel>Criar grupo</CreateRoomLabel>
-        </CreateRoomButton>
-      </ScrollView>
+              },
+              handleSelectAvatar,
+            )
+          }>
+          <ChooseAvatarIcon />
+        </ChooseAvatar>
+      </AvatarContainer>
+      <Name
+        placeholder="Nome do grupo"
+        autoCorrect={false}
+        onChangeText={setNameInput}
+        value={nameInput}
+      />
+      <Nickname
+        placeholder="Nome de identificação do grupo"
+        autoCorrect={false}
+        onChangeText={setNicknameInput}
+        value={nicknameInput}
+      />
+      <CreateRoomButton>
+        <CreateRoomLabel>Criar grupo</CreateRoomLabel>
+      </CreateRoomButton>
     </Wrapper>
   );
 };

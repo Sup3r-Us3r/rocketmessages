@@ -1,23 +1,47 @@
+import {Animated} from 'react-native';
 import styled from 'styled-components/native';
+import Feather from 'react-native-vector-icons/Feather';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
-// export const Wrapper = styled.KeyboardAvoidingView.attrs(() => ({
-//   behavior: 'padding',
-//   enabled: true,
-// }))`
-//   flex: 1;
-// `;
-
-export const Wrapper = styled.View`
-  padding: 0px 0 30px 0;
+export const Wrapper = styled(Animated.View)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
 `;
 
-export const Title = styled.Text`
-  margin-top: 20px;
-  font-size: 25px;
-  text-align: center;
-  font-weight: bold;
-  color: #7159c1;
+export const ScrollView = styled.ScrollView.attrs(() => ({
+  showsVerticalScrollIndicator: false,
+  contentContainerStyle: {
+    flex: 1,
+  },
+  keyboardShouldPersistTaps: 'handled',
+}))``;
+
+export const Container = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0 150px 0;
+`;
+
+export const ScreenBackContainer = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.8,
+}))`
+  position: absolute;
+  top: 10px;
+  left: 5px;
+  padding: 0 5px;
+`;
+
+export const ScreenBackIcon = styled(Feather).attrs(() => ({
+  name: 'arrow-left',
+  color: '#7159c1',
+  size: 28,
+}))`
+  background: transparent;
 `;
 
 export const AvatarContainer = styled.View`
@@ -38,8 +62,8 @@ export const ChooseAvatar = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.8,
 }))`
   position: absolute;
-  bottom: 0;
-  right: 90px;
+  bottom: 10px;
+  right: 30px;
   justify-content: center;
   align-items: center;
   height: 50px;
@@ -85,8 +109,7 @@ export const Nickname = styled.TextInput`
 export const CreateRoomButton = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.8,
 }))`
-  margin-top: 50px;
-  align-self: center;
+  margin-top: 40px;
   justify-content: center;
   align-items: center;
   height: 50px;

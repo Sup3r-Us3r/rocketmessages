@@ -58,9 +58,9 @@ export default new class UserController {
       const serializedUserInfo = {
         photo: req.file?.filename
           ? `${process.env.BASE_URL}/uploads/${req.file?.filename}`
-          : userExists.photo,
-        username: username ? username : userExists.username,
-        status: status ? status : userExists.status,
+          : userExists?.photo,
+        username: username ? username : userExists?.username,
+        status: status ? status : userExists?.status,
       };
 
       const updateInfo = await knex('tb_user')

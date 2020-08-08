@@ -98,7 +98,7 @@ interface ITotalMessageProp {
 
 export const ContactTotalMessages = styled.Text`
   align-self: flex-end;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
   color: #fff;
   padding: 4px 5px;

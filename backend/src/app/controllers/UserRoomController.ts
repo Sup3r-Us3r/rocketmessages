@@ -7,6 +7,7 @@ interface IBodyData {
 }
 
 interface IUserInRoomData {
+  id: number;
   username: string;
   email: string;
   status?: string;
@@ -58,6 +59,7 @@ export default new class UserRoomController {
         .join('tb_room as R', 'UR.room_id', '=', 'R.id')
         .where('R.nickname', String(nickname))
         .select(
+          'U.id',
           'U.username',
           'U.email',
           'U.photo',
@@ -76,16 +78,17 @@ export default new class UserRoomController {
       const serializedUsersInRooms = usersInRooms
         .map((item: IUserInRoomData) => ({
           user: {
-            username: item.username,
-            email: item.email,
-            status: item.status,
-            photo: item.photo,
+            id: item?.id,
+            username: item?.username,
+            email: item?.email,
+            status: item?.status,
+            photo: item?.photo,
           },
           room: {
-            name: item.name,
-            nickname: item.nickname,
-            avatar: item.avatar,
-            created_at: item.created_at,
+            name: item?.name,
+            nickname: item?.nickname,
+            avatar: item?.avatar,
+            created_at: item?.created_at,
           },
         }));
 

@@ -24,7 +24,20 @@ routes.delete('/deleteuser/:id', UserController.deleteUser);
 
 // Room
 routes.get('/rooms', RoomController.listRooms);
-routes.post('/createroom', RoomController.createRoom);
+routes.get(
+  '/listfrequentcontactsforaddroom/:from',
+  RoomController.listFrequentContactsForAddRoom
+);
+routes.post(
+  '/createroom',
+  multer(multerConfig).single('avatarphoto'),
+  RoomController.createRoom
+);
+routes.put(
+  '/updateroom/:id',
+  multer(multerConfig).single('avatarphoto'),
+  RoomController.updateRoomData
+);
 
 // User - Room
 routes.get('/usersinroom', UserRoomController.listUsersInRoom);
@@ -39,7 +52,11 @@ routes.get(
   '/privatemessages/:from/:to_user',
   MessageController.listPrivateMessages
 );
-routes.get('/roommessages/:from', MessageController.listRoomMessages);
+routes.get(
+  '/latestmessageofroom/:from',
+  MessageController.listLatestMessageOfRoom
+);
+routes.get('/roommessages', MessageController.listRoomMessages);
 routes.post('/message', MessageController.createMessage);
 
 export default routes;

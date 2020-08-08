@@ -10,6 +10,10 @@ interface IMessageData {
   created_at: Date;
 }
 
+interface IWhichRoom {
+  room_id: number;
+}
+
 export default new class MessageController {
   async createMessage(req: Request, res: Response) {
     const {
@@ -92,7 +96,7 @@ export default new class MessageController {
       .from('CTE_RN')
       .join(knex.raw(
         `
-          tb_user as U ON CASE
+          tb_user AS U ON CASE
           WHEN CTE_RN."from" = ${from} THEN CTE_RN."to_user" = U.id
           WHEN CTE_RN."to_user" = ${from} THEN CTE_RN."from" = U.id
           END
@@ -140,12 +144,12 @@ export default new class MessageController {
   }
 
   async listRoomMessages(req: Request, res: Response) {
-    const { from } = req.params;
+    const { nickname } = req.query;
 
     try {
       const messages = await knex('tb_message as M')
         .join('tb_room as R', 'M.to_room', '=', 'R.id')
-        .where('M.from', String(from))
+        .where('R.nickname', String(nickname))
         .select(
           'R.id',
           'R.name',
@@ -162,6 +166,55 @@ export default new class MessageController {
     }
 
     return res.json(messages);
+    } catch (err) {
+      return res.status(500).json({ error: 'Error on listing messages.' });
+    }
+  }
+
+  async listLatestMessageOfRoom(req: Request, res: Response) {
+    const { from } = req.params;
+
+    try {
+      const whichRooms = await knex('tb_user_room as UR')
+        .where('UR.user_id', String(from))
+        .select('UR.room_id');
+
+      const whichRoomsValuesToSingleArray = whichRooms
+        .map((room: IWhichRoom) => room.room_id);
+
+      const messages = await knex.with('CTE_RN', knex.raw(
+        `
+          SELECT
+            *,
+            ROW_NUMBER() OVER(
+              PARTITION BY M."to_room"
+              ORDER BY M."created_at" DESC) AS RN
+          FROM tb_message AS M
+          WHERE M."to_room" IS NOT NULL AND
+          M."to_room" IN (${whichRoomsValuesToSingleArray.toString()})
+        `
+      ))
+      .select(
+        'R.id',
+        'R.name',
+        'R.nickname',
+        'R.avatar',
+        'CTE_RN.from',
+        'CTE_RN.to_user',
+        'CTE_RN.to_room',
+        'CTE_RN.message',
+        'CTE_RN.image',
+        'CTE_RN.created_at',
+      )
+      .from('CTE_RN')
+      .join('tb_room as R', 'CTE_RN.to_room', 'R.id')
+      .where('RN', 1);
+
+      if (!messages) {
+        return res.status(500).json({ error: 'Error on listing messages.' });
+      }
+
+      return res.json(messages);
     } catch (err) {
       return res.status(500).json({ error: 'Error on listing messages.' });
     }
