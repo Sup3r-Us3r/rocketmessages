@@ -10,7 +10,7 @@ import EmojiSelector, {Categories} from 'react-native-emoji-selector';
 import AsyncStorage from '@react-native-community/async-storage';
 import {Modalize} from 'react-native-modalize';
 
-import ContactDetails from '../../components/ContactDetails';
+import ChatDetails from '../../components/ChatDetails';
 
 import api from '../../services/api';
 
@@ -116,7 +116,11 @@ const Messages = () => {
     .params as IDataReceivedFromNavigation;
 
   function handleNavigateToBack() {
-    return navigation.navigate('Chat');
+    if (dataReceivedFromNavigation?.nickname) {
+      return navigation.navigate('Rooms');
+    } else {
+      return navigation.navigate('Chat');
+    }
   }
 
   function handleToggleChatActions() {
@@ -244,6 +248,7 @@ const Messages = () => {
       }
     }
 
+    // Room or Private messages
     if (dataReceivedFromNavigation?.nickname) {
       handleGetRoomMessages();
     } else {
@@ -299,18 +304,19 @@ const Messages = () => {
           onContentSizeChange={() =>
             scrollViewRef?.current?.scrollToEnd({animated: true})
           }>
-          {(messages as Array<IContactData | IRoomData>).map((message) =>
-            message?.id === dataReceivedFromNavigation?.id ? (
-              <ChatContainerMessageSent key={String(message.key)}>
-                <MessageSentHour>{message?.created_at}</MessageSentHour>
-                <MessageSent>{message?.message}</MessageSent>
-              </ChatContainerMessageSent>
-            ) : (
-              <ChatContainerMessageReceived key={String(message?.key)}>
-                <MessageReceivedHour>{message?.created_at}</MessageReceivedHour>
-                <MessageReceived>{message?.message}</MessageReceived>
-              </ChatContainerMessageReceived>
-            ),
+          {(messages as Array<IContactData | IRoomData>).map(
+            (chat: IContactData | IRoomData) =>
+              chat?.id === dataReceivedFromNavigation?.id ? (
+                <ChatContainerMessageSent key={String(chat.key)}>
+                  <MessageSentHour>{chat?.created_at}</MessageSentHour>
+                  <MessageSent>{chat?.message}</MessageSent>
+                </ChatContainerMessageSent>
+              ) : (
+                <ChatContainerMessageReceived key={String(chat?.key)}>
+                  <MessageReceivedHour>{chat?.created_at}</MessageReceivedHour>
+                  <MessageReceived>{chat?.message}</MessageReceived>
+                </ChatContainerMessageReceived>
+              ),
           )}
         </ChatContainer>
 
@@ -356,12 +362,11 @@ const Messages = () => {
 
         <Modalize
           ref={modalizeRef}
-          snapPoint={480}
-          modalHeight={480}
-          handlePosition="inside"
+          snapPoint={470}
+          // modalHeight={470}
           handleStyle={handleStyle.background}
           overlayStyle={overlayStyle.background}>
-          <ContactDetails contact={dataReceivedFromNavigation} />
+          <ChatDetails chatData={dataReceivedFromNavigation} />
         </Modalize>
       </Container>
     </Wrapper>

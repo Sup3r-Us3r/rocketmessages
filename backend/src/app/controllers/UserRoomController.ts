@@ -64,10 +64,6 @@ export default new class UserRoomController {
           'U.email',
           'U.photo',
           'U.status',
-          'R.name',
-          'R.nickname',
-          'R.avatar',
-          'R.created_at',
         );
 
       if (!usersInRooms) {
@@ -75,24 +71,7 @@ export default new class UserRoomController {
           .json({ error: 'Error listing users inside the room.' });
       }
 
-      const serializedUsersInRooms = usersInRooms
-        .map((item: IUserInRoomData) => ({
-          user: {
-            id: item?.id,
-            username: item?.username,
-            email: item?.email,
-            status: item?.status,
-            photo: item?.photo,
-          },
-          room: {
-            name: item?.name,
-            nickname: item?.nickname,
-            avatar: item?.avatar,
-            created_at: item?.created_at,
-          },
-        }));
-
-      return res.json(serializedUsersInRooms);
+      return res.json(usersInRooms);
     } catch (err) {
       return res.status(500)
         .json({ error: 'Error listing users inside the room.' });

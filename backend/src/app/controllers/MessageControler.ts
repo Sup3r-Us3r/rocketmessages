@@ -149,16 +149,14 @@ export default new class MessageController {
     try {
       const messages = await knex('tb_message as M')
         .join('tb_room as R', 'M.to_room', '=', 'R.id')
+        .join('tb_user as U', 'M.from', '=', 'U.id')
         .where('R.nickname', String(nickname))
         .select(
-          'R.id',
-          'R.name',
-          'R.nickname',
-          'R.avatar',
-          'M.from',
-          'M.to_room',
+          'U.id',
+          'U.username',
           'M.message',
           'M.image',
+          'M.created_at'
         );
 
     if (!messages) {

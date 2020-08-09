@@ -224,7 +224,7 @@ export const EmojiContainer = styled.View`
 
 export const handleStyle = StyleSheet.create({
   background: {
-    backgroundColor: 'rgba(113, 89, 193, 0.8)',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
   },
 });
 
