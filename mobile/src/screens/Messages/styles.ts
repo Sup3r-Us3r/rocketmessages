@@ -3,7 +3,6 @@ import {StyleSheet} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import defaultChatBackground from '../../assets/defaultChatBackground.png';
-// import defaultChatBackground2 from '../../assets/defaultChatBackground2.jpg';
 
 export const Wrapper = styled.ImageBackground.attrs(() => ({
   source: defaultChatBackground,
@@ -30,7 +29,7 @@ export const BackButton = styled.TouchableOpacity.attrs(() => ({
   padding: 10px;
 `;
 
-export const ContactImage = styled.Image.attrs(() => ({
+export const ChatImage = styled.Image.attrs(() => ({
   resizeMode: 'cover',
 }))`
   height: 40px;
@@ -39,25 +38,25 @@ export const ContactImage = styled.Image.attrs(() => ({
   margin: 0 10px;
 `;
 
-export const ContactInfo = styled.TouchableOpacity.attrs(() => ({
+export const ChatInfo = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.6,
 }))`
   flex: 1;
 `;
 
-export const ContactName = styled.Text`
+export const ChatName = styled.Text`
   font-size: 16px;
   color: #fff;
   font-weight: bold;
 `;
 
-export const ContactStatus = styled.Text`
+export const ChatStatus = styled.Text`
   font-size: 15px;
   color: #fff;
   line-height: 20px;
 `;
 
-export const ContactAction = styled.TouchableOpacity.attrs(() => ({
+export const ChatAction = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.5,
 }))`
   padding: 10px;
@@ -108,7 +107,7 @@ export const ClearMessages = styled.TouchableOpacity.attrs(() => ({
   padding: 8px 0;
 `;
 
-export const DeleteContact = styled.TouchableOpacity.attrs(() => ({
+export const DeleteChat = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.6,
 }))`
   flex-direction: row;

@@ -34,12 +34,10 @@ import {
 
 interface ILatestMessageOfRoom {
   id: number;
-  username: string;
-  email: string;
-  photo: string;
-  status?: string;
+  name: string;
+  nickname: string;
+  avatar: string;
   message: string;
-  image?: string;
   created_at: string;
 }
 
@@ -66,18 +64,16 @@ const Rooms = () => {
     latestMessageData: ILatestMessageOfRoom[],
   ) {
     const serialized = latestMessageData.map((item) => ({
-      id: item.id,
-      username: item.username,
-      email: item.email,
-      photo: item.photo,
-      status: item.status,
-      image: item.image,
+      id: item?.id,
+      name: item?.name,
+      nickname: item?.nickname,
+      avatar: item?.avatar,
       message:
-        item.message.length < 28
-          ? item.message
-          : item.message.substr(0, 28) + '...',
-      created_at: `${new Date(item.created_at).getHours()}:${new Date(
-        item.created_at,
+        item?.message?.length < 28
+          ? item?.message
+          : item?.message?.substr(0, 28) + '...',
+      created_at: `${new Date(item?.created_at).getHours()}:${new Date(
+        item?.created_at,
       ).getMinutes()}`,
     }));
 
@@ -94,7 +90,7 @@ const Rooms = () => {
         const data = JSON.parse(String(getMyData));
 
         const message = await api.get<ILatestMessageOfRoom[]>(
-          `/latestmessageofcontact/${data?.id}`,
+          `/latestmessageofroom/${data?.id}`,
         );
 
         if (!message) {
@@ -133,10 +129,10 @@ const Rooms = () => {
               <RoomContainer
                 key={Number(item?.id)}
                 onPress={() => handleNavigateToMessages(item)}>
-                <RoomImage source={{uri: String(item?.photo)}} />
+                <RoomImage source={{uri: String(item?.avatar)}} />
                 <RoomInfoData>
                   <RoomInfo>
-                    <RoomName>{item?.username}</RoomName>
+                    <RoomName>{item?.name}</RoomName>
                     <RoomLastMessage>{item?.message}</RoomLastMessage>
                   </RoomInfo>
 

@@ -21,15 +21,15 @@ import {
   Container,
   Header,
   BackButton,
-  ContactImage,
-  ContactInfo,
-  ContactName,
-  ContactStatus,
-  ContactAction,
+  ChatImage,
+  ChatInfo,
+  ChatName,
+  ChatStatus,
+  ChatAction,
   MessageOptions,
   ArrowUpIcon,
   ClearMessages,
-  DeleteContact,
+  DeleteChat,
   ActionLabel,
   shadowContainer,
   ChatContainer,
@@ -62,6 +62,32 @@ interface IContactData {
   created_at: string;
 }
 
+interface IRoomData {
+  key: string;
+  id: number;
+  name: string;
+  nickname: string;
+  avatar: string;
+  message: string;
+  image?: string;
+  created_at: string;
+}
+
+interface IDataReceivedFromNavigation {
+  key?: string;
+  id?: number;
+  name?: string;
+  nickname?: string;
+  username?: string;
+  email?: string;
+  avatar?: string;
+  photo?: string;
+  status?: string;
+  message?: string;
+  image?: string;
+  created_at?: string;
+}
+
 interface IUserData {
   id?: number;
   username?: string;
@@ -78,21 +104,23 @@ const Messages = () => {
 
   // States
   const [userData, setUserData] = useState<IUserData>({});
-  const [messages, setMessages] = useState<IContactData[]>([]);
+  const [messages, setMessages] = useState<IContactData[] | IRoomData[]>([]);
   const [messageInput, setMessageInput] = useState<string>('');
-  const [showContactActions, setShowContactActions] = useState<boolean>(false);
+  const [showChatActions, setShowChatActions] = useState<boolean>(false);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
 
   // Navigation
   const navigation = useNavigation();
-  const contact = useRoute().params as IContactData;
+
+  const dataReceivedFromNavigation = useRoute()
+    .params as IDataReceivedFromNavigation;
 
   function handleNavigateToBack() {
     return navigation.navigate('Chat');
   }
 
-  function handleToggleContactActions() {
-    return setShowContactActions(!showContactActions);
+  function handleToggleChatActions() {
+    return setShowChatActions(!showChatActions);
   }
 
   function handleShowEmojis() {
@@ -103,18 +131,35 @@ const Messages = () => {
     return modalizeRef.current?.open();
   }
 
-  function handleSerializedMessages(allMessages: IContactData[]) {
+  function handleSerializedPrivateMessages(allMessages: IContactData[]) {
+    const serialized = allMessages.map((item) => ({
+      key: Math.random().toString(30),
+      id: item?.id,
+      username: item?.username,
+      email: item?.email,
+      photo: item?.photo,
+      status: item?.status,
+      image: item?.image,
+      message: item?.message,
+      created_at: `${new Date(item?.created_at).getHours()}:${new Date(
+        item?.created_at,
+      ).getMinutes()}`,
+    }));
+
+    return serialized;
+  }
+
+  function handleSerializedRoomMessages(allMessages: IRoomData[]) {
     const serialized = allMessages.map((item) => ({
       key: Math.random().toString(30),
       id: item.id,
-      username: item.username,
-      email: item.email,
-      photo: item.photo,
-      status: item.status,
-      image: item.image,
-      message: item.message,
-      created_at: `${new Date(item.created_at).getHours()}:${new Date(
-        item.created_at,
+      name: item?.name,
+      nickname: item?.nickname,
+      avatar: item?.avatar,
+      image: item?.image,
+      message: item?.message,
+      created_at: `${new Date(item?.created_at).getHours()}:${new Date(
+        item?.created_at,
       ).getMinutes()}`,
     }));
 
@@ -125,7 +170,7 @@ const Messages = () => {
     try {
       const data = {
         from: userData?.id,
-        to_user: contact?.id,
+        to_user: dataReceivedFromNavigation?.id,
         to_room: null,
         message: messageInput,
       };
@@ -145,25 +190,29 @@ const Messages = () => {
   }
 
   useEffect(() => {
+    async function handleSetLocalUserData() {
+      const getMyData = await AsyncStorage.getItem('@rocketMessages/userData');
+
+      const data = JSON.parse(String(getMyData));
+
+      setUserData(data);
+    }
+
+    handleSetLocalUserData();
+  }, []);
+
+  useEffect(() => {
     async function handleGetPrivateMessages() {
       try {
-        const getMyData = await AsyncStorage.getItem(
-          '@rocketMessages/userData',
-        );
-
-        const data = JSON.parse(String(getMyData));
-
-        setUserData(data);
-
         const allMessages = await api.get<IContactData[]>(
-          `/privatemessages/${data.id}/${contact.id}`,
+          `/privatemessages/${userData.id}/${dataReceivedFromNavigation.id}`,
         );
 
         if (!allMessages) {
           return Toast.error('Erro ao listar mensagens.');
         }
 
-        const response = handleSerializedMessages(allMessages.data);
+        const response = handleSerializedPrivateMessages(allMessages.data);
 
         return setMessages(response);
       } catch (err) {
@@ -173,8 +222,34 @@ const Messages = () => {
       }
     }
 
-    handleGetPrivateMessages();
-  }, [contact]);
+    async function handleGetRoomMessages() {
+      try {
+        const allMessages = await api.get<IRoomData[]>('/roommessages', {
+          params: {
+            nickname: dataReceivedFromNavigation?.nickname,
+          },
+        });
+
+        if (!allMessages) {
+          return Toast.error('Erro ao listar mensagens.');
+        }
+
+        const response = handleSerializedRoomMessages(allMessages.data);
+
+        return setMessages(response);
+      } catch (err) {
+        const {error} = err.response.data;
+
+        return Toast.error(error);
+      }
+    }
+
+    if (dataReceivedFromNavigation?.nickname) {
+      handleGetRoomMessages();
+    } else {
+      handleGetPrivateMessages();
+    }
+  }, [userData, dataReceivedFromNavigation]);
 
   return (
     <Wrapper>
@@ -183,17 +258,27 @@ const Messages = () => {
           <BackButton onPress={handleNavigateToBack}>
             <Ionicons name="ios-arrow-back" color="#fff" size={20} />
           </BackButton>
-          <ContactImage source={{uri: contact?.photo}} />
-          <ContactInfo onPress={handleShowModal}>
-            <ContactName>{contact?.username}</ContactName>
-            <ContactStatus>Online</ContactStatus>
-          </ContactInfo>
-          <ContactAction onPress={handleToggleContactActions}>
+          <ChatImage
+            source={{
+              uri: dataReceivedFromNavigation?.photo
+                ? dataReceivedFromNavigation?.photo
+                : dataReceivedFromNavigation?.avatar,
+            }}
+          />
+          <ChatInfo onPress={handleShowModal}>
+            <ChatName>
+              {dataReceivedFromNavigation?.username
+                ? dataReceivedFromNavigation?.username
+                : dataReceivedFromNavigation?.name}
+            </ChatName>
+            <ChatStatus>Online</ChatStatus>
+          </ChatInfo>
+          <ChatAction onPress={handleToggleChatActions}>
             <SimpleLinIcons name="options-vertical" color="#fff" size={20} />
-          </ContactAction>
+          </ChatAction>
         </Header>
 
-        {showContactActions && (
+        {showChatActions && (
           <>
             <ArrowUpIcon style={shadowContainer.shadowBox} />
             <MessageOptions style={shadowContainer.shadowBox}>
@@ -201,10 +286,10 @@ const Messages = () => {
                 <MaterialIcons name="clear" color="#7159c1" size={20} />
                 <ActionLabel>Limpar mensagens</ActionLabel>
               </ClearMessages>
-              <DeleteContact>
+              <DeleteChat>
                 <AntDesign name="deleteuser" color="#7159c1" size={20} />
-                <ActionLabel>Deletar contato</ActionLabel>
-              </DeleteContact>
+                <ActionLabel>Deletar conversa</ActionLabel>
+              </DeleteChat>
             </MessageOptions>
           </>
         )}
@@ -214,8 +299,8 @@ const Messages = () => {
           onContentSizeChange={() =>
             scrollViewRef?.current?.scrollToEnd({animated: true})
           }>
-          {messages?.map((message) =>
-            message?.id === contact?.id ? (
+          {(messages as Array<IContactData | IRoomData>).map((message) =>
+            message?.id === dataReceivedFromNavigation?.id ? (
               <ChatContainerMessageSent key={String(message.key)}>
                 <MessageSentHour>{message?.created_at}</MessageSentHour>
                 <MessageSent>{message?.message}</MessageSent>
@@ -276,7 +361,7 @@ const Messages = () => {
           handlePosition="inside"
           handleStyle={handleStyle.background}
           overlayStyle={overlayStyle.background}>
-          <ContactDetails contact={contact} />
+          <ContactDetails contact={dataReceivedFromNavigation} />
         </Modalize>
       </Container>
     </Wrapper>
