@@ -57,21 +57,6 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
     return text.length >= 30 ? text.substr(0, 30) + '...' : text;
   }
 
-  function handleSerializedParticipants(allParticipants: IParticipants[]) {
-    const serialized = allParticipants.map((item) => ({
-      id: item?.id,
-      username: item?.username,
-      email: item?.email,
-      status: item?.status,
-      photo: item?.photo,
-      created_at: `${new Date(item?.created_at).getHours()}:${new Date(
-        item?.created_at,
-      ).getMinutes()}`,
-    }));
-
-    return serialized;
-  }
-
   useEffect(() => {
     async function handleGetParticipants() {
       try {
@@ -115,7 +100,11 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
 
       {chatData?.nickname && (
         <ParticipantsContainer>
-          <ParticipantsTitle>Participantes</ParticipantsTitle>
+          <ParticipantsTitle>
+            {participants?.length === 1
+              ? `${participants?.length} Participante`
+              : `${participants?.length} Participantes`}
+          </ParticipantsTitle>
 
           {participants?.map((participant) => (
             <ParticipantInfo key={Number(participant?.id)}>

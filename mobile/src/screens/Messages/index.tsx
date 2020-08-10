@@ -50,24 +50,19 @@ import {
   overlayStyle,
 } from './styles';
 
-interface IContactData {
+interface IContactMessages {
   key: string;
   id: number;
   username: string;
-  email: string;
-  photo: string;
-  status?: string;
   message: string;
   image?: string;
   created_at: string;
 }
 
-interface IRoomData {
+interface IRoomMessages {
   key: string;
   id: number;
-  name: string;
-  nickname: string;
-  avatar: string;
+  username: string;
   message: string;
   image?: string;
   created_at: string;
@@ -104,7 +99,9 @@ const Messages = () => {
 
   // States
   const [userData, setUserData] = useState<IUserData>({});
-  const [messages, setMessages] = useState<IContactData[] | IRoomData[]>([]);
+  const [messages, setMessages] = useState<
+    IContactMessages[] | IRoomMessages[]
+  >([]);
   const [messageInput, setMessageInput] = useState<string>('');
   const [showChatActions, setShowChatActions] = useState<boolean>(false);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
@@ -135,14 +132,11 @@ const Messages = () => {
     return modalizeRef.current?.open();
   }
 
-  function handleSerializedPrivateMessages(allMessages: IContactData[]) {
+  function handleSerializedPrivateMessages(allMessages: IContactMessages[]) {
     const serialized = allMessages.map((item) => ({
       key: Math.random().toString(30),
       id: item?.id,
       username: item?.username,
-      email: item?.email,
-      photo: item?.photo,
-      status: item?.status,
       image: item?.image,
       message: item?.message,
       created_at: `${new Date(item?.created_at).getHours()}:${new Date(
@@ -153,13 +147,11 @@ const Messages = () => {
     return serialized;
   }
 
-  function handleSerializedRoomMessages(allMessages: IRoomData[]) {
+  function handleSerializedRoomMessages(allMessages: IRoomMessages[]) {
     const serialized = allMessages.map((item) => ({
       key: Math.random().toString(30),
       id: item.id,
-      name: item?.name,
-      nickname: item?.nickname,
-      avatar: item?.avatar,
+      username: item?.username,
       image: item?.image,
       message: item?.message,
       created_at: `${new Date(item?.created_at).getHours()}:${new Date(
@@ -208,7 +200,7 @@ const Messages = () => {
   useEffect(() => {
     async function handleGetPrivateMessages() {
       try {
-        const allMessages = await api.get<IContactData[]>(
+        const allMessages = await api.get<IContactMessages[]>(
           `/privatemessages/${userData.id}/${dataReceivedFromNavigation.id}`,
         );
 
@@ -228,7 +220,7 @@ const Messages = () => {
 
     async function handleGetRoomMessages() {
       try {
-        const allMessages = await api.get<IRoomData[]>('/roommessages', {
+        const allMessages = await api.get<IRoomMessages[]>('/roommessages', {
           params: {
             nickname: dataReceivedFromNavigation?.nickname,
           },
@@ -304,17 +296,19 @@ const Messages = () => {
           onContentSizeChange={() =>
             scrollViewRef?.current?.scrollToEnd({animated: true})
           }>
-          {(messages as Array<IContactData | IRoomData>).map(
-            (chat: IContactData | IRoomData) =>
-              chat?.id === dataReceivedFromNavigation?.id ? (
-                <ChatContainerMessageSent key={String(chat.key)}>
-                  <MessageSentHour>{chat?.created_at}</MessageSentHour>
-                  <MessageSent>{chat?.message}</MessageSent>
+          {(messages as Array<IContactMessages | IRoomMessages>).map(
+            (user: IContactMessages | IRoomMessages) =>
+              (dataReceivedFromNavigation?.nickname &&
+                user?.id === userData?.id) ||
+              user?.id === dataReceivedFromNavigation?.id ? (
+                <ChatContainerMessageSent key={String(user.key)}>
+                  <MessageSentHour>{user?.created_at}</MessageSentHour>
+                  <MessageSent>{user?.message}</MessageSent>
                 </ChatContainerMessageSent>
               ) : (
-                <ChatContainerMessageReceived key={String(chat?.key)}>
-                  <MessageReceivedHour>{chat?.created_at}</MessageReceivedHour>
-                  <MessageReceived>{chat?.message}</MessageReceived>
+                <ChatContainerMessageReceived key={String(user?.key)}>
+                  <MessageReceivedHour>{user?.created_at}</MessageReceivedHour>
+                  <MessageReceived>{user?.message}</MessageReceived>
                 </ChatContainerMessageReceived>
               ),
           )}

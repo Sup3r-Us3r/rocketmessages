@@ -125,9 +125,6 @@ export default new class MessageController {
         .orderBy('M.id', 'asc')
         .select(
           'U.id',
-          'U.username',
-          'U.email',
-          'U.photo',
           'M.message',
           'M.image',
           'M.created_at',
@@ -148,15 +145,15 @@ export default new class MessageController {
 
     try {
       const messages = await knex('tb_message as M')
-        .join('tb_room as R', 'M.to_room', '=', 'R.id')
-        .join('tb_user as U', 'M.from', '=', 'U.id')
+        .join('tb_room as R', 'M.to_room', 'R.id')
+        .join('tb_user as U', 'M.from', 'U.id')
         .where('R.nickname', String(nickname))
         .select(
           'U.id',
           'U.username',
           'M.message',
           'M.image',
-          'M.created_at'
+          'M.created_at',
         );
 
     if (!messages) {
