@@ -3,7 +3,6 @@ import AsyncStorage from '@react-native-community/async-storage';
 import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
-// import CreateRoom from '../../components/CreateRoom';
 import ShowModalRoom from '../../components/ShowModalRoom';
 
 import api from '../../services/api';
@@ -32,7 +31,7 @@ import {
   ContainerCreateRoom,
 } from './styles';
 
-interface ILatestMessageOfRoom {
+export interface ILatestMessageOfRoom {
   id: number;
   name: string;
   nickname: string;
@@ -57,7 +56,9 @@ const Rooms = () => {
   }
 
   function handleNavigateToMessages(roomData: ILatestMessageOfRoom) {
-    return navigation.navigate('Messages', roomData);
+    return navigation.navigate('Messages', {
+      roomData,
+    });
   }
 
   function handleSerializedLatestMessage(

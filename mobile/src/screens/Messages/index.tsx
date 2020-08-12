@@ -10,6 +10,10 @@ import EmojiSelector, {Categories} from 'react-native-emoji-selector';
 import AsyncStorage from '@react-native-community/async-storage';
 import {Modalize} from 'react-native-modalize';
 
+// Import exported interface
+import {ILatestMessageOfContact} from '../Chat';
+import {ILatestMessageOfRoom} from '../Rooms';
+
 import ChatDetails from '../../components/ChatDetails';
 
 import api from '../../services/api';
@@ -69,18 +73,20 @@ interface IRoomMessages {
 }
 
 interface IDataReceivedFromNavigation {
-  key?: string;
-  id?: number;
-  name?: string;
-  nickname?: string;
-  username?: string;
-  email?: string;
-  avatar?: string;
-  photo?: string;
-  status?: string;
-  message?: string;
-  image?: string;
-  created_at?: string;
+  contactData?: ILatestMessageOfContact;
+  roomData?: ILatestMessageOfRoom;
+  // key?: string;
+  // id?: number;
+  // name?: string;
+  // nickname?: string;
+  // username?: string;
+  // email?: string;
+  // avatar?: string;
+  // photo?: string;
+  // status?: string;
+  // message?: string;
+  // image?: string;
+  // created_at?: string;
 }
 
 interface IUserData {
@@ -108,15 +114,14 @@ const Messages = () => {
 
   // Navigation
   const navigation = useNavigation();
-
   const dataReceivedFromNavigation = useRoute()
     .params as IDataReceivedFromNavigation;
 
   function handleNavigateToBack() {
-    if (dataReceivedFromNavigation?.nickname) {
-      return navigation.navigate('Rooms');
-    } else {
+    if (dataReceivedFromNavigation?.contactData) {
       return navigation.navigate('Chat');
+    } else {
+      return navigation.navigate('Rooms');
     }
   }
 
@@ -166,7 +171,9 @@ const Messages = () => {
     try {
       const data = {
         from: userData?.id,
-        to_user: dataReceivedFromNavigation?.id,
+        to_user: dataReceivedFromNavigation?.contactData
+          ? dataReceivedFromNavigation?.contactData?.id
+          : dataReceivedFromNavigation?.roomData?.id,
         to_room: null,
         message: messageInput,
       };
@@ -191,7 +198,7 @@ const Messages = () => {
 
       const data = JSON.parse(String(getMyData));
 
-      setUserData(data);
+      return setUserData(data);
     }
 
     handleSetLocalUserData();
@@ -201,7 +208,7 @@ const Messages = () => {
     async function handleGetPrivateMessages() {
       try {
         const allMessages = await api.get<IContactMessages[]>(
-          `/privatemessages/${userData.id}/${dataReceivedFromNavigation.id}`,
+          `/privatemessages/${userData.id}/${dataReceivedFromNavigation?.contactData?.id}`,
         );
 
         if (!allMessages) {
@@ -222,7 +229,7 @@ const Messages = () => {
       try {
         const allMessages = await api.get<IRoomMessages[]>('/roommessages', {
           params: {
-            nickname: dataReceivedFromNavigation?.nickname,
+            nickname: dataReceivedFromNavigation?.roomData?.nickname,
           },
         });
 
@@ -240,11 +247,10 @@ const Messages = () => {
       }
     }
 
-    // Room or Private messages
-    if (dataReceivedFromNavigation?.nickname) {
-      handleGetRoomMessages();
-    } else {
+    if (dataReceivedFromNavigation?.contactData) {
       handleGetPrivateMessages();
+    } else {
+      handleGetRoomMessages();
     }
   }, [userData, dataReceivedFromNavigation]);
 
@@ -257,16 +263,16 @@ const Messages = () => {
           </BackButton>
           <ChatImage
             source={{
-              uri: dataReceivedFromNavigation?.photo
-                ? dataReceivedFromNavigation?.photo
-                : dataReceivedFromNavigation?.avatar,
+              uri: dataReceivedFromNavigation?.contactData
+                ? dataReceivedFromNavigation?.contactData?.photo
+                : dataReceivedFromNavigation?.roomData?.avatar,
             }}
           />
           <ChatInfo onPress={handleShowModal}>
             <ChatName>
-              {dataReceivedFromNavigation?.username
-                ? dataReceivedFromNavigation?.username
-                : dataReceivedFromNavigation?.name}
+              {dataReceivedFromNavigation?.contactData
+                ? dataReceivedFromNavigation?.contactData?.username
+                : dataReceivedFromNavigation?.roomData?.name}
             </ChatName>
             <ChatStatus>Online</ChatStatus>
           </ChatInfo>
@@ -298,9 +304,10 @@ const Messages = () => {
           }>
           {(messages as Array<IContactMessages | IRoomMessages>).map(
             (user: IContactMessages | IRoomMessages) =>
-              (dataReceivedFromNavigation?.nickname &&
-                user?.id === userData?.id) ||
-              user?.id === dataReceivedFromNavigation?.id ? (
+              (dataReceivedFromNavigation?.contactData &&
+                user.id === userData?.id) ||
+              (dataReceivedFromNavigation?.roomData &&
+                user?.id === userData?.id) ? (
                 <ChatContainerMessageSent key={String(user.key)}>
                   <MessageSentHour>{user?.created_at}</MessageSentHour>
                   <MessageSent>{user?.message}</MessageSent>
@@ -357,7 +364,9 @@ const Messages = () => {
         <Modalize
           ref={modalizeRef}
           snapPoint={470}
-          // modalHeight={470}
+          modalHeight={
+            dataReceivedFromNavigation?.contactData ? 470 : undefined
+          }
           handleStyle={handleStyle.background}
           overlayStyle={overlayStyle.background}>
           <ChatDetails chatData={dataReceivedFromNavigation} />

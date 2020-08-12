@@ -62,7 +62,6 @@ const Friends = () => {
       }
 
       setSearchResult(response.data);
-      console.log('searchResult: ', searchResult);
       setTyping(true);
 
       return setSearchInput('');
@@ -74,7 +73,9 @@ const Friends = () => {
   }
 
   function handleNavigateToMessages(contactData: IContactData) {
-    return navigation.navigate('Messages', contactData);
+    return navigation.navigate('Messages', {
+      contactData,
+    });
   }
 
   return (

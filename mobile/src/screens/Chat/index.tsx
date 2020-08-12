@@ -27,12 +27,12 @@ import {
   ContactTotalMessages,
 } from './styles';
 
-interface ILatestMessageOfContact {
+export interface ILatestMessageOfContact {
   id: number;
   username: string;
   email: string;
   photo: string;
-  status?: string;
+  status: string;
   message: string;
   image?: string;
   created_at: string;
@@ -49,7 +49,9 @@ const Chat = () => {
   const navigation = useNavigation();
 
   function handleNavigateToMessages(contactData: ILatestMessageOfContact) {
-    return navigation.navigate('Messages', contactData);
+    return navigation.navigate('Messages', {
+      contactData,
+    });
   }
 
   function handleSerializedLatestMessage(

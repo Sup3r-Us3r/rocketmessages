@@ -1,5 +1,9 @@
 import React, {useState, useEffect} from 'react';
 
+// import exported interface
+import {ILatestMessageOfContact} from '../../screens/Chat';
+import {ILatestMessageOfRoom} from '../../screens/Rooms';
+
 import api from '../../services/api';
 
 import Toast from '../../config/toastStyles';
@@ -22,18 +26,8 @@ import {
 } from './styles';
 
 interface IDataReceivedFromNavigation {
-  key?: string;
-  id?: number;
-  name?: string;
-  nickname?: string;
-  username?: string;
-  email?: string;
-  avatar?: string;
-  photo?: string;
-  status?: string;
-  message?: string;
-  image?: string;
-  created_at?: string;
+  contactData?: ILatestMessageOfContact;
+  roomData?: ILatestMessageOfRoom;
 }
 
 interface IChatDetailsProps {
@@ -62,7 +56,7 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
       try {
         const users = await api.get<IParticipants[]>('/usersinroom', {
           params: {
-            nickname: chatData?.nickname,
+            nickname: chatData?.roomData?.nickname,
           },
         });
 
@@ -78,7 +72,7 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
       }
     }
 
-    if (chatData?.nickname) {
+    if (chatData?.roomData?.nickname) {
       handleGetParticipants();
     }
   }, [chatData]);
@@ -87,18 +81,28 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
     <Wrapper>
       <ContainerImage style={shadowPhoto.shadow}>
         <Photo
-          source={{uri: chatData?.photo ? chatData?.photo : chatData?.avatar}}
+          source={{
+            uri: chatData?.contactData
+              ? chatData?.contactData?.photo
+              : chatData?.roomData?.avatar,
+          }}
         />
       </ContainerImage>
       <ChatTitle>
-        {chatData?.username ? chatData?.username : chatData?.name}
+        {chatData?.contactData
+          ? chatData?.contactData?.username
+          : chatData?.roomData?.name}
       </ChatTitle>
       <ChatSubtitle>
-        {chatData?.status ? chatData?.status : chatData?.nickname}
+        {chatData?.contactData
+          ? chatData?.contactData?.status
+          : chatData?.roomData?.nickname}
       </ChatSubtitle>
-      {chatData?.email && <ChatInfo>{chatData?.email}</ChatInfo>}
+      {chatData?.contactData && (
+        <ChatInfo>{chatData?.contactData?.email}</ChatInfo>
+      )}
 
-      {chatData?.nickname && (
+      {chatData?.roomData && (
         <ParticipantsContainer>
           <ParticipantsTitle>
             {participants?.length === 1
