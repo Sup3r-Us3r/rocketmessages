@@ -119,12 +119,12 @@ export default new class MessageController {
 
     try {
       const messages = await knex('tb_message as M')
-        .join('tb_user as U', 'M.to_user', '=', 'U.id')
+        .join('tb_user as U', 'M.to_user', 'U.id')
         .whereIn('M.from', [Number(from), Number(to_user)])
         .whereIn('M.to_user', [Number(to_user), Number(from)])
         .orderBy('M.id', 'asc')
         .select(
-          'U.id',
+          'M.from as id',
           'M.message',
           'M.image',
           'M.created_at',

@@ -39,12 +39,6 @@ interface IImagePickerResponse {
   uri: string;
 }
 
-interface IImageProperties {
-  uri?: string;
-  fileName?: string;
-  type?: string;
-}
-
 interface IUserData {
   id?: number;
   username?: string;
@@ -57,7 +51,7 @@ interface IUserData {
 const Settings = () => {
   // States
   const [userData, setUserData] = useState<IUserData>({});
-  const [selectedImage, setSelectedImage] = useState<IImageProperties>({});
+  const [selectedImage, setSelectedImage] = useState({uri: undefined});
   const [usernameInput, setUsernameInput] = useState<string>('');
   const [statusInput, setStatusInput] = useState<string>('');
   const [oldValueUsernameInput, setOldValueUsernameInput] = useState<string>(
@@ -66,6 +60,7 @@ const Settings = () => {
   const [oldValueStatusInput, setOldValueStatusInput] = useState<string>('');
   const [toggleModal, setToggleModal] = useState<boolean>(false);
   const [showModalOf, setShowModalOf] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
   async function handleRequestUpdateUserApi(updateData: FormData) {
     try {
@@ -189,6 +184,8 @@ const Settings = () => {
   useEffect(() => {
     async function handleGetUserData() {
       try {
+        setLoading(true);
+
         const getMyLocalData = await AsyncStorage.getItem(
           '@rocketMessages/userData',
         );
@@ -211,6 +208,7 @@ const Settings = () => {
         });
         setOldValueUsernameInput(user?.data?.username);
         setOldValueStatusInput(user?.data?.status);
+        setLoading(false);
       } catch (err) {
         const error = err.response.data;
 
@@ -223,93 +221,99 @@ const Settings = () => {
 
   return (
     <Wrapper>
-      <ContainerImage source={{uri: selectedImage?.uri}}>
-        <ChangeImageButton
-          onPress={() =>
-            ImagePicker.showImagePicker(
-              {
-                title: 'Selecione uma imagem',
-                takePhotoButtonTitle: 'Tirar foto',
-                chooseFromLibraryButtonTitle: 'Escolher da galeria',
-                cancelButtonTitle: 'Cancelar',
-                // noData: true,
-                storageOptions: {
-                  // skipBackup: true,
-                  path: 'images',
-                  cameraRoll: true,
-                  waitUntilSaved: true,
-                },
-              },
-              handleUploadImage,
-            )
-          }>
-          <ChangeImageIcon />
-        </ChangeImageButton>
-      </ContainerImage>
-
-      <Container>
-        <WrapperText>
-          <ContainerUsernameField onPress={handleShowModalEditUsername}>
-            <AntDesign name="user" color="#7159c1" size={18} />
-            <TextInfoGroup>
-              <IndicatorLabel>Nome</IndicatorLabel>
-              <UsernameLabel>{oldValueUsernameInput}</UsernameLabel>
-            </TextInfoGroup>
-          </ContainerUsernameField>
-
-          <ContainerStatusMessageField onPress={handleShowModalEditStatus}>
-            <AntDesign name="infocirlceo" color="#7159c1" size={18} />
-            <TextInfoGroup>
-              <IndicatorLabel>Recado</IndicatorLabel>
-              <StatusMessageLabel>
-                {handleLimitStatusCharacters(oldValueStatusInput)}
-              </StatusMessageLabel>
-            </TextInfoGroup>
-          </ContainerStatusMessageField>
-        </WrapperText>
-      </Container>
-
-      {toggleModal && (
-        <ShowModalEditTextInput style={shadowContainer.shadowBox}>
-          {showModalOf === 'username' && (
-            <UsernameInput
-              autoFocus
-              placeholder="Digite seu nome"
-              onChangeText={setUsernameInput}
-              autoCorrect={false}
-              onSubmitEditing={Keyboard.dismiss}
-              onBlur={Keyboard.dismiss}
-              value={usernameInput}
-            />
-          )}
-
-          {showModalOf === 'status' && (
-            <StatusMessageInput
-              autoFocus
-              placeholder="Digite seu status"
-              onChangeText={setStatusInput}
-              autoCorrect={false}
-              onSubmitEditing={Keyboard.dismiss}
-              onBlur={Keyboard.dismiss}
-              value={statusInput}
-            />
-          )}
-
-          <ModalActions>
-            <ModalButton onPress={handleCloseModal}>
-              <ModalButtonLabel>Cancelar</ModalButtonLabel>
-            </ModalButton>
-
-            <ModalButton
-              onPress={
-                showModalOf === 'username'
-                  ? handleUpdateUsername
-                  : handleUpdateStatus
+      {loading ? (
+        <Text>Carregando...</Text>
+      ) : (
+        <>
+          <ContainerImage source={{uri: selectedImage?.uri}}>
+            <ChangeImageButton
+              onPress={() =>
+                ImagePicker.showImagePicker(
+                  {
+                    title: 'Selecione uma imagem',
+                    takePhotoButtonTitle: 'Tirar foto',
+                    chooseFromLibraryButtonTitle: 'Escolher da galeria',
+                    cancelButtonTitle: 'Cancelar',
+                    // noData: true,
+                    storageOptions: {
+                      // skipBackup: true,
+                      path: 'images',
+                      cameraRoll: true,
+                      waitUntilSaved: true,
+                    },
+                  },
+                  handleUploadImage,
+                )
               }>
-              <ModalButtonLabel>Salvar</ModalButtonLabel>
-            </ModalButton>
-          </ModalActions>
-        </ShowModalEditTextInput>
+              <ChangeImageIcon />
+            </ChangeImageButton>
+          </ContainerImage>
+
+          <Container>
+            <WrapperText>
+              <ContainerUsernameField onPress={handleShowModalEditUsername}>
+                <AntDesign name="user" color="#7159c1" size={18} />
+                <TextInfoGroup>
+                  <IndicatorLabel>Nome</IndicatorLabel>
+                  <UsernameLabel>{oldValueUsernameInput}</UsernameLabel>
+                </TextInfoGroup>
+              </ContainerUsernameField>
+
+              <ContainerStatusMessageField onPress={handleShowModalEditStatus}>
+                <AntDesign name="infocirlceo" color="#7159c1" size={18} />
+                <TextInfoGroup>
+                  <IndicatorLabel>Recado</IndicatorLabel>
+                  <StatusMessageLabel>
+                    {handleLimitStatusCharacters(oldValueStatusInput)}
+                  </StatusMessageLabel>
+                </TextInfoGroup>
+              </ContainerStatusMessageField>
+            </WrapperText>
+          </Container>
+
+          {toggleModal && (
+            <ShowModalEditTextInput style={shadowContainer.shadowBox}>
+              {showModalOf === 'username' && (
+                <UsernameInput
+                  autoFocus
+                  placeholder="Digite seu nome"
+                  onChangeText={setUsernameInput}
+                  autoCorrect={false}
+                  onSubmitEditing={Keyboard.dismiss}
+                  onBlur={Keyboard.dismiss}
+                  value={usernameInput}
+                />
+              )}
+
+              {showModalOf === 'status' && (
+                <StatusMessageInput
+                  autoFocus
+                  placeholder="Digite seu status"
+                  onChangeText={setStatusInput}
+                  autoCorrect={false}
+                  onSubmitEditing={Keyboard.dismiss}
+                  onBlur={Keyboard.dismiss}
+                  value={statusInput}
+                />
+              )}
+
+              <ModalActions>
+                <ModalButton onPress={handleCloseModal}>
+                  <ModalButtonLabel>Cancelar</ModalButtonLabel>
+                </ModalButton>
+
+                <ModalButton
+                  onPress={
+                    showModalOf === 'username'
+                      ? handleUpdateUsername
+                      : handleUpdateStatus
+                  }>
+                  <ModalButtonLabel>Salvar</ModalButtonLabel>
+                </ModalButton>
+              </ModalActions>
+            </ShowModalEditTextInput>
+          )}
+        </>
       )}
     </Wrapper>
   );

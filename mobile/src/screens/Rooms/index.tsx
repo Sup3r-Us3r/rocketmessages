@@ -5,6 +5,8 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import ShowModalRoom from '../../components/ShowModalRoom';
 
+import {messageDateFormatter} from '../../utils/messageDateFormatter';
+
 import api from '../../services/api';
 
 import Toast from '../../config/toastStyles';
@@ -73,9 +75,7 @@ const Rooms = () => {
         item?.message?.length < 28
           ? item?.message
           : item?.message?.substr(0, 28) + '...',
-      created_at: `${new Date(item?.created_at).getHours()}:${new Date(
-        item?.created_at,
-      ).getMinutes()}`,
+      created_at: messageDateFormatter(item?.created_at),
     }));
 
     return serialized;
@@ -156,6 +156,7 @@ const Rooms = () => {
         <ShowModalRoom
           toggleModal={toggleModal}
           setToggleModal={setToggleModal}
+          whichModal="create"
         />
       )}
     </Wrapper>

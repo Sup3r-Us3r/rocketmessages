@@ -11,7 +11,9 @@ export const Wrapper = styled.ImageBackground.attrs(() => ({
   background: #fcfcfc;
 `;
 
-export const Container = styled.View`
+export const Container = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 1,
+}))`
   flex: 1;
 `;
 
@@ -66,37 +68,33 @@ export const MessageOptions = styled.View`
   z-index: 9999;
   position: absolute;
   padding: 10px;
-  width: 45%;
-  top: 55px;
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
+  top: 1px;
+  right: 1px;
+  border-radius: 5px;
   background: #fff;
-  margin-right: 20px;
-  align-self: flex-end;
 `;
 
-export const ArrowUpIcon = styled(Ionicons).attrs(() => ({
-  name: 'md-arrow-dropup',
-  color: '#fff',
-  size: 40,
-}))`
-  position: absolute;
-  top: 30px;
-  right: 20px;
-  align-self: flex-end;
-`;
+// export const ArrowUpIcon = styled(Ionicons).attrs(() => ({
+//   name: 'md-arrow-dropup',
+//   color: '#fff',
+//   size: 40,
+// }))`
+//   position: absolute;
+//   top: 30px;
+//   right: 20px;
+//   align-self: flex-end;
+// `;
 
 export const shadowContainer = StyleSheet.create({
   shadowBox: {
     shadowColor: '#eee',
     shadowOffset: {
       width: 0,
-      height: 12,
+      height: 10,
     },
-    shadowOpacity: 0.58,
-    shadowRadius: 16.0,
-    elevation: 24,
+    shadowOpacity: 0.5,
+    shadowRadius: 15.0,
+    elevation: 5,
   },
 });
 
@@ -108,6 +106,13 @@ export const ClearMessages = styled.TouchableOpacity.attrs(() => ({
 `;
 
 export const DeleteChat = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.6,
+}))`
+  flex-direction: row;
+  padding: 8px 0;
+`;
+
+export const UpdateRoom = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.6,
 }))`
   flex-direction: row;

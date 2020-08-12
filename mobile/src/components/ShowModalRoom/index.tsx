@@ -30,6 +30,7 @@ import Toast from '../../config/toastStyles';
 interface IShowModalRoomProps {
   toggleModal: boolean;
   setToggleModal: Dispatch<SetStateAction<boolean>>;
+  whichModal: string;
 }
 
 interface IImagePickerResponse {
@@ -50,6 +51,7 @@ interface IAvatarProperties {
 const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
   toggleModal,
   setToggleModal,
+  whichModal,
 }) => {
   // States
   const [nameInput, setNameInput] = useState<string>('');
@@ -184,8 +186,10 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
             onChangeText={setNicknameInput}
             value={nicknameInput}
           />
-          <CreateRoomButton>
-            <CreateRoomLabel>Criar grupo</CreateRoomLabel>
+          <CreateRoomButton onPress={handleSubmit}>
+            <CreateRoomLabel>
+              {whichModal === 'create' ? 'Criar grupo' : 'Editar grupo'}
+            </CreateRoomLabel>
           </CreateRoomButton>
         </Container>
       </ScrollView>

@@ -2,6 +2,8 @@ import React, {useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 import {useNavigation} from '@react-navigation/native';
 
+import {messageDateFormatter} from '../../utils/messageDateFormatter';
+
 import api from '../../services/api';
 
 import Toast from '../../config/toastStyles';
@@ -63,19 +65,17 @@ const Chat = () => {
     // );
 
     const serialized = latestMessageData.map((item) => ({
-      id: item.id,
-      username: item.username,
-      email: item.email,
-      photo: item.photo,
-      status: item.status,
-      image: item.image,
+      id: item?.id,
+      username: item?.username,
+      email: item?.email,
+      photo: item?.photo,
+      status: item?.status,
+      image: item?.image,
       message:
         item.message.length < 28
-          ? item.message
-          : item.message.substr(0, 28) + '...',
-      created_at: `${new Date(item.created_at).getHours()}:${new Date(
-        item.created_at,
-      ).getMinutes()}`,
+          ? item?.message
+          : item?.message.substr(0, 28) + '...',
+      created_at: messageDateFormatter(item?.created_at),
     }));
 
     return serialized;

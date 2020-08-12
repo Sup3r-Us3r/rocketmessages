@@ -5,20 +5,24 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import SimpleLinIcons from 'react-native-vector-icons/SimpleLineIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import EmojiSelector, {Categories} from 'react-native-emoji-selector';
 import AsyncStorage from '@react-native-community/async-storage';
 import {Modalize} from 'react-native-modalize';
 
-// Import exported interface
-import {ILatestMessageOfContact} from '../Chat';
-import {ILatestMessageOfRoom} from '../Rooms';
-
 import ChatDetails from '../../components/ChatDetails';
+import ShowModalRoom from '../../components/ShowModalRoom';
+
+import {handleTwoDigitsFormat} from '../../utils/messageDateFormatter';
 
 import api from '../../services/api';
 
 import Toast from '../../config/toastStyles';
+
+// Import exported interface
+import {ILatestMessageOfContact} from '../Chat';
+import {ILatestMessageOfRoom} from '../Rooms';
 
 import {
   Wrapper,
@@ -31,9 +35,10 @@ import {
   ChatStatus,
   ChatAction,
   MessageOptions,
-  ArrowUpIcon,
+  // ArrowUpIcon,
   ClearMessages,
   DeleteChat,
+  UpdateRoom,
   ActionLabel,
   shadowContainer,
   ChatContainer,
@@ -54,19 +59,10 @@ import {
   overlayStyle,
 } from './styles';
 
-interface IContactMessages {
+interface IMessages {
   key: string;
   id: number;
-  username: string;
-  message: string;
-  image?: string;
-  created_at: string;
-}
-
-interface IRoomMessages {
-  key: string;
-  id: number;
-  username: string;
+  username?: string;
   message: string;
   image?: string;
   created_at: string;
@@ -75,18 +71,6 @@ interface IRoomMessages {
 interface IDataReceivedFromNavigation {
   contactData?: ILatestMessageOfContact;
   roomData?: ILatestMessageOfRoom;
-  // key?: string;
-  // id?: number;
-  // name?: string;
-  // nickname?: string;
-  // username?: string;
-  // email?: string;
-  // avatar?: string;
-  // photo?: string;
-  // status?: string;
-  // message?: string;
-  // image?: string;
-  // created_at?: string;
 }
 
 interface IUserData {
@@ -105,12 +89,11 @@ const Messages = () => {
 
   // States
   const [userData, setUserData] = useState<IUserData>({});
-  const [messages, setMessages] = useState<
-    IContactMessages[] | IRoomMessages[]
-  >([]);
+  const [messages, setMessages] = useState<IMessages[]>([]);
   const [messageInput, setMessageInput] = useState<string>('');
   const [showChatActions, setShowChatActions] = useState<boolean>(false);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
+  const [toggleModal, setToggleModal] = useState<boolean>(false);
 
   // Navigation
   const navigation = useNavigation();
@@ -137,31 +120,20 @@ const Messages = () => {
     return modalizeRef.current?.open();
   }
 
-  function handleSerializedPrivateMessages(allMessages: IContactMessages[]) {
+  function handleOpenModal() {
+    setShowChatActions(false);
+
+    return setToggleModal(true);
+  }
+
+  function handleSerializedMessages(allMessages: IMessages[]) {
     const serialized = allMessages.map((item) => ({
       key: Math.random().toString(30),
       id: item?.id,
       username: item?.username,
       image: item?.image,
       message: item?.message,
-      created_at: `${new Date(item?.created_at).getHours()}:${new Date(
-        item?.created_at,
-      ).getMinutes()}`,
-    }));
-
-    return serialized;
-  }
-
-  function handleSerializedRoomMessages(allMessages: IRoomMessages[]) {
-    const serialized = allMessages.map((item) => ({
-      key: Math.random().toString(30),
-      id: item.id,
-      username: item?.username,
-      image: item?.image,
-      message: item?.message,
-      created_at: `${new Date(item?.created_at).getHours()}:${new Date(
-        item?.created_at,
-      ).getMinutes()}`,
+      created_at: handleTwoDigitsFormat(item?.created_at),
     }));
 
     return serialized;
@@ -173,8 +145,10 @@ const Messages = () => {
         from: userData?.id,
         to_user: dataReceivedFromNavigation?.contactData
           ? dataReceivedFromNavigation?.contactData?.id
-          : dataReceivedFromNavigation?.roomData?.id,
-        to_room: null,
+          : null,
+        to_room: dataReceivedFromNavigation?.roomData
+          ? dataReceivedFromNavigation?.roomData?.id
+          : null,
         message: messageInput,
       };
 
@@ -207,15 +181,15 @@ const Messages = () => {
   useEffect(() => {
     async function handleGetPrivateMessages() {
       try {
-        const allMessages = await api.get<IContactMessages[]>(
-          `/privatemessages/${userData.id}/${dataReceivedFromNavigation?.contactData?.id}`,
+        const allMessages = await api.get<IMessages[]>(
+          `/privatemessages/${userData?.id}/${dataReceivedFromNavigation?.contactData?.id}`,
         );
 
         if (!allMessages) {
           return Toast.error('Erro ao listar mensagens.');
         }
 
-        const response = handleSerializedPrivateMessages(allMessages.data);
+        const response = handleSerializedMessages(allMessages.data);
 
         return setMessages(response);
       } catch (err) {
@@ -227,7 +201,7 @@ const Messages = () => {
 
     async function handleGetRoomMessages() {
       try {
-        const allMessages = await api.get<IRoomMessages[]>('/roommessages', {
+        const allMessages = await api.get<IMessages[]>('/roommessages', {
           params: {
             nickname: dataReceivedFromNavigation?.roomData?.nickname,
           },
@@ -237,7 +211,7 @@ const Messages = () => {
           return Toast.error('Erro ao listar mensagens.');
         }
 
-        const response = handleSerializedRoomMessages(allMessages.data);
+        const response = handleSerializedMessages(allMessages.data);
 
         return setMessages(response);
       } catch (err) {
@@ -256,7 +230,7 @@ const Messages = () => {
 
   return (
     <Wrapper>
-      <Container>
+      <Container onPress={() => setShowChatActions(false)}>
         <Header>
           <BackButton onPress={handleNavigateToBack}>
             <Ionicons name="ios-arrow-back" color="#fff" size={20} />
@@ -283,7 +257,7 @@ const Messages = () => {
 
         {showChatActions && (
           <>
-            <ArrowUpIcon style={shadowContainer.shadowBox} />
+            {/* <ArrowUpIcon style={shadowContainer.shadowBox} /> */}
             <MessageOptions style={shadowContainer.shadowBox}>
               <ClearMessages>
                 <MaterialIcons name="clear" color="#7159c1" size={20} />
@@ -293,6 +267,12 @@ const Messages = () => {
                 <AntDesign name="deleteuser" color="#7159c1" size={20} />
                 <ActionLabel>Deletar conversa</ActionLabel>
               </DeleteChat>
+              {dataReceivedFromNavigation.roomData && (
+                <UpdateRoom onPress={handleOpenModal}>
+                  <Feather name="edit" color="#7159c1" size={20} />
+                  <ActionLabel>Editar grupo</ActionLabel>
+                </UpdateRoom>
+              )}
             </MessageOptions>
           </>
         )}
@@ -302,22 +282,21 @@ const Messages = () => {
           onContentSizeChange={() =>
             scrollViewRef?.current?.scrollToEnd({animated: true})
           }>
-          {(messages as Array<IContactMessages | IRoomMessages>).map(
-            (user: IContactMessages | IRoomMessages) =>
-              (dataReceivedFromNavigation?.contactData &&
-                user.id === userData?.id) ||
-              (dataReceivedFromNavigation?.roomData &&
-                user?.id === userData?.id) ? (
-                <ChatContainerMessageSent key={String(user.key)}>
-                  <MessageSentHour>{user?.created_at}</MessageSentHour>
-                  <MessageSent>{user?.message}</MessageSent>
-                </ChatContainerMessageSent>
-              ) : (
-                <ChatContainerMessageReceived key={String(user?.key)}>
-                  <MessageReceivedHour>{user?.created_at}</MessageReceivedHour>
-                  <MessageReceived>{user?.message}</MessageReceived>
-                </ChatContainerMessageReceived>
-              ),
+          {messages.map((user: IMessages) =>
+            (dataReceivedFromNavigation?.contactData &&
+              user?.id === userData?.id) ||
+            (dataReceivedFromNavigation?.roomData &&
+              user?.id === userData?.id) ? (
+              <ChatContainerMessageSent key={String(user.key)}>
+                <MessageSentHour>{user?.created_at}</MessageSentHour>
+                <MessageSent>{user?.message}</MessageSent>
+              </ChatContainerMessageSent>
+            ) : (
+              <ChatContainerMessageReceived key={String(user?.key)}>
+                <MessageReceivedHour>{user?.created_at}</MessageReceivedHour>
+                <MessageReceived>{user?.message}</MessageReceived>
+              </ChatContainerMessageReceived>
+            ),
           )}
         </ChatContainer>
 
@@ -371,6 +350,14 @@ const Messages = () => {
           overlayStyle={overlayStyle.background}>
           <ChatDetails chatData={dataReceivedFromNavigation} />
         </Modalize>
+
+        {toggleModal && (
+          <ShowModalRoom
+            toggleModal={toggleModal}
+            setToggleModal={setToggleModal}
+            whichModal="update"
+          />
+        )}
       </Container>
     </Wrapper>
   );
