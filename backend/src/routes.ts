@@ -42,6 +42,14 @@ routes.put(
 // User - Room
 routes.get('/usersinroom', UserRoomController.listUsersInRoom);
 routes.post('/insertuserinroom', UserRoomController.insertUserInRoom);
+routes.put(
+  '/makeorunmakeuseradmin/:user_id/:room_id',
+  UserRoomController.makeOrUnmakeUserAdminInRoom
+);
+routes.delete(
+  '/deleteuserfromroom/:user_id/:room_id',
+  UserRoomController.deleteUserFromRoom
+);
 
 // Message
 routes.get(

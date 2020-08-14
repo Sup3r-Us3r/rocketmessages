@@ -25,7 +25,7 @@ export function messageDateFormatter(createdAt: string): string {
     today.toLocaleDateString('pt-br') ===
     new Date(yesterdayMessage).toLocaleDateString('pt-br')
   ) {
-    return 'ontem';
+    return 'Ontem';
   }
 
   // Returns the complete date

@@ -4,28 +4,17 @@ import knex from '../../database/connection';
 interface IBodyData {
   user_id: number;
   room_id: number;
-}
-
-interface IUserInRoomData {
-  id: number;
-  username: string;
-  email: string;
-  status?: string;
-  photo?: string;
-  name: string;
-  nickname: string;
-  avatar: string;
-  created_at: Date;
+  user_admin: boolean;
 }
 
 export default new class UserRoomController {
   async insertUserInRoom(req: Request, res: Response) {
-    const { user_id, room_id } = req.body as IBodyData;
+    const { user_id, room_id, user_admin } = req.body as IBodyData;
 
     try {
       const userInRoomExists = await knex('tb_user_room as UR')
-        .where('UR.user_id', user_id)
-        .andWhere('UR.room_id', room_id)
+        .where('UR.user_id', Number(user_id))
+        .andWhere('UR.room_id', Number(room_id))
         .first();
 
       if (userInRoomExists) {
@@ -36,6 +25,7 @@ export default new class UserRoomController {
       const userInRoom = await knex('tb_user_room').insert({
         user_id,
         room_id,
+        user_admin,
       });
 
       if (!userInRoom) {
@@ -55,13 +45,14 @@ export default new class UserRoomController {
 
     try {
       const usersInRooms = await knex('tb_user_room as UR')
-        .join('tb_user as U', 'UR.user_id', '=', 'U.id')
-        .join('tb_room as R', 'UR.room_id', '=', 'R.id')
+        .join('tb_user as U', 'UR.user_id', 'U.id')
+        .join('tb_room as R', 'UR.room_id', 'R.id')
         .where('R.nickname', String(nickname))
+        .orderBy('UR.user_admin', 'desc')
         .select(
           'U.id',
+          'UR.user_admin',
           'U.username',
-          'U.email',
           'U.photo',
           'U.status',
         );
@@ -75,6 +66,65 @@ export default new class UserRoomController {
     } catch (err) {
       return res.status(500)
         .json({ error: 'Error listing users inside the room.' });
+    }
+  }
+
+  async makeOrUnmakeUserAdminInRoom(req: Request, res: Response) {
+    const { user_id, room_id } = req.params;
+    const { user_admin } = req.body as IBodyData;
+    
+    try {
+      const userExists = await knex('tb_user_room as UR')
+        .where('UR.user_id', Number(user_id))
+        .andWhere('UR.room_id', Number(room_id))
+        .first();
+
+      if (!userExists) {
+        return res.status(400).json({ error: 'User not exists in room.' });
+      }
+
+      const makeUserAdmin = await knex('tb_user_room as UR')
+        .where('UR.user_id', Number(user_id))
+        .andWhere('UR.room_id', Number(room_id))
+        .update({
+          user_admin,
+        });
+
+      if (!makeUserAdmin) {
+        return res.status(500).json({ error: 'Error making admin user.' });
+      }
+
+      return res.json(makeUserAdmin);
+    } catch (err) {
+      return res.status(500).json({ error: 'Error making admin user.' });
+    }
+  }
+
+  async deleteUserFromRoom(req: Request, res: Response) {
+    const { user_id, room_id } = req.params;
+    
+    try {
+      const userExists = await knex('tb_user_room as UR')
+        .where('UR.user_id', Number(user_id))
+        .andWhere('UR.room_id', Number(room_id))
+        .first();
+
+      if (!userExists) {
+        return res.status(400).json({ error: 'User not exists in room.' });
+      }
+
+      const removeUser = await knex('tb_user_room as UR')
+        .where('UR.user_id', Number(user_id))
+        .andWhere('UR.room_id', Number(room_id))
+        .del();
+
+      if (!removeUser) {
+        return res.status(500).json({ error: 'Error removing user from room.' });
+      }
+
+      return res.json(removeUser);
+    } catch (err) {
+      return res.status(500).json({ error: 'Error removing user from room.' });
     }
   }
 }

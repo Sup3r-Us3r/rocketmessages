@@ -15,6 +15,6 @@ export async function seed(knex: Knex) {
       nickname: 'group2',
       avatar: 'https://criticalhits.com.br/wp-content/uploads/2019/12/20190920-cropped-20190920-sasuke_t2gh-1200x675-910x512.jpg',
       created_at: date,
-    }
+    },
   ]);
 }

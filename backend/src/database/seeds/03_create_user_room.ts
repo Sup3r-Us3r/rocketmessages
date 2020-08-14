@@ -5,22 +5,27 @@ export async function seed(knex: Knex) {
     {
       user_id: 1,
       room_id: 1,
+      user_admin: true,
     },
     {
       user_id: 2,
       room_id: 1,
+      user_admin: false,
     },
     {
       user_id: 3,
       room_id: 1,
+      user_admin: false,
     },
     {
       user_id: 2,
       room_id: 2,
+      user_admin: false,
     },
     {
       user_id: 3,
       room_id: 2,
-    }
+      user_admin: true,
+    },
   ]);
 }

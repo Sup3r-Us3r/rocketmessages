@@ -342,10 +342,10 @@ const Messages = () => {
 
         <Modalize
           ref={modalizeRef}
-          snapPoint={470}
-          modalHeight={
-            dataReceivedFromNavigation?.contactData ? 470 : undefined
+          adjustToContentHeight={
+            dataReceivedFromNavigation?.contactData ? true : undefined
           }
+          snapPoint={dataReceivedFromNavigation?.roomData ? 470 : undefined}
           handleStyle={handleStyle.background}
           overlayStyle={overlayStyle.background}>
           <ChatDetails chatData={dataReceivedFromNavigation} />
@@ -356,6 +356,7 @@ const Messages = () => {
             toggleModal={toggleModal}
             setToggleModal={setToggleModal}
             whichModal="update"
+            roomData={dataReceivedFromNavigation?.roomData}
           />
         )}
       </Container>

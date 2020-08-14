@@ -1,5 +1,7 @@
 import {StyleSheet} from 'react-native';
 import styled from 'styled-components/native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export const Wrapper = styled.View`
   justify-content: center;
@@ -64,12 +66,24 @@ export const ParticipantsTitle = styled.Text`
   font-size: 18px;
   font-weight: bold;
   color: #7159c1;
+  text-align: right;
+  margin-bottom: 20px;
 `;
 
+interface IAdmin {
+  admin: boolean;
+}
+
 export const ParticipantInfo = styled.View`
-  margin-top: 20px;
+  margin-top: ${({admin}: IAdmin) => (admin ? '25px' : '20px')};
   flex-direction: row;
   align-items: center;
+`;
+
+export const ParticipantPhotoContainer = styled.View`
+  position: relative;
+  align-items: center;
+  justify-content: center;
 `;
 
 export const ParticipantPhoto = styled.Image.attrs(() => ({
@@ -78,11 +92,22 @@ export const ParticipantPhoto = styled.Image.attrs(() => ({
   height: 50px;
   width: 50px;
   border-radius: 25px;
-  margin-right: 10px;
+`;
+
+export const ParticipantAdminIcon = styled(MaterialCommunityIcons).attrs(
+  () => ({
+    name: 'crown',
+    size: 27,
+    color: '#7159c1',
+  }),
+)`
+  position: absolute;
+  top: -25px;
 `;
 
 export const ParticipantGroupLabel = styled.View`
   flex: 1;
+  margin-left: 10px;
 `;
 
 export const ParticipantName = styled.Text`
@@ -93,7 +118,29 @@ export const ParticipantName = styled.Text`
 `;
 
 export const ParticipantStatus = styled.Text`
-  font-size: 15px;
+  font-size: 16px;
   color: #999;
   line-height: 23px;
 `;
+
+export const ParticipantActionsContainer = styled.View``;
+
+export const ParticipantActionMakeAdmin = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.6,
+}))``;
+
+export const ParticipantActionMakeAdminIcon = styled(Ionicons).attrs(() => ({
+  name: 'ios-add-circle-outline',
+  color: '#7159c1',
+  size: 25,
+}))``;
+
+export const ParticipantActionRemove = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.6,
+}))``;
+
+export const ParticipantActionRemoveIcon = styled(Ionicons).attrs(() => ({
+  name: 'ios-remove-circle-outline',
+  color: '#7159c1',
+  size: 25,
+}))``;

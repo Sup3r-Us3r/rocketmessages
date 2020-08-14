@@ -6,6 +6,17 @@ import React, {
   SetStateAction,
 } from 'react';
 import {Animated, Easing} from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
+
+// Import exported interface
+import {ILatestMessageOfRoom} from '../../screens/Rooms';
+
+import ImagePicker from 'react-native-image-picker';
+
+import api from '../../services/api';
+
+import Toast from '../../config/toastStyles';
+
 import {
   Wrapper,
   ScrollView,
@@ -21,16 +32,12 @@ import {
   CreateRoomButton,
   CreateRoomLabel,
 } from './styles';
-import ImagePicker from 'react-native-image-picker';
-
-import api from '../../services/api';
-
-import Toast from '../../config/toastStyles';
 
 interface IShowModalRoomProps {
   toggleModal: boolean;
   setToggleModal: Dispatch<SetStateAction<boolean>>;
   whichModal: string;
+  roomData?: ILatestMessageOfRoom;
 }
 
 interface IImagePickerResponse {
@@ -52,8 +59,10 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
   toggleModal,
   setToggleModal,
   whichModal,
+  roomData,
 }) => {
   // States
+  const [userId, setUserId] = useState<number>();
   const [nameInput, setNameInput] = useState<string>('');
   const [nicknameInput, setNicknameInput] = useState<string>('');
   const [selectedImage, setSelectedImage] = useState<IAvatarProperties>({});
@@ -72,6 +81,52 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
 
     handleModalAnimationFadeIn();
   }, [modalAnimation]);
+
+  async function handleRequestCreateOrUpdateRoomApi(data: FormData) {
+    try {
+      const requestOptions = {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+
+      const createOrUpdateResponse =
+        whichModal === 'create'
+          ? await api.post('/createroom', data, requestOptions)
+          : await api.put(`/updateroom/${roomData?.id}`, data, requestOptions);
+
+      if (!createOrUpdateResponse) {
+        return Toast.error(
+          whichModal === 'create'
+            ? 'Erro ao criar grupo.'
+            : 'Erro ao atualizar grupo.',
+        );
+      }
+
+      const insertAdminInRoomResponse =
+        whichModal === 'create' &&
+        (await api.post('/insertuserinroom', {
+          user_id: userId,
+          room_id: Number(roomData?.id),
+          user_admin: true,
+        }));
+
+      if (whichModal === 'create' && !insertAdminInRoomResponse) {
+        return Toast.error('Erro ao inserir usuário admin.');
+      }
+
+      return Toast.success(
+        whichModal === 'create'
+          ? 'Grupo criado com sucesso.'
+          : 'Grupo atualizado com sucesso.',
+      );
+    } catch (err) {
+      const {error} = err.response.data;
+
+      return Toast.error(error);
+    }
+  }
 
   async function handleSelectAvatar(avatar: IImagePickerResponse) {
     if (avatar?.error) {
@@ -94,32 +149,17 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
   }
 
   async function handleSubmit() {
-    try {
-      const formData = new FormData();
+    const formData = new FormData();
 
-      formData.append('avatarphoto', {
-        uri: selectedImage?.uri,
-        name: selectedImage?.fileName,
-        type: selectedImage?.type,
-      });
-      formData.append('name', nameInput);
-      formData.append('nickname', nicknameInput);
+    formData.append('avatarphoto', {
+      uri: selectedImage?.uri,
+      name: selectedImage?.fileName,
+      type: selectedImage?.type,
+    });
+    formData.append('name', nameInput);
+    formData.append('nickname', nicknameInput);
 
-      const response = await api.post('createroom', formData, {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      if (!response) {
-        return Toast.error('Erro ao criar grupo.');
-      }
-    } catch (err) {
-      const {error} = err.response.data;
-
-      return Toast.error(error);
-    }
+    return await handleRequestCreateOrUpdateRoomApi(formData);
   }
 
   function handleModalAnimationFadeOut() {
@@ -138,6 +178,32 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
       return setToggleModal(false);
     }, 300);
   }
+
+  useEffect(() => {
+    if (roomData) {
+      setSelectedImage({
+        uri: roomData?.avatar,
+      });
+      setNameInput(roomData?.name);
+      setNicknameInput(roomData?.nickname);
+    }
+  }, [roomData]);
+
+  useEffect(() => {
+    async function handleGetMyUserId() {
+      try {
+        const userData = await AsyncStorage.getItem('@rocketMessages/userData');
+
+        const {id} = JSON.parse(String(userData));
+
+        setUserId(Number(id));
+      } catch (err) {
+        return Toast.error('Erro ao obter dados locais.');
+      }
+    }
+
+    handleGetMyUserId();
+  }, []);
 
   useEffect(() => {
     if (toggleModal) {

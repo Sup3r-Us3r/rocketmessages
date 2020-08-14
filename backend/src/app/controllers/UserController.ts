@@ -68,12 +68,12 @@ export default new class UserController {
         .where('id', Number(id));
 
       if (!updateInfo) {
-        return res.status(400).json({ error: 'Error updating data.' });
+        return res.status(500).json({ error: 'Error updating user data.' });
       }
 
       return res.json(updateInfo);
     } catch (err) {
-      return res.status(500).json({ error: 'Error on updating user.' });
+      return res.status(500).json({ error: 'Error updating user data.' });
     }
   }
 
@@ -99,7 +99,7 @@ export default new class UserController {
 
       return res.json(user);
     } catch (err) {
-      return res.status(500).json({ error: 'Error on updating user.' });
+      return res.status(500).json({ error: 'Error deleting user.' });
     }
   }
 

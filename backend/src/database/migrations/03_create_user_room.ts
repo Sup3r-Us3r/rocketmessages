@@ -11,6 +11,7 @@ export async function up(knex: Knex) {
       .notNullable()
       .references('id')
       .inTable('tb_room');
+    table.boolean('user_admin').notNullable();
   })
 }
 
