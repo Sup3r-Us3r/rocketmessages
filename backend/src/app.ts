@@ -3,7 +3,6 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { resolve } from 'path';
-// import formData from 'express-form-data';
 
 import routes from './routes';
 
@@ -22,7 +21,6 @@ class App {
       '/uploads',
       express.static(resolve(__dirname, '..', 'uploads'))
     );
-    // this.server.use(formData.parse());
     this.server.use(routes);
   }
 }

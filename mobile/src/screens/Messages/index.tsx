@@ -1,6 +1,7 @@
-import React, {useState, useEffect, useRef} from 'react';
-import {Keyboard, ScrollView} from 'react-native';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
+import {Keyboard, FlatList, ActivityIndicator} from 'react-native';
 import {useRoute, useNavigation} from '@react-navigation/native';
+import {AxiosRequestConfig} from 'axios';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import SimpleLinIcons from 'react-native-vector-icons/SimpleLineIcons';
@@ -41,7 +42,7 @@ import {
   UpdateRoom,
   ActionLabel,
   shadowContainer,
-  ChatContainer,
+  // ChatContainer,
   ChatContainerMessageSent,
   MessageSentHour,
   MessageSent,
@@ -60,7 +61,6 @@ import {
 } from './styles';
 
 interface IMessages {
-  key: string;
   id: number;
   username?: string;
   message: string;
@@ -84,12 +84,16 @@ interface IUserData {
 
 const Messages = () => {
   // Ref
-  const scrollViewRef = useRef<ScrollView>(null);
+  const flatListRef = useRef<FlatList>(null);
   const modalizeRef = useRef<Modalize>(null);
 
   // States
   const [userData, setUserData] = useState<IUserData>({});
   const [messages, setMessages] = useState<IMessages[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(10);
+  const [lastPage, setLastPage] = useState<number>(0);
+  const [loadingMessages, setLoadingMessages] = useState<boolean>(true);
   const [messageInput, setMessageInput] = useState<string>('');
   const [showChatActions, setShowChatActions] = useState<boolean>(false);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
@@ -126,9 +130,29 @@ const Messages = () => {
     return setToggleModal(true);
   }
 
+  function handleGetNextMessages() {
+    setPage(page + 1);
+    setLoadingMessages(true);
+  }
+
+  function handleRenderItem({item}) {
+    return (dataReceivedFromNavigation?.contactData &&
+      item?.id === userData?.id) ||
+      (dataReceivedFromNavigation?.roomData && item?.id === userData?.id) ? (
+      <ChatContainerMessageSent>
+        <MessageSentHour>{item?.created_at}</MessageSentHour>
+        <MessageSent>{item?.message}</MessageSent>
+      </ChatContainerMessageSent>
+    ) : (
+      <ChatContainerMessageReceived>
+        <MessageReceivedHour>{item?.created_at}</MessageReceivedHour>
+        <MessageReceived>{item?.message}</MessageReceived>
+      </ChatContainerMessageReceived>
+    );
+  }
+
   function handleSerializedMessages(allMessages: IMessages[]) {
     const serialized = allMessages.map((item) => ({
-      key: Math.random().toString(30),
       id: item?.id,
       username: item?.username,
       image: item?.image,
@@ -179,19 +203,41 @@ const Messages = () => {
   }, []);
 
   useEffect(() => {
-    async function handleGetPrivateMessages() {
+    async function handleGetMessages() {
+      console.log('MONTADO PELA PRIMEIRA VEZ');
+
+      const requestUrl = dataReceivedFromNavigation?.contactData
+        ? `/privatemessages/${userData?.id}/${dataReceivedFromNavigation?.contactData?.id}`
+        : '/roommessages';
+
+      const requestOptions = {
+        params: {
+          nickname: dataReceivedFromNavigation?.roomData
+            ? dataReceivedFromNavigation?.roomData?.nickname
+            : undefined,
+          page,
+          limit: 10,
+        },
+      } as AxiosRequestConfig;
+
       try {
         const allMessages = await api.get<IMessages[]>(
-          `/privatemessages/${userData?.id}/${dataReceivedFromNavigation?.contactData?.id}`,
+          requestUrl,
+          requestOptions,
         );
 
         if (!allMessages) {
           return Toast.error('Erro ao listar mensagens.');
         }
 
+        // Pagination
+        // const {currentpage, lastpage, totalpage} = allMessages.headers;
+
         const response = handleSerializedMessages(allMessages.data);
 
-        return setMessages(response);
+        setMessages(response);
+
+        return setLoadingMessages(false);
       } catch (err) {
         const {error} = err.response.data;
 
@@ -199,34 +245,8 @@ const Messages = () => {
       }
     }
 
-    async function handleGetRoomMessages() {
-      try {
-        const allMessages = await api.get<IMessages[]>('/roommessages', {
-          params: {
-            nickname: dataReceivedFromNavigation?.roomData?.nickname,
-          },
-        });
-
-        if (!allMessages) {
-          return Toast.error('Erro ao listar mensagens.');
-        }
-
-        const response = handleSerializedMessages(allMessages.data);
-
-        return setMessages(response);
-      } catch (err) {
-        const {error} = err.response.data;
-
-        return Toast.error(error);
-      }
-    }
-
-    if (dataReceivedFromNavigation?.contactData) {
-      handleGetPrivateMessages();
-    } else {
-      handleGetRoomMessages();
-    }
-  }, [userData, dataReceivedFromNavigation]);
+    handleGetMessages();
+  }, [userData, dataReceivedFromNavigation, page]);
 
   return (
     <Wrapper>
@@ -256,49 +276,42 @@ const Messages = () => {
         </Header>
 
         {showChatActions && (
-          <>
-            {/* <ArrowUpIcon style={shadowContainer.shadowBox} /> */}
-            <MessageOptions style={shadowContainer.shadowBox}>
-              <ClearMessages>
-                <MaterialIcons name="clear" color="#7159c1" size={20} />
-                <ActionLabel>Limpar mensagens</ActionLabel>
-              </ClearMessages>
-              <DeleteChat>
-                <AntDesign name="deleteuser" color="#7159c1" size={20} />
-                <ActionLabel>Deletar conversa</ActionLabel>
-              </DeleteChat>
-              {dataReceivedFromNavigation.roomData && (
-                <UpdateRoom onPress={handleOpenModal}>
-                  <Feather name="edit" color="#7159c1" size={20} />
-                  <ActionLabel>Editar grupo</ActionLabel>
-                </UpdateRoom>
-              )}
-            </MessageOptions>
-          </>
+          <MessageOptions style={shadowContainer.shadowBox}>
+            <ClearMessages>
+              <MaterialIcons name="clear" color="#7159c1" size={20} />
+              <ActionLabel>Limpar mensagens</ActionLabel>
+            </ClearMessages>
+            <DeleteChat>
+              <AntDesign name="deleteuser" color="#7159c1" size={20} />
+              <ActionLabel>Deletar conversa</ActionLabel>
+            </DeleteChat>
+            {dataReceivedFromNavigation.roomData && (
+              <UpdateRoom onPress={handleOpenModal}>
+                <Feather name="edit" color="#7159c1" size={20} />
+                <ActionLabel>Editar grupo</ActionLabel>
+              </UpdateRoom>
+            )}
+          </MessageOptions>
         )}
 
-        <ChatContainer
-          ref={scrollViewRef}
+        <FlatList
+          keyExtractor={(item, index) => String(index)}
+          data={messages}
+          ref={flatListRef}
           onContentSizeChange={() =>
-            scrollViewRef?.current?.scrollToEnd({animated: true})
-          }>
-          {messages.map((user: IMessages) =>
-            (dataReceivedFromNavigation?.contactData &&
-              user?.id === userData?.id) ||
-            (dataReceivedFromNavigation?.roomData &&
-              user?.id === userData?.id) ? (
-              <ChatContainerMessageSent key={String(user.key)}>
-                <MessageSentHour>{user?.created_at}</MessageSentHour>
-                <MessageSent>{user?.message}</MessageSent>
-              </ChatContainerMessageSent>
-            ) : (
-              <ChatContainerMessageReceived key={String(user?.key)}>
-                <MessageReceivedHour>{user?.created_at}</MessageReceivedHour>
-                <MessageReceived>{user?.message}</MessageReceived>
-              </ChatContainerMessageReceived>
-            ),
-          )}
-        </ChatContainer>
+            flatListRef?.current?.scrollToEnd({
+              animated: true,
+            })
+          }
+          onEndReached={handleGetNextMessages}
+          onEndReachedThreshold={0.1}
+          ListFooterComponent={() =>
+            loadingMessages ? (
+              <ActivityIndicator size="large" color="#7159c1" animating />
+            ) : null
+          }
+          renderItem={handleRenderItem}
+        />
 
         <WrapperMessage>
           <MessageField>

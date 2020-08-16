@@ -1,6 +1,5 @@
 import styled from 'styled-components/native';
 import {StyleSheet} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import defaultChatBackground from '../../assets/defaultChatBackground.png';
 
@@ -73,17 +72,6 @@ export const MessageOptions = styled.View`
   border-radius: 5px;
   background: #fff;
 `;
-
-// export const ArrowUpIcon = styled(Ionicons).attrs(() => ({
-//   name: 'md-arrow-dropup',
-//   color: '#fff',
-//   size: 40,
-// }))`
-//   position: absolute;
-//   top: 30px;
-//   right: 20px;
-//   align-self: flex-end;
-// `;
 
 export const shadowContainer = StyleSheet.create({
   shadowBox: {

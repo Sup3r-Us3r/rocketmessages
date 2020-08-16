@@ -116,6 +116,7 @@ export default new class MessageController {
 
   async listPrivateMessages(req: Request, res: Response) {
     const { from, to_user } = req.params;
+    const  { limit, page } = req.query;
 
     try {
       const messages = await knex('tb_message as M')
@@ -128,20 +129,29 @@ export default new class MessageController {
           'M.message',
           'M.image',
           'M.created_at',
-        );
+        )
+        .paginate({
+          currentPage: Number(page) || 1,
+          perPage: Number(limit) || 10,
+        });
 
-    if (!messages) {
-      return res.status(500).json({ error: 'Error on listing messages.' });
-    }
+      res.set('CurrentPage', String(messages?.pagination?.currentPage));
+      res.set('LastPage', String(messages?.pagination?.lastPage));
+      res.set('TotalPage', String(messages?.pagination?.total));
 
-    return res.json(messages);
+      if (!messages) {
+        return res.status(500).json({ error: 'Error on listing messages.' });
+      }
+
+      return res.json(messages?.data);
     } catch (err) {
+      console.log(err);
       return res.status(500).json({ error: 'Error on listing messages.' });
     }
   }
 
   async listRoomMessages(req: Request, res: Response) {
-    const { nickname } = req.query;
+    const { nickname, limit, page } = req.query;
 
     try {
       const messages = await knex('tb_message as M')
@@ -154,13 +164,21 @@ export default new class MessageController {
           'M.message',
           'M.image',
           'M.created_at',
-        );
+        )
+        .paginate({
+          currentPage: Number(page) || 1,
+          perPage: Number(limit) || 10,
+        });
+        
+      res.set('CurrentPage', String(messages?.pagination?.currentPage));
+      res.set('LastPage', String(messages?.pagination?.lastPage));
+      res.set('TotalPage', String(messages?.pagination?.total));
+      
+      if (!messages) {
+        return res.status(500).json({ error: 'Error on listing messages.' });
+      }
 
-    if (!messages) {
-      return res.status(500).json({ error: 'Error on listing messages.' });
-    }
-
-    return res.json(messages);
+      return res.json(messages?.data);
     } catch (err) {
       return res.status(500).json({ error: 'Error on listing messages.' });
     }
