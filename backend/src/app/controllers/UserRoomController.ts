@@ -7,6 +7,14 @@ interface IBodyData {
   user_admin: boolean;
 }
 
+interface IUserData {
+  id: number;
+  user_admin: boolean;
+  username: string;
+  photo: string;
+  status: string;
+}
+
 export default new class UserRoomController {
   async insertUserInRoom(req: Request, res: Response) {
     const { user_id, room_id, user_admin } = req.body as IBodyData;
@@ -41,7 +49,7 @@ export default new class UserRoomController {
   }
 
   async listUsersInRoom(req: Request, res: Response) {
-    const { nickname } = req.query;
+    const { user_id, nickname } = req.query;
 
     try {
       const usersInRooms = await knex('tb_user_room as UR')
@@ -62,8 +70,26 @@ export default new class UserRoomController {
           .json({ error: 'Error listing users inside the room.' });
       }
 
-      return res.json(usersInRooms);
+      const allAdmin = usersInRooms.filter(
+        (user: IUserData) => user.user_admin
+      )
+      .sort((user: IUserData) => {
+        if (user.id === Number(user_id)) return -1;
+        if (user.id !== Number(user_id)) return 1;
+
+        return 0;
+      });
+
+      const usersInRoomFiltered = usersInRooms.filter(
+        (user: IUserData) => !allAdmin.includes(user)
+      );
+
+      usersInRoomFiltered.unshift(...allAdmin);
+
+      return res.json(usersInRoomFiltered);
     } catch (err) {
+      console.log('ERROR: ', err);
+
       return res.status(500)
         .json({ error: 'Error listing users inside the room.' });
     }
@@ -83,20 +109,24 @@ export default new class UserRoomController {
         return res.status(400).json({ error: 'User not exists in room.' });
       }
 
-      const makeUserAdmin = await knex('tb_user_room as UR')
+      const makeOrUnmakeUserAdmin = await knex('tb_user_room as UR')
         .where('UR.user_id', Number(user_id))
         .andWhere('UR.room_id', Number(room_id))
         .update({
           user_admin,
         });
 
-      if (!makeUserAdmin) {
-        return res.status(500).json({ error: 'Error making admin user.' });
+      if (!makeOrUnmakeUserAdmin) {
+        return res.status(500).json({
+          error: 'Error changing user permissions.'
+        });
       }
 
-      return res.json(makeUserAdmin);
+      return res.json(makeOrUnmakeUserAdmin);
     } catch (err) {
-      return res.status(500).json({ error: 'Error making admin user.' });
+      return res.status(500).json({
+        error: 'Error changing user permissions.'
+      });
     }
   }
 

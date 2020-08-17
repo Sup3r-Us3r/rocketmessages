@@ -27,8 +27,8 @@ import {
   ParticipantName,
   ParticipantStatus,
   ParticipantActionsContainer,
-  ParticipantActionMakeAdmin,
-  ParticipantActionMakeAdminIcon,
+  ParticipantActionMakeOrUnmakeAdmin,
+  ParticipantActionMakeOrUnmakeAdminIcon,
   ParticipantActionRemove,
   ParticipantActionRemoveIcon,
 } from './styles';
@@ -60,12 +60,17 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
     return text.length >= 30 ? text.substr(0, 30) + '...' : text;
   }
 
-  async function handleMakeUserAdmin(userId: number) {
+  async function handleMakeOrUnmakeUserAdmin(userId: number) {
     try {
+      const imAdmin = Boolean(
+        participants.find((user: IParticipants) => user.id === userId)
+          ?.user_admin,
+      );
+
       const response = await api.put(
         `/makeorunmakeuseradmin/${userId}/${chatData?.roomData?.id}`,
         {
-          user_admin: true,
+          user_admin: !imAdmin,
         },
       );
 
@@ -75,7 +80,11 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
 
       const whoIs = participants.find((user) => user.id === userId)?.username;
 
-      return Toast.success(`${whoIs} é um administrador.`);
+      return Toast.success(
+        !imAdmin
+          ? `${whoIs} é um administrador.`
+          : `${whoIs} não é um administrador.`,
+      );
     } catch (err) {
       const {error} = err.response.data;
 
@@ -123,6 +132,7 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
         const users = await api.get<IParticipants[]>('/usersinroom', {
           params: {
             nickname: chatData?.roomData?.nickname,
+            user_id: myId,
           },
         });
 
@@ -210,12 +220,18 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
                   {myId === participant?.id &&
                   Boolean(participant?.user_admin) ? null : (
                     <ParticipantActionsContainer>
-                      <ParticipantActionMakeAdmin
+                      <ParticipantActionMakeOrUnmakeAdmin
                         onPress={() =>
-                          handleMakeUserAdmin(Number(participant?.id))
+                          handleMakeOrUnmakeUserAdmin(Number(participant?.id))
                         }>
-                        <ParticipantActionMakeAdminIcon />
-                      </ParticipantActionMakeAdmin>
+                        <ParticipantActionMakeOrUnmakeAdminIcon
+                          color={
+                            participant?.user_admin
+                              ? 'rgba(112, 87, 193, 0.5)'
+                              : 'rgba(112, 87, 193, 0.93)'
+                          }
+                        />
+                      </ParticipantActionMakeOrUnmakeAdmin>
 
                       <ParticipantActionRemove
                         onPress={() =>

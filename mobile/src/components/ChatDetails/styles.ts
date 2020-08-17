@@ -70,12 +70,12 @@ export const ParticipantsTitle = styled.Text`
   margin-bottom: 20px;
 `;
 
-interface IAdmin {
+interface IAdminProps {
   admin: boolean;
 }
 
 export const ParticipantInfo = styled.View`
-  margin-top: ${({admin}: IAdmin) => (admin ? '25px' : '20px')};
+  margin-top: ${({admin}: IAdminProps) => (admin ? '25px' : '20px')};
   flex-direction: row;
   align-items: center;
 `;
@@ -125,22 +125,25 @@ export const ParticipantStatus = styled.Text`
 
 export const ParticipantActionsContainer = styled.View``;
 
-export const ParticipantActionMakeAdmin = styled.TouchableOpacity.attrs(() => ({
-  activeOpacity: 0.6,
-}))``;
+export const ParticipantActionMakeOrUnmakeAdmin = styled.TouchableOpacity.attrs(
+  () => ({
+    activeOpacity: 0.6,
+  }),
+)``;
 
-export const ParticipantActionMakeAdminIcon = styled(Ionicons).attrs(() => ({
-  name: 'ios-add-circle-outline',
-  color: '#7159c1',
-  size: 25,
-}))``;
+export const ParticipantActionMakeOrUnmakeAdminIcon = styled(Ionicons).attrs(
+  () => ({
+    name: 'ios-add-circle',
+    size: 25,
+  }),
+)``;
 
 export const ParticipantActionRemove = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.6,
 }))``;
 
 export const ParticipantActionRemoveIcon = styled(Ionicons).attrs(() => ({
-  name: 'ios-remove-circle-outline',
-  color: '#7159c1',
+  name: 'ios-remove-circle',
+  color: '#F27E88',
   size: 25,
 }))``;

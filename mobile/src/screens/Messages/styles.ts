@@ -113,8 +113,6 @@ export const ActionLabel = styled.Text`
   margin-left: 5px;
 `;
 
-export const ChatContainer = styled.ScrollView``;
-
 export const ChatContainerMessageSent = styled.View`
   align-self: flex-end;
   margin-top: 5px;

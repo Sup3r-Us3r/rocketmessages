@@ -151,11 +151,13 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
   async function handleSubmit() {
     const formData = new FormData();
 
-    formData.append('avatarphoto', {
-      uri: selectedImage?.uri,
-      name: selectedImage?.fileName,
-      type: selectedImage?.type,
-    });
+    if (selectedImage?.fileName || selectedImage?.type) {
+      formData.append('avatarphoto', {
+        uri: selectedImage?.uri,
+        name: selectedImage?.fileName,
+        type: selectedImage?.type,
+      });
+    }
     formData.append('name', nameInput);
     formData.append('nickname', nicknameInput);
 

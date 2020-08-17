@@ -36,13 +36,11 @@ import {
   ChatStatus,
   ChatAction,
   MessageOptions,
-  // ArrowUpIcon,
   ClearMessages,
   DeleteChat,
   UpdateRoom,
   ActionLabel,
   shadowContainer,
-  // ChatContainer,
   ChatContainerMessageSent,
   MessageSentHour,
   MessageSent,
@@ -86,14 +84,14 @@ const Messages = () => {
   // Ref
   const flatListRef = useRef<FlatList>(null);
   const modalizeRef = useRef<Modalize>(null);
+  const pageRef = useRef<number>(1);
+  const lastPageRef = useRef<number>(1);
+  const totalPage = useRef<number>(0);
 
   // States
   const [userData, setUserData] = useState<IUserData>({});
   const [messages, setMessages] = useState<IMessages[]>([]);
-  const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(10);
-  const [lastPage, setLastPage] = useState<number>(0);
-  const [loadingMessages, setLoadingMessages] = useState<boolean>(true);
+  const [loadingMessages, setLoadingMessages] = useState<boolean>(false);
   const [messageInput, setMessageInput] = useState<string>('');
   const [showChatActions, setShowChatActions] = useState<boolean>(false);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
@@ -131,8 +129,11 @@ const Messages = () => {
   }
 
   function handleGetNextMessages() {
-    setPage(page + 1);
-    setLoadingMessages(true);
+    if (messages.length < 10) {
+      return false;
+    }
+
+    pageRef.current = pageRef.current + 1;
   }
 
   function handleRenderItem({item}) {
@@ -204,8 +205,6 @@ const Messages = () => {
 
   useEffect(() => {
     async function handleGetMessages() {
-      console.log('MONTADO PELA PRIMEIRA VEZ');
-
       const requestUrl = dataReceivedFromNavigation?.contactData
         ? `/privatemessages/${userData?.id}/${dataReceivedFromNavigation?.contactData?.id}`
         : '/roommessages';
@@ -215,12 +214,14 @@ const Messages = () => {
           nickname: dataReceivedFromNavigation?.roomData
             ? dataReceivedFromNavigation?.roomData?.nickname
             : undefined,
-          page,
+          page: pageRef.current,
           limit: 10,
         },
       } as AxiosRequestConfig;
 
       try {
+        setLoadingMessages(true);
+
         const allMessages = await api.get<IMessages[]>(
           requestUrl,
           requestOptions,
@@ -230,14 +231,13 @@ const Messages = () => {
           return Toast.error('Erro ao listar mensagens.');
         }
 
-        // Pagination
-        // const {currentpage, lastpage, totalpage} = allMessages.headers;
-
         const response = handleSerializedMessages(allMessages.data);
 
-        setMessages(response);
+        setMessages((prevState) =>
+          pageRef.current === 1 ? response : [...prevState, ...response],
+        );
 
-        return setLoadingMessages(false);
+        setLoadingMessages(false);
       } catch (err) {
         const {error} = err.response.data;
 
@@ -246,7 +246,7 @@ const Messages = () => {
     }
 
     handleGetMessages();
-  }, [userData, dataReceivedFromNavigation, page]);
+  }, [userData, dataReceivedFromNavigation]);
 
   return (
     <Wrapper>
@@ -297,12 +297,12 @@ const Messages = () => {
         <FlatList
           keyExtractor={(item, index) => String(index)}
           data={messages}
-          ref={flatListRef}
-          onContentSizeChange={() =>
-            flatListRef?.current?.scrollToEnd({
-              animated: true,
-            })
-          }
+          // ref={flatListRef}
+          // onContentSizeChange={() =>
+          //   flatListRef?.current?.scrollToEnd({
+          //     animated: true,
+          //   })
+          // }
           onEndReached={handleGetNextMessages}
           onEndReachedThreshold={0.1}
           ListFooterComponent={() =>
