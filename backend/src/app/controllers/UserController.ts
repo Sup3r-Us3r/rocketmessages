@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import knex from '../../database/connection';
 import { hashSync, compareSync } from 'bcryptjs';
+import { randomBytes } from 'crypto';
+
+import Mail from '../../services/Mail';
 
 interface IBodyData {
   username: string;
@@ -8,6 +11,7 @@ interface IBodyData {
   password: string;
   photo?: string;
   status?: string;
+  recoverycode?: string;
 }
 
 export default new class UserController {
@@ -26,7 +30,7 @@ export default new class UserController {
       const user = await knex('tb_user').insert({
         username,
         email,
-        password: hashSync(password, 8),
+        password: hashSync(String(password), 8),
         photo: photo ? photo : process.env.PROFILE_DEFAULT_PHOTO_URL,
         status: status ? status : 'Hey there, im using Rocket Messages!',
         created_at: new Date(),
@@ -47,8 +51,8 @@ export default new class UserController {
     const { username, status } = req.body as IBodyData;
 
     try {
-      const userExists = await knex('tb_user')
-        .where('id', Number(id))
+      const userExists = await knex('tb_user as U')
+        .where('U.id', Number(id))
         .first();
 
       if (!userExists) {
@@ -63,9 +67,9 @@ export default new class UserController {
         status: status ? status : userExists?.status,
       };
 
-      const updateInfo = await knex('tb_user')
-        .update(serializedUserInfo)
-        .where('id', Number(id));
+      const updateInfo = await knex('tb_user as U')
+        .where('U.id', Number(id))
+        .update(serializedUserInfo);
 
       if (!updateInfo) {
         return res.status(500).json({ error: 'Error updating user data.' });
@@ -115,7 +119,9 @@ export default new class UserController {
         return res.status(409).json({ error: 'Email not found.' });
       }
 
-      const passwordCompare = compareSync(password, accountExists.password);
+      const passwordCompare = compareSync(
+        String(password), accountExists.password
+      );
 
       if (!passwordCompare) {
         return res.status(400).json({ error: 'Password wrong.' });
@@ -189,6 +195,82 @@ export default new class UserController {
       return res.json(users);
     } catch (err) {
       return res.status(500).json({ error: 'Error on listing users.' });
+    }
+  }
+
+  async forgotPassword(req: Request, res: Response) {
+    const { id } = req.params;
+
+    try {
+      const user = await knex('tb_user as U')
+        .where('U.id', Number(id))
+        .first();
+
+      if (!user) {
+        return res.status(400).json({ error: 'User does not exists.' });
+      }
+
+      const generateCode = randomBytes(3).toString('hex');
+
+      const addCodeForRecovery = await knex('tb_user as U')
+        .where('U.id', Number(id))
+        .update({
+          recoverycode: generateCode,
+        });
+
+      if (!addCodeForRecovery) {
+        return res.status(500).json({ error: 'Error sending recovery email.' });
+      }
+
+      Mail.sendMail({
+        from: '78c268dca2f9eb',
+        to: user.email,
+        subject: 'Password recovery code',
+        html: Mail.templateMail(generateCode)
+      });
+
+      return res.sendStatus(200);
+    } catch (err) {
+      return res.status(500).json({ error: 'Error retrieving password.' });
+    }
+  }
+
+  async recoverPassword(req: Request, res: Response) {
+    const { id } = req.params;
+    const { recoverycode, password } = req.body as IBodyData;
+
+    try {
+      const user = await knex('tb_user as U')
+        .where('U.id', Number(id))
+        .first();
+
+      if (!user) {
+        return res.status(400).json({ error: 'User does not exists.' });
+      }
+
+      const verifyCode = Boolean(String(recoverycode) === user.recoverycode);
+
+      if (verifyCode) {
+        const passwordHash = hashSync(String(password), 8);
+
+        const updatePassword = await knex('tb_user as U')
+          .where('U.id', Number(id))
+          .update({
+            password: passwordHash,
+          });
+
+        if (!updatePassword) {
+          return res.status(500).json({ error: 'Error on updating password.' });
+        }
+      }
+
+      if (!verifyCode) {
+        return res.status(400).json({ error: 'Invalid code.' });
+      }
+
+      return res.sendStatus(200);
+    } catch (err) {
+      return res.status(500).json({ error: 'Error on updating password.' });
     }
   }
 }
