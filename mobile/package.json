@@ -30,6 +30,7 @@
     "react-native-tab-view": "^2.14.4",
     "react-native-tiny-toast": "^1.0.7",
     "react-native-vector-icons": "^6.6.0",
+    "socket.io-client": "^2.3.0",
     "styled-components": "^5.1.1",
     "yup": "^0.29.1"
   },
@@ -42,6 +43,7 @@
     "@types/react-native": "^0.62.13",
     "@types/react-native-vector-icons": "^6.4.5",
     "@types/react-test-renderer": "^16.9.2",
+    "@types/socket.io-client": "^1.4.33",
     "@types/styled-components": "^5.1.0",
     "@types/yup": "^0.29.3",
     "babel-jest": "^26.0.1",

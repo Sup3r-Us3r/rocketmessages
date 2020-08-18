@@ -183,24 +183,24 @@ const Authentication = () => {
     handleUserAlreadyLogged();
   }, [navigation]);
 
-  useEffect(() => {
-    function handleKeyboardShow() {
-      handleImageAnimation();
-      handleUpAnimation();
-    }
+  // useEffect(() => {
+  //   function handleKeyboardShow() {
+  //     handleImageAnimation();
+  //     handleUpAnimation();
+  //   }
 
-    function handleKeyboardHide() {
-      resetAnimations();
-    }
+  //   function handleKeyboardHide() {
+  //     resetAnimations();
+  //   }
 
-    Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
-    Keyboard.addListener('keyboardDidHide', handleKeyboardHide);
+  //   Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
+  //   Keyboard.addListener('keyboardDidHide', handleKeyboardHide);
 
-    return () => {
-      Keyboard.removeListener('keyboardDidShow', handleKeyboardShow);
-      Keyboard.removeListener('keyboardDidHide', handleKeyboardHide);
-    };
-  }, []);
+  //   return () => {
+  //     Keyboard.removeListener('keyboardDidShow', handleKeyboardShow);
+  //     Keyboard.removeListener('keyboardDidHide', handleKeyboardHide);
+  //   };
+  // }, []);
 
   return (
     <Wrapper>
