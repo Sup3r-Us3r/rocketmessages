@@ -14,6 +14,7 @@ import {Modalize} from 'react-native-modalize';
 
 import ChatDetails from '../../components/ChatDetails';
 import ShowModalRoom from '../../components/ShowModalRoom';
+import AddUserInRoom from '../../components/AddUserInRoom';
 
 import {handleTwoDigitsFormat} from '../../utils/messageDateFormatter';
 
@@ -39,6 +40,7 @@ import {
   ClearMessages,
   DeleteChat,
   UpdateRoom,
+  AddUserInRoomModal,
   ActionLabel,
   shadowContainer,
   ChatContainerMessageSent,
@@ -96,6 +98,9 @@ const Messages = () => {
   const [showChatActions, setShowChatActions] = useState<boolean>(false);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
   const [toggleModal, setToggleModal] = useState<boolean>(false);
+  const [toggleModalAddUserInRoom, setToggleModalAddUserInRoom] = useState<
+    boolean
+  >(false);
 
   // Navigation
   const navigation = useNavigation();
@@ -126,6 +131,12 @@ const Messages = () => {
     setShowChatActions(false);
 
     return setToggleModal(true);
+  }
+
+  function handleOpenModalAddUserInRoom() {
+    setShowChatActions(false);
+
+    return setToggleModalAddUserInRoom(true);
   }
 
   function handleGetNextMessages() {
@@ -291,6 +302,12 @@ const Messages = () => {
                 <ActionLabel>Editar grupo</ActionLabel>
               </UpdateRoom>
             )}
+            {dataReceivedFromNavigation.roomData && (
+              <AddUserInRoomModal onPress={handleOpenModalAddUserInRoom}>
+                <AntDesign name="adduser" color="#7159c1" size={20} />
+                <ActionLabel>Adicionar usuário</ActionLabel>
+              </AddUserInRoomModal>
+            )}
           </MessageOptions>
         )}
 
@@ -370,6 +387,16 @@ const Messages = () => {
             setToggleModal={setToggleModal}
             whichModal="update"
             roomData={dataReceivedFromNavigation?.roomData}
+          />
+        )}
+
+        {toggleModalAddUserInRoom && (
+          <AddUserInRoom
+            toggleModal={toggleModalAddUserInRoom}
+            setToggleModal={setToggleModalAddUserInRoom}
+            usersInRoom={[
+              ...new Set(messages.filter((user: IMessages) => user.id)),
+            ]}
           />
         )}
       </Container>

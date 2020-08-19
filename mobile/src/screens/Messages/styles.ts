@@ -107,6 +107,13 @@ export const UpdateRoom = styled.TouchableOpacity.attrs(() => ({
   padding: 8px 0;
 `;
 
+export const AddUserInRoomModal = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.6,
+}))`
+  flex-direction: row;
+  padding: 8px 0;
+`;
+
 export const ActionLabel = styled.Text`
   font-size: 16px;
   color: #7159c1;

@@ -29,12 +29,27 @@ class App {
   }
 
   websocket() {
+    // socket.emit() = Emit single client
+    // socket.broadcast.emit() = Emit all client except you
+    // io.emit() = Emit all client
+
     const io = socketio(this.httpServer);
 
     io.origins('*:*');
 
     io.on('connection', socket => {
       console.log('New websocket connection.');
+
+      // Welcome current user
+      socket.broadcast.emit('message', '');
+
+      // Broadcast when a user connects
+      socket.broadcast.emit('message', '');
+
+      // Runs when client disconnects
+      socket.on('disconnect', () => {
+        io.emit('message', 'A user has left the chat.');
+      });
     });
   }
 }
