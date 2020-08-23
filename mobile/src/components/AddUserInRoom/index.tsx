@@ -8,14 +8,18 @@ import React, {
 import {Animated, Easing} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 
+import socket from '../../services/websocket';
 import api from '../../services/api';
 
 import Toast from '../../config/toastStyles';
+
+import addPeopleImg from '../../assets/addPeople.png';
 
 import {
   Wrapper,
   ScrollView,
   Container,
+  HeaderContainer,
   ScreenBackContainer,
   ScreenBackIcon,
   Title,
@@ -27,15 +31,19 @@ import {
   ContactStatus,
   ContactAction,
   ContactActionIcon,
+  NoFrequentContactContainer,
+  NoFrequentContact,
+  NoFrequentContactLabel,
 } from './styles';
 
 interface IAddUserInRoomProps {
-  toggleModal: boolean;
-  setToggleModal: Dispatch<SetStateAction<boolean>>;
-  usersInRoom: number[];
+  toggleModalAddUserInRoom: boolean;
+  setToggleModalAddUserInRoom: Dispatch<SetStateAction<boolean>>;
+  nickname: string;
+  roomId: number;
 }
 
-interface IFrequentContact {
+interface IFrequentContacts {
   id: number;
   username: string;
   photo: string;
@@ -43,16 +51,42 @@ interface IFrequentContact {
 }
 
 const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
-  toggleModal,
-  setToggleModal,
-  usersInRoom,
+  toggleModalAddUserInRoom,
+  setToggleModalAddUserInRoom,
+  nickname,
+  roomId,
 }) => {
   // States
-  const [userId, setUserId] = useState<number>();
-  const [contacts, setContacts] = useState<IFrequentContact[]>([]);
+  const [contacts, setContacts] = useState<IFrequentContacts[]>([]);
   const [modalAnimation] = useState(new Animated.Value(0));
 
-  async function handleSubmit() {}
+  async function handleSubmit(userId: number) {
+    const userData = {
+      user_id: userId,
+      room_id: roomId,
+      user_admin: false,
+    };
+
+    try {
+      const insertUser = await api.post('/insertuserinroom', userData);
+
+      if (!insertUser) {
+        return Toast.error('Erro ao adicionar usuário.');
+      }
+
+      Toast.success('Usuário adicionado ao grupo.');
+
+      // Emit for websocket backend - Join user in room
+      return socket.emit('joinRoom', {
+        user: contacts.find((user: IFrequentContacts) => user.id === userId),
+        nickname,
+      });
+    } catch (err) {
+      const {error} = err.response.data;
+
+      return Toast.error(error);
+    }
+  }
 
   function handleModalAnimationFadeOut() {
     return Animated.timing(modalAnimation, {
@@ -71,7 +105,7 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
     handleModalAnimationFadeOut();
 
     setTimeout(() => {
-      return setToggleModal(false);
+      return setToggleModalAddUserInRoom(false);
     }, 300);
   }
 
@@ -92,15 +126,36 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
   useEffect(() => {
     async function handleGetFrequentContacts() {
       try {
-        const frequentContact = await api.get<IFrequentContact[]>(
-          `listfrequentcontactsforaddroom/${userId}`,
+        const userData = await AsyncStorage.getItem('@rocketMessages/userData');
+
+        const {id} = JSON.parse(String(userData));
+
+        const frequentContact = await api.get<IFrequentContacts[]>(
+          `listfrequentcontactsforaddroom/${id}`,
         );
 
         if (!frequentContact) {
           return Toast.error('Erro ao listar contatos.');
         }
 
-        return setContacts(frequentContact.data);
+        const usersInRoom = await api.get<IFrequentContacts[]>('/usersinroom', {
+          params: {
+            nickname,
+            user_id: id,
+          },
+        });
+
+        if (!usersInRoom) {
+          return Toast.error('Erro ao listar usuários no grupo.');
+        }
+
+        // Frequent contact except user already in room
+        const frequentContactFiltered = frequentContact.data.filter(
+          (user: IFrequentContacts) =>
+            !usersInRoom.data.map((item) => item.id).includes(user.id),
+        );
+
+        return setContacts(frequentContactFiltered);
       } catch (err) {
         const {error} = err.response.data;
 
@@ -109,57 +164,61 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
     }
 
     handleGetFrequentContacts();
-  }, [userId]);
 
-  useEffect(() => {
-    async function handleGetMyUserId() {
-      try {
-        const userData = await AsyncStorage.getItem('@rocketMessages/userData');
-
-        const {id} = JSON.parse(String(userData));
-
-        setUserId(Number(id));
-      } catch (err) {
-        return Toast.error('Erro ao obter dados locais.');
+    socket.on('updateUsersInRoom', (response: boolean) => {
+      if (response) {
+        handleGetFrequentContacts();
       }
-    }
+    });
 
-    handleGetMyUserId();
-  }, []);
+    return () => {
+      socket.off('updateUsersInRoom', handleGetFrequentContacts);
+    };
+  }, [nickname]);
 
   useEffect(() => {
-    if (toggleModal) {
+    if (toggleModalAddUserInRoom) {
       memoizedCallback();
     }
-  }, [toggleModal, memoizedCallback]);
+  }, [toggleModalAddUserInRoom, memoizedCallback]);
 
-  return toggleModal ? (
+  return toggleModalAddUserInRoom ? (
     <Wrapper style={{opacity: modalAnimation}}>
       <ScrollView>
         <Container>
-          <ScreenBackContainer onPress={handleScreenBack}>
-            <ScreenBackIcon />
-          </ScreenBackContainer>
+          <HeaderContainer>
+            <ScreenBackContainer onPress={handleScreenBack}>
+              <ScreenBackIcon />
+            </ScreenBackContainer>
+            <Title>Adicionar no grupo</Title>
+          </HeaderContainer>
 
-          <Title>Adicionar usuário ao grupo</Title>
+          {contacts.length !== 0 ? (
+            contacts?.map((user: IFrequentContacts) => (
+              <ContactContainer key={Number(user?.id)}>
+                <ContactPhoto source={{uri: String(user?.photo)}} />
+                <ContactInfo>
+                  <ContactInfoUser>
+                    <ContactName>{user?.username}</ContactName>
+                    <ContactStatus>
+                      {handleLimitStatusCharacters(user?.status)}
+                    </ContactStatus>
+                  </ContactInfoUser>
 
-          {contacts?.map((item: IFrequentContact) => (
-            <ContactContainer key={Number(item?.id)}>
-              <ContactPhoto source={{uri: String(item?.photo)}} />
-              <ContactInfo>
-                <ContactInfoUser>
-                  <ContactName>{item?.username}</ContactName>
-                  <ContactStatus>
-                    {handleLimitStatusCharacters(item?.status)}
-                  </ContactStatus>
-                </ContactInfoUser>
-
-                <ContactAction>
-                  <ContactActionIcon />
-                </ContactAction>
-              </ContactInfo>
-            </ContactContainer>
-          ))}
+                  <ContactAction onPress={() => handleSubmit(Number(user.id))}>
+                    <ContactActionIcon />
+                  </ContactAction>
+                </ContactInfo>
+              </ContactContainer>
+            ))
+          ) : (
+            <NoFrequentContactContainer>
+              <NoFrequentContact source={addPeopleImg} />
+              <NoFrequentContactLabel>
+                Nenhum contato frequente localizado
+              </NoFrequentContactLabel>
+            </NoFrequentContactContainer>
+          )}
         </Container>
       </ScrollView>
     </Wrapper>

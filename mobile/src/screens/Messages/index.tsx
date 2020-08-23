@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback, useRef} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {Keyboard, FlatList, ActivityIndicator} from 'react-native';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {AxiosRequestConfig} from 'axios';
@@ -11,6 +11,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import EmojiSelector, {Categories} from 'react-native-emoji-selector';
 import AsyncStorage from '@react-native-community/async-storage';
 import {Modalize} from 'react-native-modalize';
+
+import socket from '../../services/websocket';
 
 import ChatDetails from '../../components/ChatDetails';
 import ShowModalRoom from '../../components/ShowModalRoom';
@@ -37,8 +39,8 @@ import {
   ChatStatus,
   ChatAction,
   MessageOptions,
-  ClearMessages,
-  DeleteChat,
+  // ClearMessages,
+  // DeleteChat,
   UpdateRoom,
   AddUserInRoomModal,
   ActionLabel,
@@ -87,8 +89,8 @@ const Messages = () => {
   const flatListRef = useRef<FlatList>(null);
   const modalizeRef = useRef<Modalize>(null);
   const pageRef = useRef<number>(1);
-  const lastPageRef = useRef<number>(1);
-  const totalPage = useRef<number>(0);
+  // const lastPageRef = useRef<number>(1);
+  // const totalPage = useRef<number>(0);
 
   // States
   const [userData, setUserData] = useState<IUserData>({});
@@ -97,7 +99,7 @@ const Messages = () => {
   const [messageInput, setMessageInput] = useState<string>('');
   const [showChatActions, setShowChatActions] = useState<boolean>(false);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
-  const [toggleModal, setToggleModal] = useState<boolean>(false);
+  const [toggleModalRoom, setToggleModalRoom] = useState<boolean>(false);
   const [toggleModalAddUserInRoom, setToggleModalAddUserInRoom] = useState<
     boolean
   >(false);
@@ -123,14 +125,14 @@ const Messages = () => {
     return setShowEmojis(!showEmojis);
   }
 
-  function handleShowModal() {
+  function handleShowModalize() {
     return modalizeRef.current?.open();
   }
 
-  function handleOpenModal() {
+  function handleOpenModalRoom() {
     setShowChatActions(false);
 
-    return setToggleModal(true);
+    return setToggleModalRoom(true);
   }
 
   function handleOpenModalAddUserInRoom() {
@@ -194,7 +196,10 @@ const Messages = () => {
         return Toast.error('Erro ao enviar mensagem.');
       }
 
-      return setMessageInput('');
+      setMessageInput('');
+
+      // Emit message from websocket backend
+      return socket.emit('chatMessage', messageInput);
     } catch (err) {
       const {error} = err.response.data;
 
@@ -225,8 +230,8 @@ const Messages = () => {
           nickname: dataReceivedFromNavigation?.roomData
             ? dataReceivedFromNavigation?.roomData?.nickname
             : undefined,
-          page: pageRef.current,
-          limit: 10,
+          page: 1,
+          limit: 100,
         },
       } as AxiosRequestConfig;
 
@@ -244,11 +249,13 @@ const Messages = () => {
 
         const response = handleSerializedMessages(allMessages.data);
 
-        setMessages((prevState) =>
-          pageRef.current === 1 ? response : [...prevState, ...response],
-        );
+        // setMessages((prevState) =>
+        //   pageRef.current === 1 ? response : [...prevState, ...response],
+        // );
 
         setLoadingMessages(false);
+
+        return setMessages(response);
       } catch (err) {
         const {error} = err.response.data;
 
@@ -257,6 +264,18 @@ const Messages = () => {
     }
 
     handleGetMessages();
+
+    // Websocket mobile - Listen emit from backend
+    socket.on('message', (message: string) => {
+      if (message.length !== 0) {
+        handleGetMessages();
+      }
+    });
+
+    // Remove emit
+    return () => {
+      socket.off('message', handleGetMessages);
+    };
   }, [userData, dataReceivedFromNavigation]);
 
   return (
@@ -273,7 +292,7 @@ const Messages = () => {
                 : dataReceivedFromNavigation?.roomData?.avatar,
             }}
           />
-          <ChatInfo onPress={handleShowModal}>
+          <ChatInfo onPress={handleShowModalize}>
             <ChatName>
               {dataReceivedFromNavigation?.contactData
                 ? dataReceivedFromNavigation?.contactData?.username
@@ -281,32 +300,34 @@ const Messages = () => {
             </ChatName>
             <ChatStatus>Online</ChatStatus>
           </ChatInfo>
-          <ChatAction onPress={handleToggleChatActions}>
-            <SimpleLinIcons name="options-vertical" color="#fff" size={20} />
-          </ChatAction>
+          {dataReceivedFromNavigation?.roomData && (
+            <ChatAction onPress={handleToggleChatActions}>
+              <SimpleLinIcons name="options-vertical" color="#fff" size={20} />
+            </ChatAction>
+          )}
         </Header>
 
         {showChatActions && (
           <MessageOptions style={shadowContainer.shadowBox}>
-            <ClearMessages>
+            {/* <ClearMessages>
               <MaterialIcons name="clear" color="#7159c1" size={20} />
               <ActionLabel>Limpar mensagens</ActionLabel>
             </ClearMessages>
             <DeleteChat>
               <AntDesign name="deleteuser" color="#7159c1" size={20} />
               <ActionLabel>Deletar conversa</ActionLabel>
-            </DeleteChat>
-            {dataReceivedFromNavigation.roomData && (
-              <UpdateRoom onPress={handleOpenModal}>
-                <Feather name="edit" color="#7159c1" size={20} />
-                <ActionLabel>Editar grupo</ActionLabel>
-              </UpdateRoom>
-            )}
+            </DeleteChat> */}
             {dataReceivedFromNavigation.roomData && (
               <AddUserInRoomModal onPress={handleOpenModalAddUserInRoom}>
                 <AntDesign name="adduser" color="#7159c1" size={20} />
                 <ActionLabel>Adicionar usuário</ActionLabel>
               </AddUserInRoomModal>
+            )}
+            {dataReceivedFromNavigation.roomData && (
+              <UpdateRoom onPress={handleOpenModalRoom}>
+                <Feather name="edit" color="#7159c1" size={20} />
+                <ActionLabel>Editar grupo</ActionLabel>
+              </UpdateRoom>
             )}
           </MessageOptions>
         )}
@@ -314,12 +335,15 @@ const Messages = () => {
         <FlatList
           keyExtractor={(item, index) => String(index)}
           data={messages}
-          // ref={flatListRef}
-          // onContentSizeChange={() =>
-          //   flatListRef?.current?.scrollToEnd({
-          //     animated: true,
-          //   })
-          // }
+          // extraData={loadingMessages}
+          ref={flatListRef}
+          // removeClippedSubviews
+          // initialNumToRender={10}
+          onContentSizeChange={() =>
+            flatListRef?.current?.scrollToEnd({
+              animated: false,
+            })
+          }
           onEndReached={handleGetNextMessages}
           onEndReachedThreshold={0.1}
           ListFooterComponent={() =>
@@ -381,10 +405,10 @@ const Messages = () => {
           <ChatDetails chatData={dataReceivedFromNavigation} />
         </Modalize>
 
-        {toggleModal && (
+        {toggleModalRoom && (
           <ShowModalRoom
-            toggleModal={toggleModal}
-            setToggleModal={setToggleModal}
+            toggleModalRoom={toggleModalRoom}
+            setToggleModalRoom={setToggleModalRoom}
             whichModal="update"
             roomData={dataReceivedFromNavigation?.roomData}
           />
@@ -392,11 +416,10 @@ const Messages = () => {
 
         {toggleModalAddUserInRoom && (
           <AddUserInRoom
-            toggleModal={toggleModalAddUserInRoom}
-            setToggleModal={setToggleModalAddUserInRoom}
-            usersInRoom={[
-              ...new Set(messages.filter((user: IMessages) => user.id)),
-            ]}
+            toggleModalAddUserInRoom={toggleModalAddUserInRoom}
+            setToggleModalAddUserInRoom={setToggleModalAddUserInRoom}
+            nickname={String(dataReceivedFromNavigation?.roomData?.nickname)}
+            roomId={Number(dataReceivedFromNavigation?.roomData?.id)}
           />
         )}
       </Container>

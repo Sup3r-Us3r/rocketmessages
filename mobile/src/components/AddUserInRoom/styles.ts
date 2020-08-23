@@ -22,12 +22,17 @@ export const ScrollView = styled.ScrollView.attrs(() => ({
 
 export const Container = styled.View`
   flex: 1;
-  align-items: center;
+`;
+
+export const HeaderContainer = styled.View`
+  flex-direction: row;
+  margin-top: 10px;
 `;
 
 export const ScreenBackContainer = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.8,
 }))`
+  z-index: 9999;
   position: absolute;
   top: 10px;
   left: 5px;
@@ -38,17 +43,19 @@ export const ScreenBackIcon = styled(Feather).attrs(() => ({
   name: 'arrow-left',
   color: '#7159c1',
   size: 28,
-}))`
-  background: transparent;
-`;
+}))``;
 
 export const Title = styled.Text`
-  margin: 50px 0 30px 0;
+  top: 10px;
+  padding: 0 5px;
+  text-align: center;
+  width: 100%;
   font-size: 25px;
   color: #7159c1;
 `;
 
 export const ContactContainer = styled.View`
+  margin-top: 30px;
   flex-direction: row;
   align-items: center;
   padding: 10px 15px;
@@ -81,7 +88,9 @@ export const ContactActionIcon = styled(AntDesign).attrs(() => ({
   name: 'adduser',
   color: '#7159c1',
   size: 25,
-}))``;
+}))`
+  padding: 0 5px;
+`;
 
 export const ContactName = styled.Text`
   font-size: 16px;
@@ -92,4 +101,23 @@ export const ContactName = styled.Text`
 export const ContactStatus = styled.Text`
   font-size: 15px;
   color: #0a0a11;
+`;
+
+export const NoFrequentContactContainer = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const NoFrequentContact = styled.Image.attrs(() => ({
+  resizeMode: 'cover',
+}))`
+  height: 200px;
+  width: 200px;
+`;
+
+export const NoFrequentContactLabel = styled.Text`
+  margin-top: 15px;
+  font-size: 18px;
+  color: #ccc;
 `;

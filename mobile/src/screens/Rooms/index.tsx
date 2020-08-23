@@ -48,13 +48,13 @@ const Rooms = () => {
   const [latestMessageOfRoom, setLatestMessageOfRoom] = useState<
     ILatestMessageOfRoom[]
   >([]);
-  const [toggleModal, setToggleModal] = useState<boolean>(false);
+  const [toggleModalRoom, setToggleModalRoom] = useState<boolean>(false);
 
   // Navigation
   const navigation = useNavigation();
 
-  function handleOpenModal() {
-    return setToggleModal(true);
+  function handleOpenModalRoom() {
+    return setToggleModalRoom(true);
   }
 
   function handleNavigateToMessages(roomData: ILatestMessageOfRoom) {
@@ -148,14 +148,14 @@ const Rooms = () => {
         </Container>
       )}
 
-      <ContainerCreateRoom onPress={handleOpenModal}>
+      <ContainerCreateRoom onPress={handleOpenModalRoom}>
         <AntDesign name="addusergroup" color="#fff" size={27} />
       </ContainerCreateRoom>
 
-      {toggleModal && (
+      {toggleModalRoom && (
         <ShowModalRoom
-          toggleModal={toggleModal}
-          setToggleModal={setToggleModal}
+          toggleModalRoom={toggleModalRoom}
+          setToggleModalRoom={setToggleModalRoom}
           whichModal="create"
         />
       )}

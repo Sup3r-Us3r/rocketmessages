@@ -6,6 +6,14 @@ export function handleTwoDigitsFormat(time: string): string {
   return `${`0${String(hours)}`.slice(-2)}:${`0${String(minutes)}`.slice(-2)}`;
 }
 
+function handleFormatDateToPtBr(date: Date): string {
+  const day = `0${String(date.getDate())}`.slice(-2);
+  const month = `0${String(date.getMonth() + 1)}`.slice(-2);
+  const year = String(date.getFullYear()).slice(2);
+
+  return `${day}/${month}/${year}`;
+}
+
 export function messageDateFormatter(createdAt: string): string {
   const today = new Date();
 
@@ -29,5 +37,5 @@ export function messageDateFormatter(createdAt: string): string {
   }
 
   // Returns the complete date
-  return new Date(createdAt).toLocaleDateString('pt-br');
+  return handleFormatDateToPtBr(new Date(createdAt));
 }

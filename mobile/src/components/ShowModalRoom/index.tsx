@@ -34,8 +34,8 @@ import {
 } from './styles';
 
 interface IShowModalRoomProps {
-  toggleModal: boolean;
-  setToggleModal: Dispatch<SetStateAction<boolean>>;
+  toggleModalRoom: boolean;
+  setToggleModalRoom: Dispatch<SetStateAction<boolean>>;
   whichModal: string;
   roomData?: ILatestMessageOfRoom;
 }
@@ -56,8 +56,8 @@ interface IAvatarProperties {
 }
 
 const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
-  toggleModal,
-  setToggleModal,
+  toggleModalRoom,
+  setToggleModalRoom,
   whichModal,
   roomData,
 }) => {
@@ -177,7 +177,7 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
     handleModalAnimationFadeOut();
 
     setTimeout(() => {
-      return setToggleModal(false);
+      return setToggleModalRoom(false);
     }, 300);
   }
 
@@ -208,12 +208,12 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
   }, []);
 
   useEffect(() => {
-    if (toggleModal) {
+    if (toggleModalRoom) {
       memoizedCallback();
     }
-  }, [toggleModal, memoizedCallback]);
+  }, [toggleModalRoom, memoizedCallback]);
 
-  return toggleModal ? (
+  return toggleModalRoom ? (
     <Wrapper style={{opacity: modalAnimation}}>
       <ScrollView>
         <Container>
