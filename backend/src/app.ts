@@ -2,7 +2,6 @@ import 'dotenv/config';
 
 import express from 'express';
 import { createServer } from 'http';
-// import socketio from 'socket.io';
 import cors from 'cors';
 import { resolve } from 'path';
 

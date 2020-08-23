@@ -198,8 +198,21 @@ const Messages = () => {
 
       setMessageInput('');
 
+      // Handle with websocket from backend
       // Emit message from websocket backend
-      return socket.emit('chatMessage', messageInput);
+      if (dataReceivedFromNavigation?.contactData) {
+        socket.emit('joinPrivateChat', {
+          email: dataReceivedFromNavigation?.contactData?.email,
+        });
+
+        return socket.emit('chatMessage', {
+          email: dataReceivedFromNavigation?.contactData?.email,
+        });
+      } else {
+        return socket.emit('chatMessage', {
+          nickname: dataReceivedFromNavigation?.roomData?.nickname,
+        });
+      }
     } catch (err) {
       const {error} = err.response.data;
 
@@ -265,16 +278,18 @@ const Messages = () => {
 
     handleGetMessages();
 
-    // Websocket mobile - Listen emit from backend
-    socket.on('message', (message: string) => {
-      if (message.length !== 0) {
+    function handleUpdateMessages(response: boolean) {
+      if (response) {
         handleGetMessages();
       }
-    });
+    }
+
+    // Websocket mobile - Listen emit from backend
+    socket.on('message', handleUpdateMessages);
 
     // Remove emit
     return () => {
-      socket.off('message', handleGetMessages);
+      socket.off('message', handleUpdateMessages);
     };
   }, [userData, dataReceivedFromNavigation]);
 
@@ -399,7 +414,7 @@ const Messages = () => {
           adjustToContentHeight={
             dataReceivedFromNavigation?.contactData ? true : undefined
           }
-          snapPoint={dataReceivedFromNavigation?.roomData ? 470 : undefined}
+          // snapPoint={dataReceivedFromNavigation?.roomData ? 470 : undefined}
           handleStyle={handleStyle.background}
           overlayStyle={overlayStyle.background}>
           <ChatDetails chatData={dataReceivedFromNavigation} />

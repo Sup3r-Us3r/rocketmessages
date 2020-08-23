@@ -32,6 +32,7 @@ import {
   ParticipantActionRemove,
   ParticipantActionRemoveIcon,
 } from './styles';
+import socket from '../../services/websocket';
 
 interface IDataReceivedFromNavigation {
   contactData?: ILatestMessageOfContact;
@@ -80,11 +81,13 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
 
       const whoIs = participants.find((user) => user.id === userId)?.username;
 
-      return Toast.success(
+      Toast.success(
         !imAdmin
           ? `${whoIs} é um administrador.`
           : `${whoIs} não é um administrador.`,
       );
+
+      return socket.emit('handleParticipantsInRoom');
     } catch (err) {
       const {error} = err.response.data;
 
@@ -102,7 +105,9 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
         return Toast.error('Erro ao remover usuário do grupo.');
       }
 
-      return Toast.success('Usuário removido com sucesso.');
+      Toast.success('Usuário removido com sucesso.');
+
+      return socket.emit('handleParticipantsInRoom');
     } catch (err) {
       const {error} = err.response.data;
 
@@ -160,6 +165,18 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
     if (chatData?.roomData?.nickname) {
       handleGetParticipants();
     }
+
+    function handleRefreshParticipants(response: boolean) {
+      if (response) {
+        handleGetParticipants();
+      }
+    }
+
+    socket.on('refreshParticipantsInroom', handleRefreshParticipants);
+
+    return () => {
+      socket.off('refreshParticipantsInroom', handleRefreshParticipants);
+    };
   }, [chatData, myId]);
 
   return (

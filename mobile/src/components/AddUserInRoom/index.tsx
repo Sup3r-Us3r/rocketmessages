@@ -77,10 +77,7 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
       Toast.success('Usuário adicionado ao grupo.');
 
       // Emit for websocket backend - Join user in room
-      return socket.emit('joinRoom', {
-        user: contacts.find((user: IFrequentContacts) => user.id === userId),
-        nickname,
-      });
+      return socket.emit('joinRoomChat', nickname);
     } catch (err) {
       const {error} = err.response.data;
 
@@ -165,14 +162,17 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
 
     handleGetFrequentContacts();
 
-    socket.on('updateUsersInRoom', (response: boolean) => {
-      if (response) {
+    // Listen update users in room
+    function handleUpdateUsersInRoom(roomNickname: string) {
+      if (roomNickname === nickname) {
         handleGetFrequentContacts();
       }
-    });
+    }
+
+    socket.on('updateUsersInRoom', handleUpdateUsersInRoom);
 
     return () => {
-      socket.off('updateUsersInRoom', handleGetFrequentContacts);
+      socket.off('updateUsersInRoom', handleUpdateUsersInRoom);
     };
   }, [nickname]);
 
