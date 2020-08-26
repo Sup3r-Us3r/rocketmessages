@@ -1,6 +1,6 @@
 import knex from 'knex';
 import { resolve } from 'path';
-import {attachPaginate} from 'knex-paginate';
+import { attachPaginate } from 'knex-paginate';
 
 attachPaginate();
 

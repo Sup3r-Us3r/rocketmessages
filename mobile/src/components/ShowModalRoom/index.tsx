@@ -118,6 +118,19 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
         return Toast.error('Erro ao inserir usuário admin.');
       }
 
+      const insertWelcomeMessageOnRoom =
+        whichModal === 'create' &&
+        (await api.post('/message', {
+          bot: true,
+          from: userId,
+          to_room: Number(roomData?.id),
+          message: `Grupo ${nicknameInput} criado.`,
+        }));
+
+      if (whichModal === 'create' && !insertWelcomeMessageOnRoom) {
+        return Toast.error('Erro ao inserir mensagem.');
+      }
+
       Toast.success(
         whichModal === 'create'
           ? 'Grupo criado com sucesso.'

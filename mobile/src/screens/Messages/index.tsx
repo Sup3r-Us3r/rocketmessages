@@ -45,6 +45,8 @@ import {
   AddUserInRoomModal,
   ActionLabel,
   shadowContainer,
+  ChatContainerMessageBot,
+  ChatMessageBot,
   ChatContainerMessageSent,
   MessageSentHour,
   MessageSent,
@@ -64,6 +66,7 @@ import {
 
 interface IMessages {
   id: number;
+  bot: boolean;
   username?: string;
   message: string;
   image?: string;
@@ -149,10 +152,16 @@ const Messages = () => {
     pageRef.current = pageRef.current + 1;
   }
 
-  function handleRenderItem({item}) {
-    return (dataReceivedFromNavigation?.contactData &&
-      item?.id === userData?.id) ||
-      (dataReceivedFromNavigation?.roomData && item?.id === userData?.id) ? (
+  function handleRenderItem({item}: {item: IMessages}) {
+    if (item?.bot) {
+      return (
+        <ChatContainerMessageBot>
+          <ChatMessageBot>{item?.message}</ChatMessageBot>
+        </ChatContainerMessageBot>
+      );
+    }
+
+    return item?.id === userData?.id ? (
       <ChatContainerMessageSent>
         <MessageSentHour>{item?.created_at}</MessageSentHour>
         <MessageSent>{item?.message}</MessageSent>
@@ -168,6 +177,7 @@ const Messages = () => {
   function handleSerializedMessages(allMessages: IMessages[]) {
     const serialized = allMessages.map((item) => ({
       id: item?.id,
+      bot: item?.bot,
       username: item?.username,
       image: item?.image,
       message: item?.message,
@@ -180,6 +190,7 @@ const Messages = () => {
   async function handleSubmit() {
     try {
       const data = {
+        bot: false,
         from: userData?.id,
         to_user: dataReceivedFromNavigation?.contactData
           ? dataReceivedFromNavigation?.contactData?.id
@@ -433,8 +444,8 @@ const Messages = () => {
           <AddUserInRoom
             toggleModalAddUserInRoom={toggleModalAddUserInRoom}
             setToggleModalAddUserInRoom={setToggleModalAddUserInRoom}
-            nickname={String(dataReceivedFromNavigation?.roomData?.nickname)}
             roomId={Number(dataReceivedFromNavigation?.roomData?.id)}
+            nickname={String(dataReceivedFromNavigation?.roomData?.nickname)}
           />
         )}
       </Container>

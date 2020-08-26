@@ -8,7 +8,7 @@ import MainNavigation from './screens/MainNavigation';
 const App = () => {
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="#7159c1" />
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" />
 
       <NavigationContainer>
         <MainNavigation />

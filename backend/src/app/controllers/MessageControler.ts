@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import knex from '../../database/connection';
 
 interface IMessageData {
+  bot: boolean;
   from: number;
   to_user?: number;
   to_room?: number;
@@ -17,6 +18,7 @@ interface IWhichRoom {
 export default new class MessageController {
   async createMessage(req: Request, res: Response) {
     const {
+      bot,
       from,
       to_user,
       to_room,
@@ -46,9 +48,10 @@ export default new class MessageController {
       }
 
       const messageSent = await knex('tb_message').insert({
+        bot: Boolean(bot) ? true : false,
         from,
-        to_user: !to_user || undefined ? null : to_user,
-        to_room: !to_room || undefined ? null : to_room,
+        to_user: !to_user || undefined ? null : Number(to_user),
+        to_room: !to_room || undefined ? null : Number(to_room),
         message,
         image: image === '' || undefined ? null : image,
         created_at: new Date(),
@@ -76,7 +79,7 @@ export default new class MessageController {
               PARTITION BY CASE WHEN M."from" = ${from}
               THEN M."to_user" ELSE M."from" END
               ORDER BY M."created_at" DESC) AS RN
-          FROM tb_message as M
+          FROM tb_message AS M
           WHERE M."to_user" IS NOT NULL AND
           M."from" = ${from} OR M."to_user" = ${from}
         `
@@ -160,6 +163,7 @@ export default new class MessageController {
         .where('R.nickname', String(nickname))
         .select(
           'U.id',
+          'M.bot',
           'U.username',
           'M.message',
           'M.image',
@@ -189,7 +193,7 @@ export default new class MessageController {
 
     try {
       const whichRooms = await knex('tb_user_room as UR')
-        .where('UR.user_id', String(from))
+        .where('UR.user_id', Number(from))
         .select('UR.room_id');
 
       const whichRoomsValuesToSingleArray = whichRooms
@@ -223,6 +227,9 @@ export default new class MessageController {
       if (!messages) {
         return res.status(500).json({ error: 'Error on listing messages.' });
       }
+
+      // const serializedLastMessages = messages.map((item) => item.);
+      // itemsInside.filter((item, index) => !arrObj.find(obj => obj.a === item));
 
       return res.json(messages);
     } catch (err) {

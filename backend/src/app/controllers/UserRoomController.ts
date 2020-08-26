@@ -20,11 +20,6 @@ export default new class UserRoomController {
     const { user_id, nickname, user_admin } = req.body as IBodyData;
 
     try {
-      // const userInRoomExists = await knex('tb_user_room as UR')
-      //   .where('UR.user_id', Number(user_id))
-      //   .andWhere('UR.room_id', Number(room_id))
-      //   .first();
-
       const roomExists = await knex('tb_room as R')
         .where('R.nickname', String(nickname))
         .select('R.id')
@@ -34,34 +29,28 @@ export default new class UserRoomController {
         return res.status(400).json({ error: 'Room does not exists.' });
       }
 
-      console.log('ID: ', roomExists);
-
       const userInRoomExists = await knex('tb_user_room as UR')
         .where('UR.user_id', Number(user_id))
         .andWhere('UR.room_id', Number(roomExists.id))
         .first();
 
-      // if (userInRoomExists) {
-      //   return res.status(409)
-      //     .json({ error: 'Error inserting user inside the room.' });
-      // }
+      if (userInRoomExists) {
+        return res.status(409)
+          .json({ error: 'Error inserting user inside the room.' });
+      }
 
-      console.log('room: ', userInRoomExists);
+      const userInRoom = await knex('tb_user_room').insert({
+        user_id,
+        room_id: roomExists?.id,
+        user_admin,
+      });
 
-      // const userInRoom = await knex('tb_user_room').insert({
-      //   user_id,
-      //   room_id: userInRoomExists?.room_id,
-      //   user_admin,
-      // });
+      if (!userInRoom) {
+        return res.status(400)
+          .json({ error: 'Error inserting user inside the room.' });
+      }
 
-      // if (!userInRoom) {
-      //   return res.status(400)
-      //     .json({ error: 'Error inserting user inside the room.' });
-      // }
-
-      // return res.json(userInRoom);
-
-      return res.json(userInRoomExists);
+      return res.json(userInRoom);
     } catch (err) {
       return res.status(500)
         .json({ error: 'Error inserting user inside the room.' });

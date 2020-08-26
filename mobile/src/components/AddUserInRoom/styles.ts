@@ -26,7 +26,8 @@ export const Container = styled.View`
 
 export const HeaderContainer = styled.View`
   flex-direction: row;
-  margin-top: 10px;
+  margin-top: 5px;
+  align-items: center;
 `;
 
 export const ScreenBackContainer = styled.TouchableOpacity.attrs(() => ({
@@ -34,7 +35,6 @@ export const ScreenBackContainer = styled.TouchableOpacity.attrs(() => ({
 }))`
   z-index: 9999;
   position: absolute;
-  top: 10px;
   left: 5px;
   padding: 0 5px;
 `;
@@ -46,8 +46,8 @@ export const ScreenBackIcon = styled(Feather).attrs(() => ({
 }))``;
 
 export const Title = styled.Text`
-  top: 10px;
-  padding: 0 5px;
+  top: 15px;
+  margin-bottom: 30px;
   text-align: center;
   width: 100%;
   font-size: 25px;
@@ -55,7 +55,6 @@ export const Title = styled.Text`
 `;
 
 export const ContactContainer = styled.View`
-  margin-top: 30px;
   flex-direction: row;
   align-items: center;
   padding: 10px 15px;

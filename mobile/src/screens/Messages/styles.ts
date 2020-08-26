@@ -120,6 +120,20 @@ export const ActionLabel = styled.Text`
   margin-left: 5px;
 `;
 
+export const ChatContainerMessageBot = styled.View`
+  align-self: center;
+  margin-top: 10px;
+  padding: 3px 15px;
+  background: #7159c1;
+  border-radius: 20px;
+`;
+
+export const ChatMessageBot = styled.Text`
+  font-size: 14px;
+  font-weight: bold;
+  color: #fff;
+`;
+
 export const ChatContainerMessageSent = styled.View`
   align-self: flex-end;
   margin-top: 5px;

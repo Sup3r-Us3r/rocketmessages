@@ -39,8 +39,8 @@ import {
 interface IAddUserInRoomProps {
   toggleModalAddUserInRoom: boolean;
   setToggleModalAddUserInRoom: Dispatch<SetStateAction<boolean>>;
-  nickname: string;
   roomId: number;
+  nickname: string;
 }
 
 interface IFrequentContacts {
@@ -53,17 +53,21 @@ interface IFrequentContacts {
 const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
   toggleModalAddUserInRoom,
   setToggleModalAddUserInRoom,
-  nickname,
   roomId,
+  nickname,
 }) => {
   // States
   const [contacts, setContacts] = useState<IFrequentContacts[]>([]);
   const [modalAnimation] = useState(new Animated.Value(0));
 
   async function handleSubmit(userId: number) {
+    const userAdded = contacts.find(
+      (user: IFrequentContacts) => user.id === userId,
+    )?.username;
+
     const userData = {
       user_id: userId,
-      room_id: roomId,
+      nickname,
       user_admin: false,
     };
 
@@ -74,7 +78,19 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
         return Toast.error('Erro ao adicionar usuário.');
       }
 
-      Toast.success('Usuário adicionado ao grupo.');
+      const sendMessageNewUser = await api.post('/message', {
+        bot: true,
+        from: userId,
+        to_room: roomId,
+        to_user: null,
+        message: `${userAdded} foi adicionado ao grupo.`,
+      });
+
+      if (!sendMessageNewUser) {
+        return Toast.error('Erro ao enviar mensagem de novo usuário.');
+      }
+
+      Toast.success(`${userAdded} adicionado ao grupo.`);
 
       // Emit for websocket backend - Join user in room
       return socket.emit('joinRoomChat', nickname);
@@ -205,7 +221,7 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
                     </ContactStatus>
                   </ContactInfoUser>
 
-                  <ContactAction onPress={() => handleSubmit(Number(user.id))}>
+                  <ContactAction onPress={() => handleSubmit(Number(user?.id))}>
                     <ContactActionIcon />
                   </ContactAction>
                 </ContactInfo>

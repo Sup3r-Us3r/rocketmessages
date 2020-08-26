@@ -3,6 +3,7 @@ import Knex from 'knex';
 export async function up(knex: Knex) {
   return knex.schema.createTable('tb_message', table => {
     table.increments('id').primary();
+    table.boolean('bot');
     table.integer('from').notNullable();
     table.integer('to_user')
       .references('id')

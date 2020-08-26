@@ -19,7 +19,7 @@ export default {
     return cb(null, true);
   },
   limits: {
-    fileSize: 2 * 1024 * 1024,
+    fileSize: 7 * 1024 * 1024,
   },
   storage: multer.diskStorage({
     destination: resolve(__dirname, '..', '..', 'uploads'),
