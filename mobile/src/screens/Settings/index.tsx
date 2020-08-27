@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Keyboard, Platform, Text} from 'react-native';
+import {Keyboard, Platform} from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import AsyncStorage from '@react-native-community/async-storage';
 import AntDesign from 'react-native-vector-icons/AntDesign';

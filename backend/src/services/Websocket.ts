@@ -1,36 +1,12 @@
 import { Server } from 'http';
 import socketio from 'socket.io';
 
-interface IUserJoinedInRoom {
-  id: number | string;
-  username: string;
-  nickname: string;
-}
-
-interface IJoinPrivate {
-  email: string;
-}
-
 interface IPrivateChatOrRoomChat {
   email?: string;
   nickname?: string;
 }
 
 class Websocket {
-  private usersArray = [] as IUserJoinedInRoom[];
-
-  private joinUserInRoom(id: string, username: string, nickname: string) {
-    const user = {id, username, nickname};
-
-    this.usersArray.push(user);
-
-    return user;
-  }
-
-  private getCurrentUser(id: string) {
-    return this.usersArray.find((user: IUserJoinedInRoom) => user.id === id);
-  }
-
   socketIO(httpServer: Server) {
     // socket.emit() = Emit single client
     // socket.broadcast.emit() = Emit all client except you
@@ -45,28 +21,12 @@ class Websocket {
 
       // Listen users joined in room
       socket.on('joinRoomChat', (nickname: string) => {
-        // console.log(userJoined);
-        // const currentUserForJoin = this.joinUserInRoom(
-        //   socket.id,
-        //   userJoined.username,
-        //   userJoined.nickname,
-        // );
-
         socket.join(nickname);
-
-        // Welcome current user
-        // socket.to(currentUserForJoin.nickname)
-        //  .emit('message', 'Welcome to Rocket Messages');
-
-        // Broadcast when a user connects
-        // socket.broadcast.to(currentUserForJoin.nickname)
-        //  .emit('message', '');
-
         socket.emit('updateUsersInRoom', nickname);
       });
 
       // Join user in private room
-      socket.on('joinPrivateChat', ({email}: IJoinPrivate) => {
+      socket.on('joinPrivateChat', (email: string) => {
         socket.join(email);
       });
 
@@ -81,11 +41,8 @@ class Websocket {
 
           if (privateChatOrRoomChat?.nickname) {
             // Is room chat
-            io.to(privateChatOrRoomChat?.nickname)
+            io.sockets.in(privateChatOrRoomChat?.nickname)
               .emit('message', true);
-
-            // const currentUser = this.getCurrentUser(socket.id);
-            // io.to(String(currentUser?.nickname)).emit('message', true);
           }
         },
       );

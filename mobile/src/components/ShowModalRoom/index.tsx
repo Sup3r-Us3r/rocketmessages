@@ -13,7 +13,6 @@ import {ILatestMessageOfRoom} from '../../screens/Rooms';
 
 import ImagePicker from 'react-native-image-picker';
 
-import socket from '../../services/websocket';
 import api from '../../services/api';
 
 import Toast from '../../config/toastStyles';
@@ -110,7 +109,6 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
         (await api.post('/insertuserinroom', {
           user_id: userId,
           nickname: nicknameInput,
-          // room_id: Number(roomData?.id),
           user_admin: true,
         }));
 
@@ -123,7 +121,7 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
         (await api.post('/message', {
           bot: true,
           from: userId,
-          to_room: Number(roomData?.id),
+          to_room: Number(...createOrUpdateResponse.data),
           message: `Grupo ${nicknameInput} criado.`,
         }));
 
@@ -131,14 +129,11 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
         return Toast.error('Erro ao inserir mensagem.');
       }
 
-      Toast.success(
+      return Toast.success(
         whichModal === 'create'
           ? 'Grupo criado com sucesso.'
           : 'Grupo atualizado com sucesso.',
       );
-
-      // Emit for websocket backend - Join user in room
-      return socket.emit('joinRoomChat', roomData?.nickname);
     } catch (err) {
       const {error} = err.response.data;
 

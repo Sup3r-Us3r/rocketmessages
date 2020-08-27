@@ -107,6 +107,13 @@ export const UpdateRoom = styled.TouchableOpacity.attrs(() => ({
   padding: 8px 0;
 `;
 
+export const LeaveRoom = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.6,
+}))`
+  flex-direction: row;
+  padding: 8px 0;
+`;
+
 export const AddUserInRoomModal = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.6,
 }))`
@@ -146,6 +153,11 @@ export const ChatContainerMessageSent = styled.View`
   border-top-right-radius: 20px;
 `;
 
+export const ChatMessageHeader = styled.View`
+  flex-direction: row-reverse;
+  align-self: flex-start;
+`;
+
 export const MessageSentHour = styled.Text`
   font-size: 14px;
   font-weight: bold;
@@ -155,6 +167,13 @@ export const MessageSentHour = styled.Text`
 export const MessageSent = styled.Text`
   font-size: 16px;
   color: #fff;
+`;
+
+export const MessageSenderName = styled.Text`
+  font-size: 14px;
+  margin-left: 10px;
+  color: #111;
+  font-weight: bold;
 `;
 
 export const ChatContainerMessageReceived = styled.View`

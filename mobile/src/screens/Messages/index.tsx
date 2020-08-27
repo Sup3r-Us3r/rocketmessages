@@ -1,10 +1,10 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {Keyboard, FlatList, ActivityIndicator} from 'react-native';
+import {Keyboard, FlatList, StatusBar, ActivityIndicator} from 'react-native';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {AxiosRequestConfig} from 'axios';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import SimpleLinIcons from 'react-native-vector-icons/SimpleLineIcons';
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -17,6 +17,7 @@ import socket from '../../services/websocket';
 import ChatDetails from '../../components/ChatDetails';
 import ShowModalRoom from '../../components/ShowModalRoom';
 import AddUserInRoom from '../../components/AddUserInRoom';
+import LeaveRoomModal from '../../components/LeaveRoom';
 
 import {handleTwoDigitsFormat} from '../../utils/messageDateFormatter';
 
@@ -41,15 +42,18 @@ import {
   MessageOptions,
   // ClearMessages,
   // DeleteChat,
-  UpdateRoom,
   AddUserInRoomModal,
+  UpdateRoom,
+  LeaveRoom,
   ActionLabel,
   shadowContainer,
   ChatContainerMessageBot,
   ChatMessageBot,
   ChatContainerMessageSent,
+  ChatMessageHeader,
   MessageSentHour,
   MessageSent,
+  MessageSenderName,
   ChatContainerMessageReceived,
   MessageReceivedHour,
   MessageReceived,
@@ -90,7 +94,8 @@ interface IUserData {
 const Messages = () => {
   // Ref
   const flatListRef = useRef<FlatList>(null);
-  const modalizeRef = useRef<Modalize>(null);
+  const modalizeChatDetailsRef = useRef<Modalize>(null);
+  const modalizeLeaveRoomRef = useRef<Modalize>(null);
   const pageRef = useRef<number>(1);
   // const lastPageRef = useRef<number>(1);
   // const totalPage = useRef<number>(0);
@@ -128,8 +133,8 @@ const Messages = () => {
     return setShowEmojis(!showEmojis);
   }
 
-  function handleShowModalize() {
-    return modalizeRef.current?.open();
+  function handleShowModalizeChatDetails() {
+    return modalizeChatDetailsRef.current?.open();
   }
 
   function handleOpenModalRoom() {
@@ -142,6 +147,12 @@ const Messages = () => {
     setShowChatActions(false);
 
     return setToggleModalAddUserInRoom(true);
+  }
+
+  function handleShowModalizeLeaveRoom() {
+    setShowChatActions(false);
+
+    return modalizeLeaveRoomRef.current?.open();
   }
 
   function handleGetNextMessages() {
@@ -168,7 +179,14 @@ const Messages = () => {
       </ChatContainerMessageSent>
     ) : (
       <ChatContainerMessageReceived>
-        <MessageReceivedHour>{item?.created_at}</MessageReceivedHour>
+        {dataReceivedFromNavigation?.roomData ? (
+          <ChatMessageHeader>
+            <MessageSenderName>~ Mayderson Mello</MessageSenderName>
+            <MessageReceivedHour>{item?.created_at}</MessageReceivedHour>
+          </ChatMessageHeader>
+        ) : (
+          <MessageReceivedHour>{item?.created_at}</MessageReceivedHour>
+        )}
         <MessageReceived>{item?.message}</MessageReceived>
       </ChatContainerMessageReceived>
     );
@@ -212,14 +230,20 @@ const Messages = () => {
       // Handle with websocket from backend
       // Emit message from websocket backend
       if (dataReceivedFromNavigation?.contactData) {
-        socket.emit('joinPrivateChat', {
-          email: dataReceivedFromNavigation?.contactData?.email,
-        });
+        socket.emit(
+          'joinPrivateChat',
+          dataReceivedFromNavigation?.contactData?.email,
+        );
 
         return socket.emit('chatMessage', {
           email: dataReceivedFromNavigation?.contactData?.email,
         });
       } else {
+        socket.emit(
+          'joinRoomChat',
+          dataReceivedFromNavigation?.roomData?.nickname,
+        );
+
         return socket.emit('chatMessage', {
           nickname: dataReceivedFromNavigation?.roomData?.nickname,
         });
@@ -305,151 +329,183 @@ const Messages = () => {
   }, [userData, dataReceivedFromNavigation]);
 
   return (
-    <Wrapper>
-      <Container onPress={() => setShowChatActions(false)}>
-        <Header>
-          <BackButton onPress={handleNavigateToBack}>
-            <Ionicons name="ios-arrow-back" color="#fff" size={20} />
-          </BackButton>
-          <ChatImage
-            source={{
-              uri: dataReceivedFromNavigation?.contactData
-                ? dataReceivedFromNavigation?.contactData?.photo
-                : dataReceivedFromNavigation?.roomData?.avatar,
-            }}
-          />
-          <ChatInfo onPress={handleShowModalize}>
-            <ChatName>
-              {dataReceivedFromNavigation?.contactData
-                ? dataReceivedFromNavigation?.contactData?.username
-                : dataReceivedFromNavigation?.roomData?.name}
-            </ChatName>
-            <ChatStatus>Online</ChatStatus>
-          </ChatInfo>
-          {dataReceivedFromNavigation?.roomData && (
-            <ChatAction onPress={handleToggleChatActions}>
-              <SimpleLinIcons name="options-vertical" color="#fff" size={20} />
-            </ChatAction>
-          )}
-        </Header>
+    <>
+      <StatusBar barStyle="light-content" backgroundColor="#7159c1" />
 
-        {showChatActions && (
-          <MessageOptions style={shadowContainer.shadowBox}>
-            {/* <ClearMessages>
-              <MaterialIcons name="clear" color="#7159c1" size={20} />
-              <ActionLabel>Limpar mensagens</ActionLabel>
-            </ClearMessages>
-            <DeleteChat>
-              <AntDesign name="deleteuser" color="#7159c1" size={20} />
-              <ActionLabel>Deletar conversa</ActionLabel>
-            </DeleteChat> */}
-            {dataReceivedFromNavigation.roomData && (
-              <AddUserInRoomModal onPress={handleOpenModalAddUserInRoom}>
-                <AntDesign name="adduser" color="#7159c1" size={20} />
-                <ActionLabel>Adicionar usuário</ActionLabel>
-              </AddUserInRoomModal>
-            )}
-            {dataReceivedFromNavigation.roomData && (
-              <UpdateRoom onPress={handleOpenModalRoom}>
-                <Feather name="edit" color="#7159c1" size={20} />
-                <ActionLabel>Editar grupo</ActionLabel>
-              </UpdateRoom>
-            )}
-          </MessageOptions>
-        )}
-
-        <FlatList
-          keyExtractor={(item, index) => String(index)}
-          data={messages}
-          // extraData={loadingMessages}
-          ref={flatListRef}
-          // removeClippedSubviews
-          // initialNumToRender={10}
-          onContentSizeChange={() =>
-            flatListRef?.current?.scrollToEnd({
-              animated: false,
-            })
-          }
-          onEndReached={handleGetNextMessages}
-          onEndReachedThreshold={0.1}
-          ListFooterComponent={() =>
-            loadingMessages ? (
-              <ActivityIndicator size="large" color="#7159c1" animating />
-            ) : null
-          }
-          renderItem={handleRenderItem}
-        />
-
-        <WrapperMessage>
-          <MessageField>
-            <InputMessage
-              placeholder="Digite uma mensagem"
-              autoCorrect={false}
-              multiline
-              onBlur={Keyboard.dismiss}
-              onSubmitEditing={() => null}
-              onChangeText={setMessageInput}
-              value={messageInput}
+      <Wrapper>
+        <Container onPress={() => setShowChatActions(false)}>
+          <Header>
+            <BackButton onPress={handleNavigateToBack}>
+              <Ionicons name="ios-arrow-back" color="#fff" size={20} />
+            </BackButton>
+            <ChatImage
+              source={{
+                uri: dataReceivedFromNavigation?.contactData
+                  ? dataReceivedFromNavigation?.contactData?.photo
+                  : dataReceivedFromNavigation?.roomData?.avatar,
+              }}
             />
-            {messageInput.length > 0 && (
-              <SendMessage onPress={handleSubmit}>
-                <MaterialCommunityIcons name="send" color="#fff" size={23} />
-              </SendMessage>
+            <ChatInfo onPress={handleShowModalizeChatDetails}>
+              <ChatName>
+                {dataReceivedFromNavigation?.contactData
+                  ? dataReceivedFromNavigation?.contactData?.username
+                  : dataReceivedFromNavigation?.roomData?.name}
+              </ChatName>
+              <ChatStatus>Online</ChatStatus>
+            </ChatInfo>
+            {dataReceivedFromNavigation?.roomData && (
+              <ChatAction onPress={handleToggleChatActions}>
+                <SimpleLineIcons
+                  name="options-vertical"
+                  color="#fff"
+                  size={20}
+                />
+              </ChatAction>
             )}
-            <SelectEmoji onPress={handleShowEmojis}>
-              <MaterialIcons name="insert-emoticon" color="#7159c1" size={23} />
-            </SelectEmoji>
-            {messageInput.length === 0 && (
-              <AudioRecord>
-                <SimpleLinIcons name="microphone" color="#fff" size={23} />
-              </AudioRecord>
-            )}
-          </MessageField>
+          </Header>
 
-          {showEmojis && (
-            <EmojiContainer>
-              <EmojiSelector
-                columns={10}
-                showSectionTitles={false}
-                showSearchBar={false}
-                placeholder="Pesquisar..."
-                category={Categories.emotion}
-                onEmojiSelected={(emoji) => console.log(emoji)}
-              />
-            </EmojiContainer>
+          {showChatActions && (
+            <MessageOptions style={shadowContainer.shadowBox}>
+              {/* <ClearMessages>
+                <MaterialIcons name="clear" color="#7159c1" size={20} />
+                <ActionLabel>Limpar mensagens</ActionLabel>
+              </ClearMessages>
+              <DeleteChat>
+                <AntDesign name="deleteuser" color="#7159c1" size={20} />
+                <ActionLabel>Deletar conversa</ActionLabel>
+              </DeleteChat> */}
+              {dataReceivedFromNavigation.roomData && (
+                <>
+                  <AddUserInRoomModal onPress={handleOpenModalAddUserInRoom}>
+                    <AntDesign name="adduser" color="#7159c1" size={20} />
+                    <ActionLabel>Adicionar usuário</ActionLabel>
+                  </AddUserInRoomModal>
+
+                  <UpdateRoom onPress={handleOpenModalRoom}>
+                    <Feather name="edit" color="#7159c1" size={20} />
+                    <ActionLabel>Editar grupo</ActionLabel>
+                  </UpdateRoom>
+
+                  <LeaveRoom onPress={handleShowModalizeLeaveRoom}>
+                    <AntDesign name="logout" color="#7159c1" size={20} />
+                    <ActionLabel>Sair do grupo</ActionLabel>
+                  </LeaveRoom>
+                </>
+              )}
+            </MessageOptions>
           )}
-        </WrapperMessage>
 
-        <Modalize
-          ref={modalizeRef}
-          adjustToContentHeight={
-            dataReceivedFromNavigation?.contactData ? true : undefined
-          }
-          // snapPoint={dataReceivedFromNavigation?.roomData ? 470 : undefined}
-          handleStyle={handleStyle.background}
-          overlayStyle={overlayStyle.background}>
-          <ChatDetails chatData={dataReceivedFromNavigation} />
-        </Modalize>
-
-        {toggleModalRoom && (
-          <ShowModalRoom
-            toggleModalRoom={toggleModalRoom}
-            setToggleModalRoom={setToggleModalRoom}
-            whichModal="update"
-            roomData={dataReceivedFromNavigation?.roomData}
+          <FlatList
+            keyExtractor={(item, index) => String(index)}
+            data={messages}
+            // extraData={loadingMessages}
+            ref={flatListRef}
+            // removeClippedSubviews
+            // initialNumToRender={10}
+            onContentSizeChange={() =>
+              flatListRef?.current?.scrollToEnd({
+                animated: false,
+              })
+            }
+            onEndReached={handleGetNextMessages}
+            onEndReachedThreshold={0.1}
+            // ListFooterComponent={() =>
+            //   loadingMessages ? (
+            //     <ActivityIndicator size="large" color="#7159c1" animating />
+            //   ) : null
+            // }
+            renderItem={handleRenderItem}
           />
-        )}
 
-        {toggleModalAddUserInRoom && (
-          <AddUserInRoom
-            toggleModalAddUserInRoom={toggleModalAddUserInRoom}
-            setToggleModalAddUserInRoom={setToggleModalAddUserInRoom}
-            roomId={Number(dataReceivedFromNavigation?.roomData?.id)}
-            nickname={String(dataReceivedFromNavigation?.roomData?.nickname)}
-          />
-        )}
-      </Container>
-    </Wrapper>
+          <WrapperMessage>
+            <MessageField>
+              <InputMessage
+                placeholder="Digite uma mensagem"
+                autoCorrect={false}
+                multiline
+                onBlur={Keyboard.dismiss}
+                onSubmitEditing={() => null}
+                onChangeText={setMessageInput}
+                value={messageInput}
+              />
+              {messageInput.length > 0 && (
+                <SendMessage onPress={handleSubmit}>
+                  <MaterialCommunityIcons name="send" color="#fff" size={23} />
+                </SendMessage>
+              )}
+              <SelectEmoji onPress={handleShowEmojis}>
+                <MaterialIcons
+                  name="insert-emoticon"
+                  color="#7159c1"
+                  size={23}
+                />
+              </SelectEmoji>
+              {messageInput.length === 0 && (
+                <AudioRecord>
+                  <SimpleLineIcons name="microphone" color="#fff" size={23} />
+                </AudioRecord>
+              )}
+            </MessageField>
+
+            {showEmojis && (
+              <EmojiContainer>
+                <EmojiSelector
+                  theme="#7159c1"
+                  columns={10}
+                  showSectionTitles={false}
+                  showSearchBar={false}
+                  placeholder="Pesquisar..."
+                  category={Categories.emotion}
+                  onEmojiSelected={(emoji) =>
+                    setMessageInput((prevState) => prevState + emoji)
+                  }
+                />
+              </EmojiContainer>
+            )}
+          </WrapperMessage>
+
+          {/* Modal for chat details */}
+          <Modalize
+            ref={modalizeChatDetailsRef}
+            adjustToContentHeight={
+              dataReceivedFromNavigation?.contactData ? true : undefined
+            }
+            // snapPoint={dataReceivedFromNavigation?.roomData ? 470 : undefined}
+            handleStyle={handleStyle.background}
+            overlayStyle={overlayStyle.background}>
+            <ChatDetails chatData={dataReceivedFromNavigation} />
+          </Modalize>
+
+          {/* Modal for leave room */}
+          <Modalize
+            ref={modalizeLeaveRoomRef}
+            adjustToContentHeight
+            // snapPoint={300}
+            withHandle={false}
+            overlayStyle={overlayStyle.background}>
+            <LeaveRoomModal modalRef={modalizeLeaveRoomRef} />
+          </Modalize>
+
+          {toggleModalRoom && (
+            <ShowModalRoom
+              toggleModalRoom={toggleModalRoom}
+              setToggleModalRoom={setToggleModalRoom}
+              whichModal="update"
+              roomData={dataReceivedFromNavigation?.roomData}
+            />
+          )}
+
+          {toggleModalAddUserInRoom && (
+            <AddUserInRoom
+              toggleModalAddUserInRoom={toggleModalAddUserInRoom}
+              setToggleModalAddUserInRoom={setToggleModalAddUserInRoom}
+              roomId={Number(dataReceivedFromNavigation?.roomData?.id)}
+              nickname={String(dataReceivedFromNavigation?.roomData?.nickname)}
+            />
+          )}
+        </Container>
+      </Wrapper>
+    </>
   );
 };
 

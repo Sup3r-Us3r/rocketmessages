@@ -29,7 +29,9 @@ export default new class RoomController {
           ? `${process.env.BASE_URL}/uploads/${req.file?.filename}`
           : process.env.ROOM_DEFAULT_AVATAR_URL,
         created_at: new Date(),
-      });
+      })
+        .returning('id')
+        .into('tb_room');
 
       if (!room) {
         return res.status(400).json({ error: 'Error on creating room.' });
@@ -76,7 +78,7 @@ export default new class RoomController {
       return res.status(500).json({ error: 'Error on updating room.' });
     }
   }
-  
+
   async listRooms(req: Request, res: Response) {
     try {
       const rooms = await knex('tb_room').select('*');
