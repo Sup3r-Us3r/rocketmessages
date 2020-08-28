@@ -1,8 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import AsyncStorage from '@react-native-community/async-storage';
+import React, {useState, useEffect, useContext} from 'react';
 import {useNavigation} from '@react-navigation/native';
 
 import {messageDateFormatter} from '../../utils/messageDateFormatter';
+
+import AuthContex from '../../contexts/auth';
 
 import api from '../../services/api';
 
@@ -40,7 +41,10 @@ export interface ILatestMessageOfContact {
   created_at: string;
 }
 
-const Chat = () => {
+const Chat: React.FC = () => {
+  // Contex
+  const {userData} = useContext(AuthContex);
+
   // States
   const [noMessage, setNoMessage] = useState<boolean>(false);
   const [latestMessageOfContact, setLatestMessageOfContact] = useState<
@@ -59,11 +63,6 @@ const Chat = () => {
   function handleSerializedLatestMessage(
     latestMessageData: ILatestMessageOfContact[],
   ) {
-    // const distinctData = latestMessageData.filter(
-    //   (item, index, array) =>
-    //     array.map((obj) => obj.id).indexOf(item.id) === index,
-    // );
-
     const serialized = latestMessageData.map((item) => ({
       id: item?.id,
       username: item?.username,
@@ -84,14 +83,8 @@ const Chat = () => {
   useEffect(() => {
     async function handleGetLatestMessage() {
       try {
-        const getMyData = await AsyncStorage.getItem(
-          '@rocketMessages/userData',
-        );
-
-        const data = JSON.parse(String(getMyData));
-
         const message = await api.get<ILatestMessageOfContact[]>(
-          `/latestmessageofcontact/${data?.id}`,
+          `/latestmessageofcontact/${userData?.id}`,
         );
 
         if (!message) {
@@ -113,7 +106,7 @@ const Chat = () => {
     }
 
     handleGetLatestMessage();
-  }, []);
+  }, [userData]);
 
   return (
     <Wrapper>

@@ -40,7 +40,7 @@ interface IContactData {
   created_at: string;
 }
 
-const Friends = () => {
+const Friends: React.FC = () => {
   // States
   const [typing, setTyping] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState<string>('');

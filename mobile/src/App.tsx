@@ -3,17 +3,19 @@ import {StatusBar} from 'react-native';
 
 import {NavigationContainer} from '@react-navigation/native';
 
-import MainNavigation from './screens/MainNavigation';
+// import MainNavigation from './screens/MainNavigation';
+import Routes from './routes';
+
+import {AuthProvider} from './contexts/auth';
 
 const App = () => {
   return (
-    <>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-
-      <NavigationContainer>
-        <MainNavigation />
-      </NavigationContainer>
-    </>
+    <NavigationContainer>
+      <AuthProvider>
+        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <Routes />
+      </AuthProvider>
+    </NavigationContainer>
   );
 };
 

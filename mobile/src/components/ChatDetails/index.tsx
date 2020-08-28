@@ -207,7 +207,7 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
       {chatData?.roomData && (
         <ParticipantsContainer>
           <ParticipantsTitle>
-            {participants?.length === 1
+            {participants?.length <= 1
               ? `${participants?.length} Participante`
               : `${participants?.length} Participantes`}
           </ParticipantsTitle>

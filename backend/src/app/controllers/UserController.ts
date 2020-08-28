@@ -35,10 +35,22 @@ export default new class UserController {
         status: status ? status : 'Hey there, im using Rocket Messages!',
         created_at: new Date(),
       });
-  
+
       if (!user) {
         return res.status(400).json({ error: 'Error on creating user.' });
       }
+
+      // const findUser = await knex('tb_user as U')
+      //   .where('U.email', String(email))
+      //   .first();
+
+      // if (!findUser) {
+      //   return res.status(500).json({ error: 'Error on finding user.' });
+      // }
+
+      // // Exclude fields
+      // findUser.password = undefined;
+      // findUser.recoverycode = undefined;
 
       return res.json(user);
     } catch (err) {
@@ -127,7 +139,8 @@ export default new class UserController {
         return res.status(400).json({ error: 'Password wrong.' });
       }
 
-      // Exclude passworld field
+      // Exclude fields
+      accountExists.recoverycode = undefined;
       accountExists.password = undefined;
 
       return res.json(accountExists);

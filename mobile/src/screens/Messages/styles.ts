@@ -86,20 +86,6 @@ export const shadowContainer = StyleSheet.create({
   },
 });
 
-export const ClearMessages = styled.TouchableOpacity.attrs(() => ({
-  activeOpacity: 0.6,
-}))`
-  flex-direction: row;
-  padding: 8px 0;
-`;
-
-export const DeleteChat = styled.TouchableOpacity.attrs(() => ({
-  activeOpacity: 0.6,
-}))`
-  flex-direction: row;
-  padding: 8px 0;
-`;
-
 export const UpdateRoom = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.6,
 }))`
@@ -172,7 +158,7 @@ export const MessageSent = styled.Text`
 export const MessageSenderName = styled.Text`
   font-size: 14px;
   margin-left: 10px;
-  color: #111;
+  color: #7159c1;
   font-weight: bold;
 `;
 

@@ -40,8 +40,6 @@ import {
   ChatStatus,
   ChatAction,
   MessageOptions,
-  // ClearMessages,
-  // DeleteChat,
   AddUserInRoomModal,
   UpdateRoom,
   LeaveRoom,
@@ -181,7 +179,7 @@ const Messages = () => {
       <ChatContainerMessageReceived>
         {dataReceivedFromNavigation?.roomData ? (
           <ChatMessageHeader>
-            <MessageSenderName>~ Mayderson Mello</MessageSenderName>
+            <MessageSenderName>~ {item?.username}</MessageSenderName>
             <MessageReceivedHour>{item?.created_at}</MessageReceivedHour>
           </ChatMessageHeader>
         ) : (
@@ -366,14 +364,6 @@ const Messages = () => {
 
           {showChatActions && (
             <MessageOptions style={shadowContainer.shadowBox}>
-              {/* <ClearMessages>
-                <MaterialIcons name="clear" color="#7159c1" size={20} />
-                <ActionLabel>Limpar mensagens</ActionLabel>
-              </ClearMessages>
-              <DeleteChat>
-                <AntDesign name="deleteuser" color="#7159c1" size={20} />
-                <ActionLabel>Deletar conversa</ActionLabel>
-              </DeleteChat> */}
               {dataReceivedFromNavigation.roomData && (
                 <>
                   <AddUserInRoomModal onPress={handleOpenModalAddUserInRoom}>
@@ -480,10 +470,13 @@ const Messages = () => {
           <Modalize
             ref={modalizeLeaveRoomRef}
             adjustToContentHeight
-            // snapPoint={300}
             withHandle={false}
             overlayStyle={overlayStyle.background}>
-            <LeaveRoomModal modalRef={modalizeLeaveRoomRef} />
+            <LeaveRoomModal
+              modalRef={modalizeLeaveRoomRef}
+              userId={Number(userData?.id)}
+              roomId={Number(dataReceivedFromNavigation?.roomData?.id)}
+            />
           </Modalize>
 
           {toggleModalRoom && (

@@ -1,8 +1,7 @@
 import styled from 'styled-components/native';
-import {Platform, Dimensions} from 'react-native';
+import {Platform} from 'react-native';
 
-// const {height} = Dimensions.get('window');
-// const getHeight = `${Math.round((15 / 100) * Math.round(height))}px`;
+import getStartedBackground from '../../assets/getStartedBackground.png';
 
 export const Wrapper = styled.KeyboardAvoidingView.attrs(() => ({
   behavior: Platform.OS === 'android' ? undefined : 'padding',
@@ -24,6 +23,14 @@ export const Container = styled.View`
   align-items: center;
   justify-content: center;
   padding: 0 0 150px 0;
+`;
+
+export const BackgroundImage = styled.Image.attrs(() => ({
+  resizeMode: 'cover',
+  source: getStartedBackground,
+}))`
+  height: 250px;
+  width: 250px;
 `;
 
 export const WelcomeMessage = styled.Text`
@@ -96,7 +103,7 @@ export const AuthStartActionLabel = styled.Text`
   color: #fff;
 `;
 
-export const AuthActionButton = styled.TouchableOpacity.attrs(() => ({
+export const ChangeLayoutAuthContainer = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.6,
 }))`
   padding: 10px;

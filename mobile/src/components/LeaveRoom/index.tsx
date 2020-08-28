@@ -1,4 +1,4 @@
-import React, {useRef, RefObject} from 'react';
+import React, {RefObject} from 'react';
 import {} from 'react-native';
 
 import api from '../../services/api';
@@ -13,19 +13,22 @@ import {
   ActionButtonLabel,
 } from './styles';
 
-interface IHandles {
+interface IModalizeOption {
   close(): void;
 }
 
 interface ILeaveRoomProps {
-  modalRef: RefObject<IHandles>;
+  modalRef: RefObject<IModalizeOption>;
+  userId: number;
+  roomId: number;
 }
 
-const LeaveRoom: React.FC<ILeaveRoomProps> = ({modalRef}) => {
+const LeaveRoom: React.FC<ILeaveRoomProps> = ({modalRef, userId, roomId}) => {
   async function handleLeaveRoom() {
     try {
-      const leaveRoom = await api.delete('');
-      // `/deleteuserfromroom/${userId}/${chatData?.roomData?.id}`
+      const leaveRoom = await api.delete(
+        `/deleteuserfromroom/${userId}/${roomId}`,
+      );
 
       if (!leaveRoom) {
         return Toast.error('Erro ao sair do grupo.');

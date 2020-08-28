@@ -1,11 +1,12 @@
-import React, {useState, useEffect} from 'react';
-import AsyncStorage from '@react-native-community/async-storage';
+import React, {useState, useEffect, useContext} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import ShowModalRoom from '../../components/ShowModalRoom';
 
 import {messageDateFormatter} from '../../utils/messageDateFormatter';
+
+import AuthContex from '../../contexts/auth';
 
 import api from '../../services/api';
 
@@ -42,7 +43,10 @@ export interface ILatestMessageOfRoom {
   created_at: string;
 }
 
-const Rooms = () => {
+const Rooms: React.FC = () => {
+  // Contex
+  const {userData} = useContext(AuthContex);
+
   // States
   const [noMessage, setNoMessage] = useState<boolean>(false);
   const [latestMessageOfRoom, setLatestMessageOfRoom] = useState<
@@ -84,14 +88,8 @@ const Rooms = () => {
   useEffect(() => {
     async function handleGetLatestMessage() {
       try {
-        const getMyData = await AsyncStorage.getItem(
-          '@rocketMessages/userData',
-        );
-
-        const data = JSON.parse(String(getMyData));
-
         const message = await api.get<ILatestMessageOfRoom[]>(
-          `/latestmessageofroom/${data?.id}`,
+          `/latestmessageofroom/${userData?.id}`,
         );
 
         if (!message) {
@@ -113,7 +111,7 @@ const Rooms = () => {
     }
 
     handleGetLatestMessage();
-  }, []);
+  }, [userData]);
 
   return (
     <Wrapper>

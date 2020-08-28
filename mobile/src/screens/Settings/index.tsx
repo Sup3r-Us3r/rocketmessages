@@ -1,12 +1,14 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {Keyboard, Platform} from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import AsyncStorage from '@react-native-community/async-storage';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
-import Toast from '../../config/toastStyles';
+import AuthContex from '../../contexts/auth';
 
 import api from '../../services/api';
+
+import Toast from '../../config/toastStyles';
 
 import {
   Wrapper,
@@ -46,17 +48,20 @@ interface IImageProperties {
 }
 
 interface IUserData {
-  id?: number;
-  username?: string;
-  email?: string;
-  photo?: string;
-  status?: string;
-  created_at?: Date;
+  id: number;
+  username: string;
+  email: string;
+  photo: string;
+  status: string;
+  created_at: Date;
 }
 
-const Settings = () => {
+const Settings: React.FC = () => {
+  // Context
+  const {userData} = useContext(AuthContex);
+
   // States
-  const [userData, setUserData] = useState<IUserData>({});
+  // const [userData, setUserData] = useState<IUserData>({} as IUserData);
   const [selectedImage, setSelectedImage] = useState<IImageProperties>({});
   const [usernameInput, setUsernameInput] = useState<string>('');
   const [statusInput, setStatusInput] = useState<string>('');
@@ -189,23 +194,12 @@ const Settings = () => {
   useEffect(() => {
     async function handleGetUserData() {
       try {
-        const getMyLocalData = await AsyncStorage.getItem(
-          '@rocketMessages/userData',
-        );
-
-        const data = JSON.parse(String(getMyLocalData));
-
-        if (!data) {
-          return Toast.error('Erro ao obter informações.');
-        }
-
-        const user = await api.get(`/user/${data?.id}`);
+        const user = await api.get<IUserData>(`/user/${userData?.id}`);
 
         if (!user) {
           return Toast.error('Erro ao obter informações.');
         }
 
-        setUserData(user?.data);
         setSelectedImage({
           uri: user?.data?.photo,
         });
@@ -219,7 +213,7 @@ const Settings = () => {
     }
 
     handleGetUserData();
-  }, []);
+  }, [userData]);
 
   return (
     <Wrapper>
