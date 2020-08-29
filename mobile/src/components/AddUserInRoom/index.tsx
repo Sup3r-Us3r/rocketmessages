@@ -2,11 +2,13 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useContext,
   Dispatch,
   SetStateAction,
 } from 'react';
 import {Animated, Easing} from 'react-native';
-import AsyncStorage from '@react-native-community/async-storage';
+
+import AuthContext from '../../contexts/auth';
 
 import socket from '../../services/websocket';
 import api from '../../services/api';
@@ -56,6 +58,9 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
   roomId,
   nickname,
 }) => {
+  // Context
+  const {userData} = useContext(AuthContext);
+
   // States
   const [contacts, setContacts] = useState<IFrequentContacts[]>([]);
   const [modalAnimation] = useState(new Animated.Value(0));
@@ -65,14 +70,14 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
       (user: IFrequentContacts) => user.id === userId,
     )?.username;
 
-    const userData = {
+    const userDataInput = {
       user_id: userId,
       nickname,
       user_admin: false,
     };
 
     try {
-      const insertUser = await api.post('/insertuserinroom', userData);
+      const insertUser = await api.post('/insertuserinroom', userDataInput);
 
       if (!insertUser) {
         return Toast.error('Erro ao adicionar usuário.');
@@ -139,12 +144,8 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
   useEffect(() => {
     async function handleGetFrequentContacts() {
       try {
-        const userData = await AsyncStorage.getItem('@rocketMessages/userData');
-
-        const {id} = JSON.parse(String(userData));
-
         const frequentContact = await api.get<IFrequentContacts[]>(
-          `listfrequentcontactsforaddroom/${id}`,
+          `listfrequentcontactsforaddroom/${userData?.id}`,
         );
 
         if (!frequentContact) {
@@ -154,7 +155,7 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
         const usersInRoom = await api.get<IFrequentContacts[]>('/usersinroom', {
           params: {
             nickname,
-            user_id: id,
+            user_id: userData?.id,
           },
         });
 
@@ -190,7 +191,7 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
     return () => {
       socket.off('updateUsersInRoom', handleUpdateUsersInRoom);
     };
-  }, [nickname]);
+  }, [userData, nickname]);
 
   useEffect(() => {
     if (toggleModalAddUserInRoom) {

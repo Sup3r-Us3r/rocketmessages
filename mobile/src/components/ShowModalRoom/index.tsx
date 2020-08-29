@@ -2,16 +2,18 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useContext,
   Dispatch,
   SetStateAction,
 } from 'react';
 import {Animated, Easing} from 'react-native';
-import AsyncStorage from '@react-native-community/async-storage';
 
 // Import exported interface
 import {ILatestMessageOfRoom} from '../../screens/Rooms';
 
 import ImagePicker from 'react-native-image-picker';
+
+import AuthContext from '../../contexts/auth';
 
 import api from '../../services/api';
 
@@ -61,8 +63,10 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
   whichModal,
   roomData,
 }) => {
+  // Context
+  const {userData} = useContext(AuthContext);
+
   // States
-  const [userId, setUserId] = useState<number>();
   const [nameInput, setNameInput] = useState<string>('');
   const [nicknameInput, setNicknameInput] = useState<string>('');
   const [selectedImage, setSelectedImage] = useState<IAvatarProperties>({});
@@ -107,7 +111,7 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
       const insertAdminInRoomResponse =
         whichModal === 'create' &&
         (await api.post('/insertuserinroom', {
-          user_id: userId,
+          user_id: userData?.id,
           nickname: nicknameInput,
           user_admin: true,
         }));
@@ -120,7 +124,7 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
         whichModal === 'create' &&
         (await api.post('/message', {
           bot: true,
-          from: userId,
+          from: userData?.id,
           to_room: Number(...createOrUpdateResponse.data),
           message: `Grupo ${nicknameInput} criado.`,
         }));
@@ -203,22 +207,6 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
       setNicknameInput(roomData?.nickname);
     }
   }, [roomData]);
-
-  useEffect(() => {
-    async function handleGetMyUserId() {
-      try {
-        const userData = await AsyncStorage.getItem('@rocketMessages/userData');
-
-        const {id} = JSON.parse(String(userData));
-
-        setUserId(Number(id));
-      } catch (err) {
-        return Toast.error('Erro ao obter dados locais.');
-      }
-    }
-
-    handleGetMyUserId();
-  }, []);
 
   useEffect(() => {
     if (toggleModalRoom) {

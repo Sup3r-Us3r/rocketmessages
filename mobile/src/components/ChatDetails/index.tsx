@@ -1,9 +1,10 @@
-import React, {useState, useEffect} from 'react';
-import AsyncStorage from '@react-native-community/async-storage';
+import React, {useState, useEffect, useContext} from 'react';
 
 // import exported interface
 import {ILatestMessageOfContact} from '../../screens/Chat';
 import {ILatestMessageOfRoom} from '../../screens/Rooms';
+
+import AuthContext from '../../contexts/auth';
 
 import api from '../../services/api';
 
@@ -52,9 +53,11 @@ interface IParticipants {
 }
 
 const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
+  // context
+  const {userData} = useContext(AuthContext);
+
   // States
   const [participants, setParticipants] = useState<IParticipants[]>([]);
-  const [myId, setMyId] = useState<number>();
   const [admin, setAdmin] = useState<boolean>(false);
 
   function handleLimitCharacters(text: string) {
@@ -116,28 +119,12 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
   }
 
   useEffect(() => {
-    async function handleGetMyUserId() {
-      try {
-        const userData = await AsyncStorage.getItem('@rocketMessages/userData');
-
-        const {id} = JSON.parse(String(userData));
-
-        setMyId(Number(id));
-      } catch (err) {
-        return Toast.error('Erro ao obter dados locais.');
-      }
-    }
-
-    handleGetMyUserId();
-  }, []);
-
-  useEffect(() => {
     async function handleGetParticipants() {
       try {
         const users = await api.get<IParticipants[]>('/usersinroom', {
           params: {
             nickname: chatData?.roomData?.nickname,
-            user_id: myId,
+            user_id: userData?.id,
           },
         });
 
@@ -147,7 +134,7 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
 
         // I'm admin?
         const isAdmin = Boolean(
-          users.data.find((user) => user?.id === myId)?.user_admin,
+          users.data.find((user) => user?.id === userData?.id)?.user_admin,
         );
 
         if (isAdmin) {
@@ -177,7 +164,7 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
     return () => {
       socket.off('refreshParticipantsInroom', handleRefreshParticipants);
     };
-  }, [chatData, myId]);
+  }, [chatData, userData]);
 
   return (
     <Wrapper>
@@ -234,7 +221,7 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
 
               {admin && (
                 <>
-                  {myId === participant?.id &&
+                  {userData?.id === participant?.id &&
                   Boolean(participant?.user_admin) ? null : (
                     <ParticipantActionsContainer>
                       <ParticipantActionMakeOrUnmakeAdmin

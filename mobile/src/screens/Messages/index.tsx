@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useContext} from 'react';
 import {Keyboard, FlatList, StatusBar, ActivityIndicator} from 'react-native';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {AxiosRequestConfig} from 'axios';
@@ -9,7 +9,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import EmojiSelector, {Categories} from 'react-native-emoji-selector';
-import AsyncStorage from '@react-native-community/async-storage';
 import {Modalize} from 'react-native-modalize';
 
 import socket from '../../services/websocket';
@@ -20,6 +19,8 @@ import AddUserInRoom from '../../components/AddUserInRoom';
 import LeaveRoomModal from '../../components/LeaveRoom';
 
 import {handleTwoDigitsFormat} from '../../utils/messageDateFormatter';
+
+import AuthContext from '../../contexts/auth';
 
 import api from '../../services/api';
 
@@ -80,16 +81,10 @@ interface IDataReceivedFromNavigation {
   roomData?: ILatestMessageOfRoom;
 }
 
-interface IUserData {
-  id?: number;
-  username?: string;
-  email?: string;
-  photo?: string;
-  status?: string;
-  created_at?: Date;
-}
+const Messages: React.FC = () => {
+  // Context
+  const {userData} = useContext(AuthContext);
 
-const Messages = () => {
   // Ref
   const flatListRef = useRef<FlatList>(null);
   const modalizeChatDetailsRef = useRef<Modalize>(null);
@@ -99,7 +94,6 @@ const Messages = () => {
   // const totalPage = useRef<number>(0);
 
   // States
-  const [userData, setUserData] = useState<IUserData>({});
   const [messages, setMessages] = useState<IMessages[]>([]);
   const [loadingMessages, setLoadingMessages] = useState<boolean>(false);
   const [messageInput, setMessageInput] = useState<string>('');
@@ -252,18 +246,6 @@ const Messages = () => {
       return Toast.error(error);
     }
   }
-
-  useEffect(() => {
-    async function handleSetLocalUserData() {
-      const getMyData = await AsyncStorage.getItem('@rocketMessages/userData');
-
-      const data = JSON.parse(String(getMyData));
-
-      return setUserData(data);
-    }
-
-    handleSetLocalUserData();
-  }, []);
 
   useEffect(() => {
     async function handleGetMessages() {
