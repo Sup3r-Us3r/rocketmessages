@@ -20,34 +20,7 @@ const AppRoutes = () => {
         stackAnimation: 'fade',
       }}>
       <AppStack.Screen name="BottomTabs" component={BottomTabs} />
-      <AppStack.Screen
-        name="Messages"
-        component={Messages}
-        // options={{
-        //   contentStyle: {
-        //     alignItems: 'center',
-        //     justifyContent: 'center',
-        //   },
-        //   backButtonInCustomView: true,
-        //   headerLeft: () => (
-        //     <Image
-        //       source={{uri: 'https://bit.ly/3fqFao7'}}
-        //       style={{marginLeft: 0, height: 50, width: 50}}
-        //     />
-        //   ),
-        //   headerRight: () => (
-        //     <View>
-        //       <Ionicons name="ios-options" size={20} color="#fff" />
-        //       <Text>Test</Text>
-        //     </View>
-        //   ),
-        //   headerShown: true,
-        //   headerTintColor: '#fff',
-        //   headerStyle: {
-        //     backgroundColor: '#7159c1',
-        //   },
-        // }}
-      />
+      <AppStack.Screen name="Messages" component={Messages} />
     </AppStack.Navigator>
   );
 };

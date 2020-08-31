@@ -97,7 +97,6 @@ export default new class UserRoomController {
 
       return res.json(usersInRoomFiltered);
     } catch (err) {
-      console.log('ERROR: ', err);
 
       return res.status(500)
         .json({ error: 'Error listing users inside the room.' });
@@ -164,6 +163,28 @@ export default new class UserRoomController {
       return res.json(removeUser);
     } catch (err) {
       return res.status(500).json({ error: 'Error removing user from room.' });
+    }
+  }
+
+  async getOutOfTheRoom(req: Request, res: Response) {
+    // Method to check if the user is in the room,
+    // to validate whether the user will be able to send a message or not.
+
+    const { user_id, room_id } = req.params;
+    
+    try {
+      const user = await knex('tb_user_room as UR')
+        .where('UR.user_id', Number(user_id))
+        .andWhere('UR.room_id', Number(room_id))
+        .first();
+
+      if (!user) {
+        return res.sendStatus(403);
+      }
+
+      return res.sendStatus(200);
+    } catch (err) {
+      return res.status(500).json({ error: 'Error checking user in group.' });
     }
   }
 }

@@ -43,6 +43,10 @@ routes.put(
 
 // User - Room
 routes.get('/usersinroom', UserRoomController.listUsersInRoom);
+routes.get(
+  '/getoutoftheroom/:user_id/:room_id',
+  UserRoomController.getOutOfTheRoom
+);
 routes.post('/insertuserinroom', UserRoomController.insertUserInRoom);
 routes.put(
   '/makeorunmakeuseradmin/:user_id/:room_id',

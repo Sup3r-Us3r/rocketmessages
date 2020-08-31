@@ -33,11 +33,15 @@ const LeaveRoom: React.FC<ILeaveRoomProps> = ({modalRef, userId, roomId}) => {
         return Toast.error('Erro ao sair do grupo.');
       }
 
-      return Toast.success('Você saiu do grupo.');
+      Toast.success('Você saiu do grupo.');
+
+      return modalRef.current?.close();
     } catch (err) {
       const {error} = err.response.data;
 
-      return Toast.error(error);
+      Toast.error(error);
+
+      return modalRef.current?.close();
     }
   }
 

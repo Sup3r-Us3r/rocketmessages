@@ -56,7 +56,7 @@ interface IUserData {
   created_at: Date;
 }
 
-const Settings: React.FC = () => {
+const Profile: React.FC = () => {
   // Context
   const {userData} = useContext(AuthContex);
 
@@ -309,4 +309,4 @@ const Settings: React.FC = () => {
   );
 };
 
-export default Settings;
+export default Profile;

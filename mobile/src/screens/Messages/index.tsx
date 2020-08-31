@@ -99,6 +99,7 @@ const Messages: React.FC = () => {
   const [messageInput, setMessageInput] = useState<string>('');
   const [showChatActions, setShowChatActions] = useState<boolean>(false);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
+  const [hideMessageField, setHideMessageField] = useState<boolean>(false);
   const [toggleModalRoom, setToggleModalRoom] = useState<boolean>(false);
   const [toggleModalAddUserInRoom, setToggleModalAddUserInRoom] = useState<
     boolean
@@ -248,6 +249,28 @@ const Messages: React.FC = () => {
   }
 
   useEffect(() => {
+    async function allowedToSendMessage() {
+      try {
+        const user = await api.get(
+          `/getoutoftheroom/${userData?.id}/${dataReceivedFromNavigation?.roomData?.id}`,
+        );
+
+        if (user.status !== 200) {
+          setHideMessageField(true);
+        }
+      } catch (err) {
+        const {error} = err.response.data;
+
+        return Toast.error(error);
+      }
+    }
+
+    if (dataReceivedFromNavigation?.roomData) {
+      allowedToSendMessage();
+    }
+  }, [userData, dataReceivedFromNavigation]);
+
+  useEffect(() => {
     async function handleGetMessages() {
       const requestUrl = dataReceivedFromNavigation?.contactData
         ? `/privatemessages/${userData?.id}/${dataReceivedFromNavigation?.contactData?.id}`
@@ -389,52 +412,58 @@ const Messages: React.FC = () => {
             renderItem={handleRenderItem}
           />
 
-          <WrapperMessage>
-            <MessageField>
-              <InputMessage
-                placeholder="Digite uma mensagem"
-                autoCorrect={false}
-                multiline
-                onBlur={Keyboard.dismiss}
-                onSubmitEditing={() => null}
-                onChangeText={setMessageInput}
-                value={messageInput}
-              />
-              {messageInput.length > 0 && (
-                <SendMessage onPress={handleSubmit}>
-                  <MaterialCommunityIcons name="send" color="#fff" size={23} />
-                </SendMessage>
-              )}
-              <SelectEmoji onPress={handleShowEmojis}>
-                <MaterialIcons
-                  name="insert-emoticon"
-                  color="#7159c1"
-                  size={23}
+          {!hideMessageField && (
+            <WrapperMessage>
+              <MessageField>
+                <InputMessage
+                  placeholder="Digite uma mensagem"
+                  autoCorrect={false}
+                  multiline
+                  onBlur={Keyboard.dismiss}
+                  onSubmitEditing={() => null}
+                  onChangeText={setMessageInput}
+                  value={messageInput}
                 />
-              </SelectEmoji>
-              {messageInput.length === 0 && (
-                <AudioRecord>
-                  <SimpleLineIcons name="microphone" color="#fff" size={23} />
-                </AudioRecord>
-              )}
-            </MessageField>
+                {messageInput.length > 0 && (
+                  <SendMessage onPress={handleSubmit}>
+                    <MaterialCommunityIcons
+                      name="send"
+                      color="#fff"
+                      size={23}
+                    />
+                  </SendMessage>
+                )}
+                <SelectEmoji onPress={handleShowEmojis}>
+                  <MaterialIcons
+                    name="insert-emoticon"
+                    color="#7159c1"
+                    size={23}
+                  />
+                </SelectEmoji>
+                {messageInput.length === 0 && (
+                  <AudioRecord>
+                    <SimpleLineIcons name="microphone" color="#fff" size={23} />
+                  </AudioRecord>
+                )}
+              </MessageField>
 
-            {showEmojis && (
-              <EmojiContainer>
-                <EmojiSelector
-                  theme="#7159c1"
-                  columns={10}
-                  showSectionTitles={false}
-                  showSearchBar={false}
-                  placeholder="Pesquisar..."
-                  category={Categories.emotion}
-                  onEmojiSelected={(emoji) =>
-                    setMessageInput((prevState) => prevState + emoji)
-                  }
-                />
-              </EmojiContainer>
-            )}
-          </WrapperMessage>
+              {showEmojis && (
+                <EmojiContainer>
+                  <EmojiSelector
+                    theme="#7159c1"
+                    columns={10}
+                    showSectionTitles={false}
+                    showSearchBar={false}
+                    placeholder="Pesquisar..."
+                    category={Categories.emotion}
+                    onEmojiSelected={(emoji) =>
+                      setMessageInput((prevState) => prevState + emoji)
+                    }
+                  />
+                </EmojiContainer>
+              )}
+            </WrapperMessage>
+          )}
 
           {/* Modal for chat details */}
           <Modalize

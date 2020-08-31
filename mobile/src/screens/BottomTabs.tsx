@@ -6,7 +6,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import Chat from './Chat';
 import Rooms from './Rooms';
 import Friends from './Friends';
-import Settings from './Settings';
+import Profile from './Profile';
 
 const Tabs = createMaterialTopTabNavigator();
 
@@ -67,10 +67,10 @@ const BottomTabs = () => {
         }}
       />
       <Tabs.Screen
-        name="Settings"
-        component={Settings}
+        name="Profile"
+        component={Profile}
         options={{
-          title: 'Ajustes',
+          title: 'Perfil',
           tabBarIcon: ({color}) => (
             <Feather name="settings" color={color} size={20} />
           ),

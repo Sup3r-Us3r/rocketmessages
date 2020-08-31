@@ -196,7 +196,7 @@ export default new class MessageController {
         .where('UR.user_id', Number(from))
         .select('UR.room_id');
 
-      const whichRoomsValuesToSingleArray = whichRooms
+      const getRoomIds = whichRooms
         .map((room: IWhichRoom) => room.room_id);
 
       const messages = await knex.with('CTE_RN', knex.raw(
@@ -208,7 +208,7 @@ export default new class MessageController {
               ORDER BY M."created_at" DESC) AS RN
           FROM tb_message AS M
           WHERE M."to_room" IS NOT NULL AND
-          M."to_room" IN (${whichRoomsValuesToSingleArray.toString()})
+          M."to_room" IN (${getRoomIds.toString()})
         `
       ))
       .select(
