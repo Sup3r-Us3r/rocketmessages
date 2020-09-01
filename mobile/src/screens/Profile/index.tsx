@@ -12,6 +12,9 @@ import Toast from '../../config/toastStyles';
 
 import {
   Wrapper,
+  Header,
+  Title,
+  LogoutContainer,
   Container,
   ContainerImage,
   ChangeImageButton,
@@ -58,10 +61,9 @@ interface IUserData {
 
 const Profile: React.FC = () => {
   // Context
-  const {userData} = useContext(AuthContex);
+  const {userData, signOut} = useContext(AuthContex);
 
   // States
-  // const [userData, setUserData] = useState<IUserData>({} as IUserData);
   const [selectedImage, setSelectedImage] = useState<IImageProperties>({});
   const [usernameInput, setUsernameInput] = useState<string>('');
   const [statusInput, setStatusInput] = useState<string>('');
@@ -191,6 +193,10 @@ const Profile: React.FC = () => {
     return text.length >= 35 ? text.substr(0, 35) + '...' : text;
   }
 
+  function handleSignOut() {
+    return signOut();
+  }
+
   useEffect(() => {
     async function handleGetUserData() {
       try {
@@ -217,6 +223,14 @@ const Profile: React.FC = () => {
 
   return (
     <Wrapper>
+      <Header>
+        <Title>Edite suas informações</Title>
+
+        <LogoutContainer onPress={handleSignOut}>
+          <AntDesign name="logout" color="#7159c1" size={20} />
+        </LogoutContainer>
+      </Header>
+
       <ContainerImage source={{uri: selectedImage?.uri}}>
         <ChangeImageButton
           onPress={() =>

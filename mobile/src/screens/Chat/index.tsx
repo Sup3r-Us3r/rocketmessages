@@ -5,6 +5,7 @@ import {messageDateFormatter} from '../../utils/messageDateFormatter';
 
 import AuthContex from '../../contexts/auth';
 
+import socket from '../../services/websocket';
 import api from '../../services/api';
 
 import Toast from '../../config/toastStyles';
@@ -106,6 +107,18 @@ const Chat: React.FC = () => {
     }
 
     handleGetLatestMessage();
+
+    function handleUpdateLatestMessage(response: boolean) {
+      if (response) {
+        handleGetLatestMessage();
+      }
+    }
+
+    socket.on('updateLatestPrivateMessage', handleUpdateLatestMessage);
+
+    return () => {
+      socket.off('updateLatestPrivateMessage', handleUpdateLatestMessage);
+    };
   }, [userData]);
 
   return (

@@ -52,6 +52,19 @@ class Websocket {
         socket.emit('refreshParticipantsInroom', true);
       });
 
+      // Listen updating and emit update for main page
+      socket.on('updateLatestPrivateMessage', (response: boolean) => {
+        if (response) {
+          socket.emit('updateLatestPrivateMessage', true);
+        }
+      });
+
+      socket.on('updateLatestRoomMessage', (response: boolean) => {
+        if (response) {
+          socket.emit('updateLatestRoomMessage', true);
+        }
+      });
+
       // Runs when client disconnects
       socket.on('disconnect', () => {
         io.emit('messagee', 'A user has left the chat.');

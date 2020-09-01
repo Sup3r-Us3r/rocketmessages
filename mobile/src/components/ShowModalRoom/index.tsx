@@ -7,6 +7,7 @@ import React, {
   SetStateAction,
 } from 'react';
 import {Animated, Easing} from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // Import exported interface
 import {ILatestMessageOfRoom} from '../../screens/Rooms';
@@ -26,6 +27,7 @@ import {
   ScreenBackContainer,
   ScreenBackIcon,
   AvatarContainer,
+  DefaultAvatar,
   Avatar,
   ChooseAvatar,
   ChooseAvatarIcon,
@@ -77,7 +79,7 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
     function handleModalAnimationFadeIn() {
       return Animated.timing(modalAnimation, {
         toValue: 1,
-        duration: 300,
+        duration: 100,
         easing: Easing.ease,
         useNativeDriver: true,
       }).start();
@@ -184,7 +186,7 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
   function handleModalAnimationFadeOut() {
     return Animated.timing(modalAnimation, {
       toValue: 0,
-      duration: 300,
+      duration: 100,
       easing: Easing.ease,
       useNativeDriver: true,
     }).start();
@@ -195,7 +197,7 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
 
     setTimeout(() => {
       return setToggleModalRoom(false);
-    }, 300);
+    }, 100);
   }
 
   useEffect(() => {
@@ -223,9 +225,17 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
           </ScreenBackContainer>
 
           <AvatarContainer>
-            <Avatar
-              source={{uri: selectedImage?.uri || 'https://bit.ly/3fqFao7'}}
-            />
+            {whichModal === 'create' && !selectedImage?.uri ? (
+              <DefaultAvatar>
+                <MaterialCommunityIcons
+                  name="image-search-outline"
+                  size={100}
+                  color="#fff"
+                />
+              </DefaultAvatar>
+            ) : (
+              <Avatar source={{uri: selectedImage?.uri}} />
+            )}
             <ChooseAvatar
               onPress={() =>
                 ImagePicker.launchImageLibrary(

@@ -1,15 +1,17 @@
 import React from 'react';
-import {View, Text, Image} from 'react-native';
 import {createNativeStackNavigator} from 'react-native-screens/native-stack';
 import {enableScreens} from 'react-native-screens';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import BottomTabs from '../screens/BottomTabs';
 import Messages from '../screens/Messages';
 
 const AppStack = createNativeStackNavigator();
 
-const AppRoutes = () => {
+interface IAppRoutesProps {
+  currentRouteName: string;
+}
+
+const AppRoutes: React.FC = () => {
   enableScreens();
 
   return (

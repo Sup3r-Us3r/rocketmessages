@@ -6,7 +6,7 @@ import AuthContex from '../contexts/auth';
 import AuthRoutes from './auth.routes';
 import AppRoutes from './app.routes';
 
-const Routes = () => {
+const Routes: React.FC = () => {
   const {signed, loading} = useContext(AuthContex);
 
   const wrapperStyles = StyleSheet.create({

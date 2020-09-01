@@ -10,6 +10,31 @@ export const Wrapper = styled.KeyboardAvoidingView.attrs(() => ({
   background: #fff;
 `;
 
+export const Header = styled.View`
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 0;
+  flex-direction: row;
+  background: #fff;
+`;
+
+export const Title = styled.Text`
+  width: 80%;
+  margin-left: 10%;
+  font-size: 18px;
+  color: #777;
+  text-align: center;
+`;
+
+export const LogoutContainer = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.5,
+}))`
+  align-items: center;
+  width: 10%;
+  padding: 5px;
+`;
+
 export const ContainerImage = styled.ImageBackground.attrs(() => ({
   resizeMode: 'cover',
 }))`
@@ -43,14 +68,6 @@ export const Container = styled.View`
   justify-content: space-between;
   align-items: center;
   margin-top: 30px;
-`;
-
-export const Title = styled.Text`
-  font-size: 27px;
-  font-weight: bold;
-  color: #7159c1;
-  margin-bottom: 20px;
-  align-self: flex-start;
 `;
 
 export const WrapperText = styled.View`

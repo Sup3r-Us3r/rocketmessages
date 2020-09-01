@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef, useContext} from 'react';
-import {Keyboard, FlatList, StatusBar, ActivityIndicator} from 'react-native';
+import {Keyboard, FlatList, ActivityIndicator} from 'react-native';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {AxiosRequestConfig} from 'axios';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -319,197 +319,196 @@ const Messages: React.FC = () => {
     function handleUpdateMessages(response: boolean) {
       if (response) {
         handleGetMessages();
+
+        if (dataReceivedFromNavigation?.contactData) {
+          socket.emit('updateLatestPrivateMessage', true);
+        } else {
+          socket.emit('updateLatestRoomMessage', true);
+        }
       }
     }
 
     // Websocket mobile - Listen emit from backend
     socket.on('message', handleUpdateMessages);
 
-    // Remove emit
+    // Remove listen
     return () => {
       socket.off('message', handleUpdateMessages);
     };
   }, [userData, dataReceivedFromNavigation]);
 
   return (
-    <>
-      <StatusBar barStyle="light-content" backgroundColor="#7159c1" />
-
-      <Wrapper>
-        <Container onPress={() => setShowChatActions(false)}>
-          <Header>
-            <BackButton onPress={handleNavigateToBack}>
-              <Ionicons name="ios-arrow-back" color="#fff" size={20} />
-            </BackButton>
-            <ChatImage
-              source={{
-                uri: dataReceivedFromNavigation?.contactData
-                  ? dataReceivedFromNavigation?.contactData?.photo
-                  : dataReceivedFromNavigation?.roomData?.avatar,
-              }}
-            />
-            <ChatInfo onPress={handleShowModalizeChatDetails}>
-              <ChatName>
-                {dataReceivedFromNavigation?.contactData
-                  ? dataReceivedFromNavigation?.contactData?.username
-                  : dataReceivedFromNavigation?.roomData?.name}
-              </ChatName>
-              <ChatStatus>Online</ChatStatus>
-            </ChatInfo>
-            {dataReceivedFromNavigation?.roomData && (
-              <ChatAction onPress={handleToggleChatActions}>
-                <SimpleLineIcons
-                  name="options-vertical"
-                  color="#fff"
-                  size={20}
-                />
-              </ChatAction>
-            )}
-          </Header>
-
-          {showChatActions && (
-            <MessageOptions style={shadowContainer.shadowBox}>
-              {dataReceivedFromNavigation.roomData && (
-                <>
-                  <AddUserInRoomModal onPress={handleOpenModalAddUserInRoom}>
-                    <AntDesign name="adduser" color="#7159c1" size={20} />
-                    <ActionLabel>Adicionar usuário</ActionLabel>
-                  </AddUserInRoomModal>
-
-                  <UpdateRoom onPress={handleOpenModalRoom}>
-                    <Feather name="edit" color="#7159c1" size={20} />
-                    <ActionLabel>Editar grupo</ActionLabel>
-                  </UpdateRoom>
-
-                  <LeaveRoom onPress={handleShowModalizeLeaveRoom}>
-                    <AntDesign name="logout" color="#7159c1" size={20} />
-                    <ActionLabel>Sair do grupo</ActionLabel>
-                  </LeaveRoom>
-                </>
-              )}
-            </MessageOptions>
-          )}
-
-          <FlatList
-            keyExtractor={(item, index) => String(index)}
-            data={messages}
-            // extraData={loadingMessages}
-            ref={flatListRef}
-            // removeClippedSubviews
-            // initialNumToRender={10}
-            onContentSizeChange={() =>
-              flatListRef?.current?.scrollToEnd({
-                animated: false,
-              })
-            }
-            onEndReached={handleGetNextMessages}
-            onEndReachedThreshold={0.1}
-            // ListFooterComponent={() =>
-            //   loadingMessages ? (
-            //     <ActivityIndicator size="large" color="#7159c1" animating />
-            //   ) : null
-            // }
-            renderItem={handleRenderItem}
+    <Wrapper>
+      <Container onPress={() => setShowChatActions(false)}>
+        <Header>
+          <BackButton onPress={handleNavigateToBack}>
+            <Ionicons name="ios-arrow-back" color="#7159c1" size={20} />
+          </BackButton>
+          <ChatImage
+            source={{
+              uri: dataReceivedFromNavigation?.contactData
+                ? dataReceivedFromNavigation?.contactData?.photo
+                : dataReceivedFromNavigation?.roomData?.avatar,
+            }}
           />
+          <ChatInfo onPress={handleShowModalizeChatDetails}>
+            <ChatName>
+              {dataReceivedFromNavigation?.contactData
+                ? dataReceivedFromNavigation?.contactData?.username
+                : dataReceivedFromNavigation?.roomData?.name}
+            </ChatName>
+            <ChatStatus>Online</ChatStatus>
+          </ChatInfo>
+          {dataReceivedFromNavigation?.roomData && (
+            <ChatAction onPress={handleToggleChatActions}>
+              <SimpleLineIcons
+                name="options-vertical"
+                color="#7159c1"
+                size={20}
+              />
+            </ChatAction>
+          )}
+        </Header>
 
-          {!hideMessageField && (
-            <WrapperMessage>
-              <MessageField>
-                <InputMessage
-                  placeholder="Digite uma mensagem"
-                  autoCorrect={false}
-                  multiline
-                  onBlur={Keyboard.dismiss}
-                  onSubmitEditing={() => null}
-                  onChangeText={setMessageInput}
-                  value={messageInput}
-                />
-                {messageInput.length > 0 && (
-                  <SendMessage onPress={handleSubmit}>
-                    <MaterialCommunityIcons
-                      name="send"
-                      color="#fff"
-                      size={23}
-                    />
-                  </SendMessage>
-                )}
-                <SelectEmoji onPress={handleShowEmojis}>
-                  <MaterialIcons
-                    name="insert-emoticon"
-                    color="#7159c1"
-                    size={23}
-                  />
-                </SelectEmoji>
-                {messageInput.length === 0 && (
-                  <AudioRecord>
-                    <SimpleLineIcons name="microphone" color="#fff" size={23} />
-                  </AudioRecord>
-                )}
-              </MessageField>
+        {showChatActions && (
+          <MessageOptions style={shadowContainer.shadowBox}>
+            {dataReceivedFromNavigation.roomData && (
+              <>
+                <AddUserInRoomModal onPress={handleOpenModalAddUserInRoom}>
+                  <AntDesign name="adduser" color="#7159c1" size={20} />
+                  <ActionLabel>Adicionar usuário</ActionLabel>
+                </AddUserInRoomModal>
 
-              {showEmojis && (
-                <EmojiContainer>
-                  <EmojiSelector
-                    theme="#7159c1"
-                    columns={10}
-                    showSectionTitles={false}
-                    showSearchBar={false}
-                    placeholder="Pesquisar..."
-                    category={Categories.emotion}
-                    onEmojiSelected={(emoji) =>
-                      setMessageInput((prevState) => prevState + emoji)
-                    }
-                  />
-                </EmojiContainer>
+                <UpdateRoom onPress={handleOpenModalRoom}>
+                  <Feather name="edit" color="#7159c1" size={20} />
+                  <ActionLabel>Editar grupo</ActionLabel>
+                </UpdateRoom>
+
+                <LeaveRoom onPress={handleShowModalizeLeaveRoom}>
+                  <AntDesign name="logout" color="#7159c1" size={20} />
+                  <ActionLabel>Sair do grupo</ActionLabel>
+                </LeaveRoom>
+              </>
+            )}
+          </MessageOptions>
+        )}
+
+        <FlatList
+          keyExtractor={(item, index) => String(index)}
+          data={messages}
+          // extraData={loadingMessages}
+          ref={flatListRef}
+          // removeClippedSubviews
+          // initialNumToRender={10}
+          onContentSizeChange={() =>
+            flatListRef?.current?.scrollToEnd({
+              animated: false,
+            })
+          }
+          onEndReached={handleGetNextMessages}
+          onEndReachedThreshold={0.1}
+          // ListFooterComponent={() =>
+          //   loadingMessages ? (
+          //     <ActivityIndicator size="large" color="#7159c1" animating />
+          //   ) : null
+          // }
+          renderItem={handleRenderItem}
+        />
+
+        {!hideMessageField && (
+          <WrapperMessage>
+            <MessageField>
+              <InputMessage
+                scrollEnabled
+                placeholder="Digite uma mensagem"
+                autoCorrect={false}
+                multiline
+                onBlur={Keyboard.dismiss}
+                onSubmitEditing={() => null}
+                onChangeText={setMessageInput}
+                value={messageInput}
+              />
+              {messageInput.length > 0 && (
+                <SendMessage onPress={handleSubmit}>
+                  <MaterialCommunityIcons name="send" color="#fff" size={23} />
+                </SendMessage>
               )}
-            </WrapperMessage>
-          )}
+              <SelectEmoji onPress={handleShowEmojis}>
+                <MaterialIcons
+                  name="insert-emoticon"
+                  color="#7159c1"
+                  size={23}
+                />
+              </SelectEmoji>
+              {messageInput.length === 0 && (
+                <AudioRecord>
+                  <SimpleLineIcons name="microphone" color="#fff" size={23} />
+                </AudioRecord>
+              )}
+            </MessageField>
 
-          {/* Modal for chat details */}
-          <Modalize
-            ref={modalizeChatDetailsRef}
-            adjustToContentHeight={
-              dataReceivedFromNavigation?.contactData ? true : undefined
-            }
-            // snapPoint={dataReceivedFromNavigation?.roomData ? 470 : undefined}
-            handleStyle={handleStyle.background}
-            overlayStyle={overlayStyle.background}>
-            <ChatDetails chatData={dataReceivedFromNavigation} />
-          </Modalize>
+            {showEmojis && (
+              <EmojiContainer>
+                <EmojiSelector
+                  theme="#7159c1"
+                  columns={10}
+                  showSectionTitles={false}
+                  showSearchBar={false}
+                  placeholder="Pesquisar..."
+                  category={Categories.emotion}
+                  onEmojiSelected={(emoji) =>
+                    setMessageInput((prevState) => prevState + emoji)
+                  }
+                />
+              </EmojiContainer>
+            )}
+          </WrapperMessage>
+        )}
 
-          {/* Modal for leave room */}
-          <Modalize
-            ref={modalizeLeaveRoomRef}
-            adjustToContentHeight
-            withHandle={false}
-            overlayStyle={overlayStyle.background}>
-            <LeaveRoomModal
-              modalRef={modalizeLeaveRoomRef}
-              userId={Number(userData?.id)}
-              roomId={Number(dataReceivedFromNavigation?.roomData?.id)}
-            />
-          </Modalize>
+        {/* Modal for chat details */}
+        <Modalize
+          ref={modalizeChatDetailsRef}
+          adjustToContentHeight={
+            dataReceivedFromNavigation?.contactData ? true : undefined
+          }
+          // snapPoint={dataReceivedFromNavigation?.roomData ? 470 : undefined}
+          handleStyle={handleStyle.background}
+          overlayStyle={overlayStyle.background}>
+          <ChatDetails chatData={dataReceivedFromNavigation} />
+        </Modalize>
 
-          {toggleModalRoom && (
-            <ShowModalRoom
-              toggleModalRoom={toggleModalRoom}
-              setToggleModalRoom={setToggleModalRoom}
-              whichModal="update"
-              roomData={dataReceivedFromNavigation?.roomData}
-            />
-          )}
+        {/* Modal for leave room */}
+        <Modalize
+          ref={modalizeLeaveRoomRef}
+          adjustToContentHeight
+          withHandle={false}
+          overlayStyle={overlayStyle.background}>
+          <LeaveRoomModal
+            modalRef={modalizeLeaveRoomRef}
+            userId={Number(userData?.id)}
+            roomId={Number(dataReceivedFromNavigation?.roomData?.id)}
+          />
+        </Modalize>
 
-          {toggleModalAddUserInRoom && (
-            <AddUserInRoom
-              toggleModalAddUserInRoom={toggleModalAddUserInRoom}
-              setToggleModalAddUserInRoom={setToggleModalAddUserInRoom}
-              roomId={Number(dataReceivedFromNavigation?.roomData?.id)}
-              nickname={String(dataReceivedFromNavigation?.roomData?.nickname)}
-            />
-          )}
-        </Container>
-      </Wrapper>
-    </>
+        {toggleModalRoom && (
+          <ShowModalRoom
+            toggleModalRoom={toggleModalRoom}
+            setToggleModalRoom={setToggleModalRoom}
+            whichModal="update"
+            roomData={dataReceivedFromNavigation?.roomData}
+          />
+        )}
+
+        {toggleModalAddUserInRoom && (
+          <AddUserInRoom
+            toggleModalAddUserInRoom={toggleModalAddUserInRoom}
+            setToggleModalAddUserInRoom={setToggleModalAddUserInRoom}
+            roomId={Number(dataReceivedFromNavigation?.roomData?.id)}
+            nickname={String(dataReceivedFromNavigation?.roomData?.nickname)}
+          />
+        )}
+      </Container>
+    </Wrapper>
   );
 };
 

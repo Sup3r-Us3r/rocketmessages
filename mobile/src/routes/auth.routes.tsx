@@ -3,6 +3,7 @@ import {createNativeStackNavigator} from 'react-native-screens/native-stack';
 import {enableScreens} from 'react-native-screens';
 
 import Auth from '../screens/Auth';
+import ForgotPassword from '../screens/ForgotPassword';
 
 const AuthStack = createNativeStackNavigator();
 
@@ -17,6 +18,15 @@ const AuthRoutes = () => {
         stackAnimation: 'fade',
       }}>
       <AuthStack.Screen name="Auth" component={Auth} />
+      <AuthStack.Screen
+        name="ForgotPassword"
+        component={ForgotPassword}
+        options={{
+          headerShown: true,
+          headerTitle: 'Recuperar senha',
+          headerTintColor: '#7159c1',
+        }}
+      />
     </AuthStack.Navigator>
   );
 };

@@ -109,7 +109,7 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
   function handleModalAnimationFadeOut() {
     return Animated.timing(modalAnimation, {
       toValue: 0,
-      duration: 300,
+      duration: 100,
       easing: Easing.ease,
       useNativeDriver: true,
     }).start();
@@ -124,7 +124,7 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
 
     setTimeout(() => {
       return setToggleModalAddUserInRoom(false);
-    }, 300);
+    }, 100);
   }
 
   // Callback
@@ -132,7 +132,7 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
     function handleModalAnimationFadeIn() {
       return Animated.timing(modalAnimation, {
         toValue: 1,
-        duration: 300,
+        duration: 100,
         easing: Easing.ease,
         useNativeDriver: true,
       }).start();

@@ -48,6 +48,15 @@ export const AvatarContainer = styled.View`
   position: relative;
 `;
 
+export const DefaultAvatar = styled.View`
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  width: 300px;
+  background: #eee;
+  border-radius: 150px;
+`;
+
 export const Avatar = styled.Image.attrs(() => ({
   resizeMode: 'cover',
 }))`

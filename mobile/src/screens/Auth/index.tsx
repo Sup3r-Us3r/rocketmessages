@@ -1,4 +1,5 @@
 import React, {useState, useContext} from 'react';
+import {useNavigation} from '@react-navigation/native';
 import {Keyboard} from 'react-native';
 
 import AuthContext from '../../contexts/auth';
@@ -21,8 +22,11 @@ import {
 } from './styles';
 
 const Auth = () => {
+  // Navigation
+  const navigation = useNavigation();
+
   // Context
-  const {signed, signIn, signUp} = useContext(AuthContext);
+  const {signIn, signUp} = useContext(AuthContext);
 
   // States
   const [changeLayout, setChangeLayout] = useState<string>('login');
@@ -37,8 +41,6 @@ const Auth = () => {
     };
 
     await signIn(userDataInput);
-
-    console.log('LOGADO: ', signed);
   }
 
   async function handleSignUp() {
@@ -65,6 +67,10 @@ const Auth = () => {
     } else {
       setChangeLayout('login');
     }
+  }
+
+  function handleForgotPassword() {
+    return navigation.navigate('ForgotPassword');
   }
 
   return (
@@ -96,7 +102,7 @@ const Auth = () => {
             />
 
             {changeLayout === 'login' && (
-              <ForgotPassword>
+              <ForgotPassword onPress={handleForgotPassword}>
                 <ForgotPasswordLabel>Esqueci minha senha</ForgotPasswordLabel>
               </ForgotPassword>
             )}

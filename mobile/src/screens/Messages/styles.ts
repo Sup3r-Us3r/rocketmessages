@@ -20,7 +20,7 @@ export const Header = styled.View`
   flex-direction: row;
   align-items: center;
   height: 55px;
-  background: #7159c1;
+  background: #fff;
   padding: 0 10px;
 `;
 
@@ -47,13 +47,13 @@ export const ChatInfo = styled.TouchableOpacity.attrs(() => ({
 
 export const ChatName = styled.Text`
   font-size: 16px;
-  color: #fff;
+  color: #7159c1;
   font-weight: bold;
 `;
 
 export const ChatStatus = styled.Text`
   font-size: 15px;
-  color: #fff;
+  color: #bcbfc4;
   line-height: 20px;
 `;
 
@@ -199,8 +199,9 @@ export const MessageField = styled.View`
 export const InputMessage = styled.TextInput`
   position: relative;
   flex: 1;
+  max-height: 200px;
   background: #eee;
-  border-radius: 20px;
+  border-radius: 30px;
   padding: 10px 20px 10px 40px;
   margin: 0 10px;
   font-size: 16px;
@@ -247,6 +248,6 @@ export const handleStyle = StyleSheet.create({
 
 export const overlayStyle = StyleSheet.create({
   background: {
-    backgroundColor: 'rgba(113, 89, 193, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
 });

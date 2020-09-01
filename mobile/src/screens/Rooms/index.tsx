@@ -8,6 +8,7 @@ import {messageDateFormatter} from '../../utils/messageDateFormatter';
 
 import AuthContex from '../../contexts/auth';
 
+import socket from '../../services/websocket';
 import api from '../../services/api';
 
 import Toast from '../../config/toastStyles';
@@ -33,6 +34,7 @@ import {
   RoomTotalMessages,
   ContainerCreateRoom,
 } from './styles';
+import {bool} from 'yup';
 
 export interface ILatestMessageOfRoom {
   id: number;
@@ -111,6 +113,18 @@ const Rooms: React.FC = () => {
     }
 
     handleGetLatestMessage();
+
+    function handleUpdateLatestMessage(response: boolean) {
+      if (response) {
+        handleGetLatestMessage();
+      }
+    }
+
+    socket.on('updateLatestRoomMessage', handleUpdateLatestMessage);
+
+    return () => {
+      socket.off('updateLatestRoomMessage', handleUpdateLatestMessage);
+    };
   }, [userData]);
 
   return (
