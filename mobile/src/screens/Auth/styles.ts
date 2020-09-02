@@ -20,6 +20,8 @@ export const ScrollView = styled.ScrollView.attrs(() => ({
 
 export const Container = styled.View`
   flex: 1;
+  width: 80%;
+  margin: 0 auto;
   align-items: center;
   justify-content: center;
   padding: 0 0 150px 0;
@@ -46,8 +48,8 @@ export const UsernameInput = styled.TextInput`
   padding: 20px 10px 10px 10px;
   border-bottom-width: 2px;
   border-bottom-color: #7159c1;
-  width: 80%;
   border-radius: 8px;
+  width: 100%;
 `;
 
 export const EmailInput = styled.TextInput`
@@ -56,8 +58,8 @@ export const EmailInput = styled.TextInput`
   padding: 20px 10px 10px 10px;
   border-bottom-width: 2px;
   border-bottom-color: #7159c1;
-  width: 80%;
   border-radius: 8px;
+  width: 100%;
 `;
 
 export const PasswordInput = styled.TextInput`
@@ -66,15 +68,16 @@ export const PasswordInput = styled.TextInput`
   padding: 20px 10px 10px 10px;
   border-bottom-width: 2px;
   border-bottom-color: #7159c1;
-  width: 80%;
   border-radius: 8px;
+  width: 100%;
 `;
 
 export const ForgotPassword = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.4,
 }))`
   align-self: flex-end;
-  margin: 30px 45px 0 0;
+  margin-top: 15px;
+  padding: 10px 5px 0 5px;
 `;
 
 export const ForgotPasswordLabel = styled.Text`
@@ -83,18 +86,18 @@ export const ForgotPasswordLabel = styled.Text`
   margin-top: -13px;
 `;
 
-export const AuthStartAction = styled.TouchableOpacity.attrs(() => ({
+export const AuthRequest = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.8,
 }))`
   background: #7159c1;
   margin: 20px 0;
-  padding: 20px;
-  width: 80%;
+  padding: 17px 20px;
+  width: 100%;
   border-radius: 50px;
   align-self: center;
 `;
 
-export const AuthStartActionLabel = styled.Text`
+export const AuthRequestLabel = styled.Text`
   text-align: center;
   font-size: 16px;
   font-weight: bold;

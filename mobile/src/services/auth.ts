@@ -31,7 +31,7 @@ async function handleFieldsValidation(fields: IUserSentData): Promise<boolean> {
 
 export async function signIn(
   userSentData: IUserSentData,
-): Promise<ISignInResponse> {
+): Promise<ISignInResponse | any> {
   try {
     const validation = await handleFieldsValidation(userSentData);
 

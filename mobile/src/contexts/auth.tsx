@@ -26,19 +26,19 @@ export const AuthProvider: React.FC = ({children}) => {
   const [userData, setUserData] = useState<ISignInResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  async function signIn(userSentData: IUserSentData): Promise<ISignInResponse> {
+  async function signIn(
+    userSentData: IUserSentData,
+  ): Promise<ISignInResponse | any> {
     const response = await auth.signIn(userSentData);
 
     if (response?.username) {
       setUserData(response);
+
+      await AsyncStorage.setItem(
+        '@rocketMessages/userData',
+        JSON.stringify(response),
+      );
     }
-
-    await AsyncStorage.setItem(
-      '@rocketMessages/userData',
-      JSON.stringify(response),
-    );
-
-    return response;
   }
 
   async function signUp(userSentData: IUserSentData) {

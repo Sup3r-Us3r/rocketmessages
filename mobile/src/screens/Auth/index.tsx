@@ -1,8 +1,11 @@
 import React, {useState, useContext} from 'react';
-import {useNavigation} from '@react-navigation/native';
 import {Keyboard} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import Lottie from 'lottie-react-native';
 
 import AuthContext from '../../contexts/auth';
+
+import chatAnimation from '../../animations/chatAnimation.json';
 
 import {
   Wrapper,
@@ -15,8 +18,8 @@ import {
   PasswordInput,
   ForgotPassword,
   ForgotPasswordLabel,
-  AuthStartAction,
-  AuthStartActionLabel,
+  AuthRequest,
+  AuthRequestLabel,
   ChangeLayoutAuthContainer,
   AuthActionLabel,
 } from './styles';
@@ -78,9 +81,18 @@ const Auth = () => {
       <>
         <ScrollView>
           <Container>
-            <BackgroundImage />
+            <Lottie
+              source={chatAnimation}
+              // autoSize
+              autoPlay
+              loop
+              resizeMode="contain"
+              style={{height: 300, width: 300}}
+            />
+            {/* <BackgroundImage /> */}
 
             <WelcomeMessage>Rocket Messages</WelcomeMessage>
+
             {changeLayout === 'register' && (
               <UsernameInput
                 placeholder="Digite seu nome"
@@ -107,11 +119,11 @@ const Auth = () => {
               </ForgotPassword>
             )}
 
-            <AuthStartAction onPress={handleSubmit}>
-              <AuthStartActionLabel>
+            <AuthRequest onPress={handleSubmit}>
+              <AuthRequestLabel>
                 {changeLayout === 'login' ? 'Entrar' : 'Registrar'}
-              </AuthStartActionLabel>
-            </AuthStartAction>
+              </AuthRequestLabel>
+            </AuthRequest>
           </Container>
         </ScrollView>
 
