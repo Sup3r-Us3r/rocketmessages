@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import {Keyboard} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {useNavigation} from '@react-navigation/native';
 
 import api from '../../services/api';
 

@@ -11,8 +11,6 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import EmojiSelector, {Categories} from 'react-native-emoji-selector';
 import {Modalize} from 'react-native-modalize';
 
-import socket from '../../services/websocket';
-
 import ChatDetails from '../../components/ChatDetails';
 import ShowModalRoom from '../../components/ShowModalRoom';
 import AddUserInRoom from '../../components/AddUserInRoom';
@@ -22,6 +20,7 @@ import {handleTwoDigitsFormat} from '../../utils/messageDateFormatter';
 
 import AuthContext from '../../contexts/auth';
 
+import socket from '../../services/websocket';
 import api from '../../services/api';
 
 import Toast from '../../config/toastStyles';

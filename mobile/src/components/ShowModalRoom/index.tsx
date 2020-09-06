@@ -16,6 +16,7 @@ import ImagePicker from 'react-native-image-picker';
 
 import AuthContext from '../../contexts/auth';
 
+import socket from '../../services/websocket';
 import api from '../../services/api';
 
 import Toast from '../../config/toastStyles';
@@ -57,6 +58,11 @@ interface IAvatarProperties {
   uri?: string;
   fileName?: string;
   type?: string;
+}
+
+interface IRoomInputs {
+  name: string;
+  nickname: string;
 }
 
 const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
@@ -128,7 +134,7 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
           bot: true,
           from: userData?.id,
           to_room: Number(...createOrUpdateResponse.data),
-          message: `Grupo ${nicknameInput} criado.`,
+          message: `Grupo ${nicknameInput} criado`,
         }));
 
       if (whichModal === 'create' && !insertWelcomeMessageOnRoom) {
@@ -167,6 +173,16 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
     });
   }
 
+  function handleFieldsValidation(fields: IRoomInputs): boolean {
+    if (!fields.name || !fields.nickname) {
+      Toast.error('Campos obrigatórios.');
+
+      return false;
+    }
+
+    return true;
+  }
+
   async function handleSubmit() {
     const formData = new FormData();
 
@@ -180,7 +196,16 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
     formData.append('name', nameInput);
     formData.append('nickname', nicknameInput);
 
-    return await handleRequestCreateOrUpdateRoomApi(formData);
+    const validation = handleFieldsValidation({
+      name: nameInput,
+      nickname: nicknameInput,
+    });
+
+    if (validation) {
+      await handleRequestCreateOrUpdateRoomApi(formData);
+    }
+
+    return socket.emit('updateLatestRoomMessage', true);
   }
 
   function handleModalAnimationFadeOut() {
@@ -262,6 +287,7 @@ const ShowModalRoom: React.FC<IShowModalRoomProps> = ({
           <Nickname
             placeholder="Nome de identificação do grupo"
             autoCorrect={false}
+            autoCapitalize="none"
             onChangeText={setNicknameInput}
             value={nicknameInput}
           />

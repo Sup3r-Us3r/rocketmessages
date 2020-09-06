@@ -11,7 +11,7 @@ import {
   Wrapper,
   ScrollView,
   Container,
-  BackgroundImage,
+  // BackgroundImage,
   WelcomeMessage,
   UsernameInput,
   EmailInput,
@@ -83,13 +83,12 @@ const Auth = () => {
           <Container>
             <Lottie
               source={chatAnimation}
-              // autoSize
               autoPlay
               loop
               resizeMode="contain"
+              // eslint-disable-next-line react-native/no-inline-styles
               style={{height: 300, width: 300}}
             />
-            {/* <BackgroundImage /> */}
 
             <WelcomeMessage>Rocket Messages</WelcomeMessage>
 

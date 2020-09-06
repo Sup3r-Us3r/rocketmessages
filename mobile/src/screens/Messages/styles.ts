@@ -117,7 +117,7 @@ export const ChatContainerMessageBot = styled.View`
   align-self: center;
   margin-top: 10px;
   padding: 3px 15px;
-  background: #7159c1;
+  background: rgba(17, 17, 17, 0.3);
   border-radius: 20px;
 `;
 

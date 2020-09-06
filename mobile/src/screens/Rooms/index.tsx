@@ -34,7 +34,6 @@ import {
   RoomTotalMessages,
   ContainerCreateRoom,
 } from './styles';
-import {bool} from 'yup';
 
 export interface ILatestMessageOfRoom {
   id: number;

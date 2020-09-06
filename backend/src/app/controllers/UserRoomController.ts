@@ -184,7 +184,7 @@ export default new class UserRoomController {
 
       return res.sendStatus(200);
     } catch (err) {
-      return res.status(500).json({ error: 'Error checking user in group.' });
+      return res.status(500).json({ error: 'Error checking user in room.' });
     }
   }
 }

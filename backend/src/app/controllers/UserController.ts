@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import knex from '../../database/connection';
 import { hashSync, compareSync } from 'bcryptjs';
-import { randomBytes } from 'crypto';
 
 import Mail from '../../services/Mail';
 
