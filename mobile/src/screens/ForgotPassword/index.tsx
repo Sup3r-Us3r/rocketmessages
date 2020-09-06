@@ -99,6 +99,7 @@ const ForgotPassword: React.FC = () => {
         <EmailInput
           placeholder="Entre com seu email"
           autoCorrect={false}
+          autoCapitalize="none"
           autoFocus
           onChangeText={setEmailInput}
           value={emailInput}

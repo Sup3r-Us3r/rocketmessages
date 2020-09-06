@@ -103,6 +103,7 @@ const Auth = () => {
               placeholder="Digite seu email"
               onChangeText={setEmailInput}
               autoCorrect={false}
+              autoCapitalize="none"
             />
             <PasswordInput
               placeholder="Digite sua senha"
