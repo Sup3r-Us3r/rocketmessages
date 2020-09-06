@@ -1,4 +1,5 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Lottie from 'lottie-react-native';
 import CodeInput from 'react-native-confirmation-code-input';
 
@@ -7,8 +8,6 @@ import api from '../../services/api';
 import Toast from '../../config/toastStyles';
 
 import verificationCode from '../../animations/verificationCode.json';
-import success from '../../animations/success.json';
-import failed from '../../animations/failed.json';
 
 import {
   Wrapper,
@@ -16,15 +15,23 @@ import {
   ContainerAnimation,
   VerificationCodeLabel,
   NewPasswordLabel,
-  CheckCode,
-  CheckCodeLabel,
   NewPasswordInput,
   SendRequest,
   SendRequestLabel,
   codeInputStyles,
 } from './styles';
 
+interface IDataReceivedFromNavigation {
+  email: string;
+  recoverycode: string;
+}
+
 const VerificationCode: React.FC = () => {
+  // Navigation
+  const navigation = useNavigation();
+  const dataReceivedFromNavigation = useRoute()
+    .params as IDataReceivedFromNavigation;
+
   // States
   const [changeLayout, setChangeLayout] = useState<boolean>(false);
   const [newPassword, setNewPassword] = useState<string>('');
@@ -39,20 +46,27 @@ const VerificationCode: React.FC = () => {
 
   async function handleChangePassword() {
     const data = {
-      recoveryCode: '',
+      recoverycode: dataReceivedFromNavigation?.recoverycode,
       password: newPassword,
     };
 
     try {
-      const response = await api.post('/recoverpassword/:email', data);
+      const response = await api.post(
+        `/recoverpassword/${dataReceivedFromNavigation?.email}`,
+        data,
+      );
 
-      if (!response) {
+      if (response.status !== 200) {
         return Toast.error('Erro ao recuperar senha.');
       }
+
+      Toast.success('Senha alterada com sucesso.');
+
+      return navigation.navigate('Auth');
     } catch (err) {
       const {error} = err.response.data;
 
-      return Toast.error(error);
+      return Toast.error(error ? error : 'Erro ao recuperar senha.');
     }
   }
 
@@ -89,7 +103,7 @@ const VerificationCode: React.FC = () => {
             size={50}
             codeLength={5}
             codeInputStyle={codeInputStyles.input}
-            // compareWithCode={}
+            compareWithCode={String(dataReceivedFromNavigation?.recoverycode)}
             onFulfill={handleCompleteCode}
           />
         )}

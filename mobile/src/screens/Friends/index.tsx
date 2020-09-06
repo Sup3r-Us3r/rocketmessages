@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {Keyboard} from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -77,6 +77,17 @@ const Friends: React.FC = () => {
       contactData,
     });
   }
+
+  useEffect(() => {
+    function handleNavigationListener() {
+      setTyping(false);
+      setSearchResult([]);
+    }
+
+    navigation.addListener('blur', handleNavigationListener);
+
+    return () => navigation.removeListener('blur', handleNavigationListener);
+  }, [navigation]);
 
   return (
     <Wrapper>

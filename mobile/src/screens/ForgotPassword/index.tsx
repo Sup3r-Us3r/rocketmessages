@@ -20,6 +20,10 @@ import {
   SendRequestLabel,
 } from './styles';
 
+interface IForgotPassword {
+  recoverycode: string;
+}
+
 const ForgotPassword: React.FC = () => {
   // Ref
   const lottieRef = useRef<Lottie>(null);
@@ -27,6 +31,7 @@ const ForgotPassword: React.FC = () => {
   // States
   const [loading, setLoading] = useState<boolean>(false);
   const [emailInput, setEmailInput] = useState<string>('');
+  const [recoveryCode, setRecoveryCode] = useState<string>('');
 
   // Navigation
   const navigation = useNavigation();
@@ -39,28 +44,34 @@ const ForgotPassword: React.FC = () => {
 
       setLoading(true);
 
-      const response = await api.get(`/forgotpassword/${emailInput}`);
+      const response = await api.get<IForgotPassword>(
+        `/forgotpassword/${emailInput}`,
+      );
 
-      if (response.status !== 200) {
+      if (!response) {
         return Toast.error('Erro ao enviar solicitação.');
       }
+
+      setRecoveryCode(response.data.recoverycode);
 
       return lottieRef.current?.play();
     } catch (err) {
       const {error} = err.response.data;
 
       setTimeout(() => setLoading(false), 1000);
-
       setEmailInput('');
 
-      return Toast.error(error ? error : 'Erro ao enviar solicitação');
+      return Toast.error(error);
     }
   }
 
   function handleNavigateToVerificationCode() {
     setLoading(false);
 
-    return navigation.navigate('VerificationCode');
+    return navigation.navigate('VerificationCode', {
+      email: emailInput,
+      recoverycode: recoveryCode,
+    });
   }
 
   return (

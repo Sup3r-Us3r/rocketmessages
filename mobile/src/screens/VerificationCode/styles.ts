@@ -11,8 +11,6 @@ export const Container = styled.View`
   margin: 0 auto;
   align-items: center;
   width: 80%;
-  /* background: #ddd;
-  padding: 0 0 150px 0; */
 `;
 
 export const ContainerAnimation = styled.View`
@@ -35,23 +33,6 @@ export const NewPasswordLabel = styled.Text`
   text-align: center;
   font-weight: bold;
   color: #999;
-`;
-
-export const CheckCode = styled.TouchableOpacity.attrs(() => ({
-  activeOpacity: 0.8,
-}))`
-  margin-top: 20px;
-  width: 100%;
-  background: #7159c1;
-  padding: 20px;
-  border-radius: 50px;
-`;
-
-export const CheckCodeLabel = styled.Text`
-  font-size: 16px;
-  font-weight: bold;
-  text-align: center;
-  color: #fff;
 `;
 
 export const NewPasswordInput = styled.TextInput`

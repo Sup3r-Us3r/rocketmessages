@@ -235,7 +235,6 @@ export default new class UserController {
       });
 
       return res.json({
-        email,
         recoverycode: generateCode,
       });
     } catch (err) {
