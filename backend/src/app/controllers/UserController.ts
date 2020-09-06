@@ -40,18 +40,6 @@ export default new class UserController {
         return res.status(400).json({ error: 'Error on creating user.' });
       }
 
-      // const findUser = await knex('tb_user as U')
-      //   .where('U.email', String(email))
-      //   .first();
-
-      // if (!findUser) {
-      //   return res.status(500).json({ error: 'Error on finding user.' });
-      // }
-
-      // // Exclude fields
-      // findUser.password = undefined;
-      // findUser.recoverycode = undefined;
-
       return res.json(user);
     } catch (err) {
       return res.status(500).json({ error: 'Error on creating user.' });
@@ -212,21 +200,25 @@ export default new class UserController {
   }
 
   async forgotPassword(req: Request, res: Response) {
-    const { id } = req.params;
+    const { email } = req.params;
+
+    function randomNumbers(min: number = 10000, max: number = 99999): number {
+      return Math.round(Math.random() * (max - min) + min);
+    }
 
     try {
       const user = await knex('tb_user as U')
-        .where('U.id', Number(id))
+        .where('U.email', String(email))
         .first();
 
       if (!user) {
         return res.status(400).json({ error: 'User does not exists.' });
       }
 
-      const generateCode = randomBytes(3).toString('hex');
+      const generateCode = String(randomNumbers());
 
       const addCodeForRecovery = await knex('tb_user as U')
-        .where('U.id', Number(id))
+        .where('U.email', String(email))
         .update({
           recoverycode: generateCode,
         });
@@ -242,19 +234,22 @@ export default new class UserController {
         html: Mail.templateMail(generateCode)
       });
 
-      return res.sendStatus(200);
+      return res.json({
+        email,
+        recoverycode: generateCode,
+      });
     } catch (err) {
       return res.status(500).json({ error: 'Error retrieving password.' });
     }
   }
 
   async recoverPassword(req: Request, res: Response) {
-    const { id } = req.params;
+    const { email } = req.params;
     const { recoverycode, password } = req.body as IBodyData;
 
     try {
       const user = await knex('tb_user as U')
-        .where('U.id', Number(id))
+        .where('U.email', String(email))
         .first();
 
       if (!user) {
@@ -267,7 +262,7 @@ export default new class UserController {
         const passwordHash = hashSync(String(password), 8);
 
         const updatePassword = await knex('tb_user as U')
-          .where('U.id', Number(id))
+          .where('U.email', String(email))
           .update({
             password: passwordHash,
           });

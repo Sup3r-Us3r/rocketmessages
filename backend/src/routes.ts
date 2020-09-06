@@ -13,10 +13,10 @@ const routes = Router();
 // User
 routes.get('/user/:id', UserController.listUser);
 routes.get('/users', UserController.listUsers);
-routes.get('/forgotpassword/:id', UserController.forgotPassword);
+routes.get('/forgotpassword/:email', UserController.forgotPassword);
 routes.post('/createuser', UserController.createUser);
 routes.post('/login', UserController.loginRocketMessages);
-routes.post('/recoverpassword/:id', UserController.recoverPassword);
+routes.post('/recoverpassword/:email', UserController.recoverPassword);
 routes.put(
   '/updateuser/:id',
   multer(multerConfig).single('userphoto'),

@@ -22,6 +22,7 @@
     "node-crypto": "^1.0.0",
     "react": "16.11.0",
     "react-native": "0.62.2",
+    "react-native-confirmation-code-input": "^1.0.4",
     "react-native-emoji-selector": "^0.1.8",
     "react-native-gesture-handler": "^1.7.0",
     "react-native-image-picker": "^2.3.1",

@@ -1,25 +1,35 @@
 import styled from 'styled-components/native';
+import {StyleSheet} from 'react-native';
 
 export const Wrapper = styled.View`
   flex: 1;
   background: #fff;
 `;
 
-export const VerificationCodeContainer = styled.View`
+export const Container = styled.View`
   flex: 1;
   margin: 0 auto;
   align-items: center;
   width: 80%;
+  /* background: #ddd;
+  padding: 0 0 150px 0; */
 `;
 
 export const ContainerAnimation = styled.View`
-  height: 150px;
-  width: 150px;
+  height: 180px;
+  width: 180px;
   margin: 0 auto;
-  background: #ddd;
 `;
 
-export const VerificationCodeBold = styled.Text`
+export const VerificationCodeLabel = styled.Text`
+  margin: 10px 0;
+  font-size: 20px;
+  text-align: center;
+  font-weight: bold;
+  color: #999;
+`;
+
+export const NewPasswordLabel = styled.Text`
   margin-top: 10px;
   font-size: 20px;
   text-align: center;
@@ -27,14 +37,24 @@ export const VerificationCodeBold = styled.Text`
   color: #999;
 `;
 
-export const VerificationCodeLabel = styled.Text`
-  margin: 15px 0;
-  font-size: 16px;
-  text-align: center;
-  color: #ddd;
+export const CheckCode = styled.TouchableOpacity.attrs(() => ({
+  activeOpacity: 0.8,
+}))`
+  margin-top: 20px;
+  width: 100%;
+  background: #7159c1;
+  padding: 20px;
+  border-radius: 50px;
 `;
 
-export const CodeInput = styled.TextInput`
+export const CheckCodeLabel = styled.Text`
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  color: #fff;
+`;
+
+export const NewPasswordInput = styled.TextInput`
   font-size: 18px;
   color: #333;
   padding: 20px 10px 10px 10px;
@@ -50,8 +70,8 @@ export const SendRequest = styled.TouchableOpacity.attrs(() => ({
   margin-top: 20px;
   width: 100%;
   background: #7159c1;
-  padding: 20px;
-  border-radius: 50px;
+  padding: 17px 20px;
+  border-radius: 5px;
 `;
 
 export const SendRequestLabel = styled.Text`
@@ -60,3 +80,10 @@ export const SendRequestLabel = styled.Text`
   text-align: center;
   color: #fff;
 `;
+
+export const codeInputStyles = StyleSheet.create({
+  input: {
+    borderWidth: 2,
+    color: '#7159c1',
+  },
+});

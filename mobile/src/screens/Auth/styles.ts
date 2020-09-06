@@ -93,7 +93,7 @@ export const AuthRequest = styled.TouchableOpacity.attrs(() => ({
   margin: 20px 0;
   padding: 17px 20px;
   width: 100%;
-  border-radius: 50px;
+  border-radius: 5px;
   align-self: center;
 `;
 
