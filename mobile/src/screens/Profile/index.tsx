@@ -63,7 +63,7 @@ interface IUserData {
 
 const Profile: React.FC = () => {
   // Context
-  const {userData, signOut} = useContext(AuthContex);
+  const {userData} = useContext(AuthContex);
 
   // States
   const [selectedImage, setSelectedImage] = useState<IImageProperties>({});
@@ -197,8 +197,7 @@ const Profile: React.FC = () => {
   }
 
   function handleSignOut() {
-    setOpenSignOutModal(true);
-    // return signOut();
+    return setOpenSignOutModal(true);
   }
 
   useEffect(() => {
@@ -326,11 +325,13 @@ const Profile: React.FC = () => {
         )}
       </Wrapper>
 
-      <SignOut
-        username={oldValueUsernameInput}
-        openSignOutModal={openSignOutModal}
-        setOpenSignOutModal={setOpenSignOutModal}
-      />
+      {openSignOutModal && (
+        <SignOut
+          username={oldValueUsernameInput}
+          openSignOutModal={openSignOutModal}
+          setOpenSignOutModal={setOpenSignOutModal}
+        />
+      )}
     </>
   );
 };

@@ -11,7 +11,6 @@ import {
   Wrapper,
   ScrollView,
   Container,
-  // BackgroundImage,
   WelcomeMessage,
   UsernameInput,
   EmailInput,

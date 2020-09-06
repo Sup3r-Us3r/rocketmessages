@@ -90,12 +90,11 @@ export const NoResearchBackground = styled.Image.attrs(() => ({
 }))`
   height: 250px;
   width: 300px;
-  /* border-radius: 125px; */
 `;
 
 export const NoResearchLabel = styled.Text`
   margin-top: 15px;
   font-size: 18px;
-  color: #ccc;
+  color: #ddd;
   text-align: center;
 `;

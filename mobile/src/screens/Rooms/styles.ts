@@ -20,11 +20,9 @@ export const NoMessageBackground = styled.Image.attrs(() => ({
 `;
 
 export const NoMessageLabel = styled.Text`
-  margin-top: 10px;
-  font-size: 20px;
+  font-size: 18px;
   text-align: center;
-  font-weight: bold;
-  color: #999;
+  color: #ddd;
 `;
 
 export const Container = styled.View`

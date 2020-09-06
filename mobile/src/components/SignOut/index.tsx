@@ -1,11 +1,15 @@
-import React, {Dispatch, SetStateAction} from 'react';
+import React, {useContext, Dispatch, SetStateAction} from 'react';
 import Lottie from 'lottie-react-native';
 
-import success from '../../animations/success.json';
+import AuthContext from '../../contexts/auth';
+
+import confirm from '../../animations/confirm.json';
 import rocketMessagesLogo from '../../assets/logo.png';
 
 import {
   Wrapper,
+  ScreenBackContainer,
+  ScreenBackIcon,
   RocketMessageLogo,
   SignOutLabel,
   ConfirmSignOut,
@@ -22,26 +26,32 @@ const SignOut: React.FC<ISignOutProps> = ({
   openSignOutModal,
   setOpenSignOutModal,
 }) => {
+  // Context
+  const {signOut} = useContext(AuthContext);
+
   function handleCloseModal() {
-    setOpenSignOutModal(true);
+    setOpenSignOutModal(false);
+  }
+
+  function handleSignOut() {
+    signOut();
   }
 
   return openSignOutModal ? (
     <Wrapper>
+      <ScreenBackContainer onPress={handleCloseModal}>
+        <ScreenBackIcon />
+      </ScreenBackContainer>
+
       <RocketMessageLogo source={rocketMessagesLogo} />
 
       <SignOutLabel>
-        Nãooo! que isso {username} já tá indo? fica mais
+        Nãooo se vá {username} está partindo porque sei que você já não mais me
+        ama...
       </SignOutLabel>
 
-      <ConfirmSignOut>
-        <Lottie
-          source={success}
-          resizeMode="contain"
-          autoPlay
-          loop={false}
-          // onAnimationFinish={}
-        />
+      <ConfirmSignOut onPress={handleSignOut}>
+        <Lottie source={confirm} resizeMode="contain" autoPlay loop={false} />
       </ConfirmSignOut>
     </Wrapper>
   ) : null;

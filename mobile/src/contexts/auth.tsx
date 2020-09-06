@@ -1,6 +1,8 @@
 import React, {createContext, useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 
+import Toast from '../config/toastStyles';
+
 import * as auth from '../services/auth';
 
 import {ISignInResponse} from '../services/auth';
@@ -23,6 +25,7 @@ interface IAuthContextData {
 const AuthContext = createContext<IAuthContextData>({} as IAuthContextData);
 
 export const AuthProvider: React.FC = ({children}) => {
+  // States
   const [userData, setUserData] = useState<ISignInResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -45,7 +48,7 @@ export const AuthProvider: React.FC = ({children}) => {
     const response = await auth.signUp(userSentData);
 
     if (response) {
-      return response;
+      return Toast.success('Conta criada com sucesso.');
     }
   }
 

@@ -1,8 +1,6 @@
 import styled from 'styled-components/native';
 import {Platform} from 'react-native';
 
-import getStartedBackground from '../../assets/getStartedBackground.png';
-
 export const Wrapper = styled.KeyboardAvoidingView.attrs(() => ({
   behavior: Platform.OS === 'android' ? undefined : 'padding',
   enabled: true,
@@ -25,14 +23,6 @@ export const Container = styled.View`
   align-items: center;
   justify-content: center;
   padding: 0 0 150px 0;
-`;
-
-export const BackgroundImage = styled.Image.attrs(() => ({
-  resizeMode: 'cover',
-  source: getStartedBackground,
-}))`
-  height: 250px;
-  width: 250px;
 `;
 
 export const WelcomeMessage = styled.Text`

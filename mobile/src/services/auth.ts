@@ -66,6 +66,8 @@ export async function signUp(userSentData: IUserSentData) {
     if (!create) {
       return Toast.error('Erro ao fazer cadastro.');
     }
+
+    return create;
   } catch (err) {
     const {error} = err.response.data;
 
