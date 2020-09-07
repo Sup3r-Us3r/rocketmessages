@@ -489,6 +489,7 @@ const Messages: React.FC = () => {
           />
         </Modalize>
 
+        {/* Modal for edit room */}
         {toggleModalRoom && (
           <ShowModalRoom
             toggleModalRoom={toggleModalRoom}
@@ -498,6 +499,7 @@ const Messages: React.FC = () => {
           />
         )}
 
+        {/* Modal for add user in room */}
         {toggleModalAddUserInRoom && (
           <AddUserInRoom
             toggleModalAddUserInRoom={toggleModalAddUserInRoom}
