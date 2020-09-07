@@ -15,7 +15,9 @@ import ChatDetails from '../../components/ChatDetails';
 import CreateOrEditRoom, {
   ICreateOrEditRoomHandles,
 } from '../../components/CreateOrEditRoom';
-import AddUserInRoom from '../../components/AddUserInRoom';
+import AddUserInRoom, {
+  IAddUserInRoomHandles,
+} from '../../components/AddUserInRoom';
 import LeaveRoomModal from '../../components/LeaveRoom';
 
 import {handleTwoDigitsFormat} from '../../utils/messageDateFormatter';
@@ -92,6 +94,7 @@ const Messages: React.FC = () => {
   const modalizeLeaveRoomRef = useRef<Modalize>(null);
   const pageRef = useRef<number>(1);
   const createOrEditRoomRef = useRef<ICreateOrEditRoomHandles>(null);
+  const addUserInRoomRef = useRef<IAddUserInRoomHandles>(null);
   // const lastPageRef = useRef<number>(1);
   // const totalPage = useRef<number>(0);
 
@@ -102,9 +105,6 @@ const Messages: React.FC = () => {
   const [showChatActions, setShowChatActions] = useState<boolean>(false);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
   const [hideMessageField, setHideMessageField] = useState<boolean>(false);
-  const [toggleModalAddUserInRoom, setToggleModalAddUserInRoom] = useState<
-    boolean
-  >(false);
 
   // Navigation
   const navigation = useNavigation();
@@ -135,13 +135,12 @@ const Messages: React.FC = () => {
     setShowChatActions(false);
 
     return createOrEditRoomRef.current?.openModal();
-    // return setToggleModalRoom(true);
   }
 
   function handleOpenModalAddUserInRoom() {
     setShowChatActions(false);
 
-    return setToggleModalAddUserInRoom(true);
+    return addUserInRoomRef.current?.openModal();
   }
 
   function handleShowModalizeLeaveRoom() {
@@ -222,23 +221,11 @@ const Messages: React.FC = () => {
 
       setMessageInput('');
 
-      // Handle with websocket from backend
-      // Emit message from websocket backend
       if (dataReceivedFromNavigation?.contactData) {
-        socket.emit(
-          'joinPrivateChat',
-          dataReceivedFromNavigation?.contactData?.email,
-        );
-
         return socket.emit('chatMessage', {
           email: dataReceivedFromNavigation?.contactData?.email,
         });
       } else {
-        socket.emit(
-          'joinRoomChat',
-          dataReceivedFromNavigation?.roomData?.nickname,
-        );
-
         return socket.emit('chatMessage', {
           nickname: dataReceivedFromNavigation?.roomData?.nickname,
         });
@@ -338,6 +325,20 @@ const Messages: React.FC = () => {
       socket.off('message', handleUpdateMessages);
     };
   }, [userData, dataReceivedFromNavigation]);
+
+  useEffect(() => {
+    if (dataReceivedFromNavigation?.contactData) {
+      socket.emit(
+        'joinChatPrivate',
+        dataReceivedFromNavigation?.contactData?.email,
+      );
+    } else {
+      socket.emit(
+        'joinChatRoom',
+        dataReceivedFromNavigation?.roomData?.nickname,
+      );
+    }
+  }, [dataReceivedFromNavigation]);
 
   return (
     <Wrapper>
@@ -500,14 +501,11 @@ const Messages: React.FC = () => {
         />
 
         {/* Modal for add user in room */}
-        {toggleModalAddUserInRoom && (
-          <AddUserInRoom
-            toggleModalAddUserInRoom={toggleModalAddUserInRoom}
-            setToggleModalAddUserInRoom={setToggleModalAddUserInRoom}
-            roomId={Number(dataReceivedFromNavigation?.roomData?.id)}
-            nickname={String(dataReceivedFromNavigation?.roomData?.nickname)}
-          />
-        )}
+        <AddUserInRoom
+          ref={addUserInRoomRef}
+          roomId={Number(dataReceivedFromNavigation?.roomData?.id)}
+          nickname={String(dataReceivedFromNavigation?.roomData?.nickname)}
+        />
       </Container>
     </Wrapper>
   );

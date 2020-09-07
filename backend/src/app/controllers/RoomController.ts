@@ -56,6 +56,16 @@ export default new class RoomController {
         return res.status(400).json({ error: 'Room does not exist.' });
       }
 
+      if (nickname !== roomExists.nickname) {
+        const nicknameAlreadyExists = await knex('tb_room as R')
+          .where('R.nickname', String(nickname))
+          .first();
+  
+        if (nicknameAlreadyExists) {
+          return res.status(400).json({ error: 'Nickname already exists.' });
+        }
+      }
+
       const serializedRoomInfo = {
         avatar: req.file?.filename ?
           `${process.env.BASE_URL}/uploads/${req.file?.filename}`

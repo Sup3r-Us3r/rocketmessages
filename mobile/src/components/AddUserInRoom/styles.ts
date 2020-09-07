@@ -50,7 +50,7 @@ export const Title = styled.Text`
   margin-bottom: 30px;
   text-align: center;
   width: 100%;
-  font-size: 25px;
+  font-size: 18px;
   color: #7159c1;
 `;
 

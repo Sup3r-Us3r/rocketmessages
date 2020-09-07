@@ -216,6 +216,8 @@ const CreateOrEditRoom: React.RefForwardingComponent<
       await handleRequestCreateOrUpdateRoomApi(formData);
     }
 
+    // socket.emit('joinChatRoom', nicknameInput);
+    // socket.emit('chatMessage', nicknameInput);
     return socket.emit('updateLatestRoomMessage', true);
   }
 

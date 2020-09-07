@@ -3,8 +3,8 @@ import React, {
   useEffect,
   useCallback,
   useContext,
-  Dispatch,
-  SetStateAction,
+  forwardRef,
+  useImperativeHandle,
 } from 'react';
 import {Animated, Easing} from 'react-native';
 
@@ -38,9 +38,11 @@ import {
   NoFrequentContactLabel,
 } from './styles';
 
+export interface IAddUserInRoomHandles {
+  openModal: () => void;
+}
+
 interface IAddUserInRoomProps {
-  toggleModalAddUserInRoom: boolean;
-  setToggleModalAddUserInRoom: Dispatch<SetStateAction<boolean>>;
   roomId: number;
   nickname: string;
 }
@@ -52,18 +54,28 @@ interface IFrequentContacts {
   status: string;
 }
 
-const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
-  toggleModalAddUserInRoom,
-  setToggleModalAddUserInRoom,
-  roomId,
-  nickname,
-}) => {
+const AddUserInRoom: React.RefForwardingComponent<
+  IAddUserInRoomHandles,
+  IAddUserInRoomProps
+> = ({roomId, nickname}, ref) => {
   // Context
   const {userData} = useContext(AuthContext);
 
   // States
+  const [visible, setVisible] = useState<boolean>(false);
   const [contacts, setContacts] = useState<IFrequentContacts[]>([]);
   const [modalAnimation] = useState(new Animated.Value(0));
+
+  const openModal = useCallback(() => {
+    return setVisible(true);
+  }, []);
+
+  // ImperativeHandle
+  useImperativeHandle(ref, () => {
+    return {
+      openModal,
+    };
+  });
 
   async function handleSubmit(userId: number) {
     const userAdded = contacts.find(
@@ -123,12 +135,12 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
     handleModalAnimationFadeOut();
 
     setTimeout(() => {
-      return setToggleModalAddUserInRoom(false);
+      return setVisible(false);
     }, 100);
   }
 
   // Callback
-  const memoizedCallback = useCallback(() => {
+  const animationFadeIn = useCallback(() => {
     function handleModalAnimationFadeIn() {
       return Animated.timing(modalAnimation, {
         toValue: 1,
@@ -194,12 +206,12 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
   }, [userData, nickname]);
 
   useEffect(() => {
-    if (toggleModalAddUserInRoom) {
-      memoizedCallback();
+    if (visible) {
+      animationFadeIn();
     }
-  }, [toggleModalAddUserInRoom, memoizedCallback]);
+  }, [visible, animationFadeIn]);
 
-  return toggleModalAddUserInRoom ? (
+  return visible ? (
     <Wrapper style={{opacity: modalAnimation}}>
       <ScrollView>
         <Container>
@@ -242,4 +254,4 @@ const AddUserInRoom: React.FC<IAddUserInRoomProps> = ({
   ) : null;
 };
 
-export default AddUserInRoom;
+export default forwardRef(AddUserInRoom);

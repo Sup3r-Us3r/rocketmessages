@@ -20,13 +20,13 @@ class Websocket {
       console.log('New websocket connection.');
 
       // Listen users joined in room
-      socket.on('joinRoomChat', (nickname: string) => {
+      socket.on('joinChatRoom', (nickname: string) => {
         socket.join(nickname);
         socket.emit('updateUsersInRoom', nickname);
       });
 
       // Join user in private room
-      socket.on('joinPrivateChat', (email: string) => {
+      socket.on('joinChatPrivate', (email: string[]) => {
         socket.join(email);
       });
 
