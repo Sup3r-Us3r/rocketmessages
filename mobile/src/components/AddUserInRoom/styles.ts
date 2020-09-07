@@ -25,18 +25,20 @@ export const Container = styled.View`
 `;
 
 export const HeaderContainer = styled.View`
+  position: relative;
   flex-direction: row;
-  margin-top: 5px;
+  margin: 20px 0;
   align-items: center;
 `;
 
 export const ScreenBackContainer = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.8,
 }))`
+  position: relative;
   z-index: 9999;
   position: absolute;
-  left: 5px;
-  padding: 0 5px;
+  left: 0;
+  padding: 0 10px;
 `;
 
 export const ScreenBackIcon = styled(Feather).attrs(() => ({
@@ -46,8 +48,6 @@ export const ScreenBackIcon = styled(Feather).attrs(() => ({
 }))``;
 
 export const Title = styled.Text`
-  top: 15px;
-  margin-bottom: 30px;
   text-align: center;
   width: 100%;
   font-size: 18px;

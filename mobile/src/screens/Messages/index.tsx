@@ -221,13 +221,15 @@ const Messages: React.FC = () => {
 
       setMessageInput('');
 
-      if (dataReceivedFromNavigation?.contactData) {
+      if (userData && dataReceivedFromNavigation?.contactData) {
         return socket.emit('chatMessage', {
-          email: dataReceivedFromNavigation?.contactData?.email,
+          private: [userData?.id, dataReceivedFromNavigation?.contactData?.id]
+            .sort((a, b) => a - b)
+            .join('-'),
         });
       } else {
         return socket.emit('chatMessage', {
-          nickname: dataReceivedFromNavigation?.roomData?.nickname,
+          room: dataReceivedFromNavigation?.roomData?.nickname,
         });
       }
     } catch (err) {
@@ -327,10 +329,12 @@ const Messages: React.FC = () => {
   }, [userData, dataReceivedFromNavigation]);
 
   useEffect(() => {
-    if (dataReceivedFromNavigation?.contactData) {
+    if (userData && dataReceivedFromNavigation?.contactData) {
       socket.emit(
         'joinChatPrivate',
-        dataReceivedFromNavigation?.contactData?.email,
+        [userData?.id, dataReceivedFromNavigation?.contactData?.id]
+          .sort((a, b) => a - b)
+          .join('-'),
       );
     } else {
       socket.emit(
@@ -338,7 +342,7 @@ const Messages: React.FC = () => {
         dataReceivedFromNavigation?.roomData?.nickname,
       );
     }
-  }, [dataReceivedFromNavigation]);
+  }, [userData, dataReceivedFromNavigation]);
 
   return (
     <Wrapper>

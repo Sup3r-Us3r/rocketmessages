@@ -4,7 +4,7 @@ import ImagePicker from 'react-native-image-picker';
 import AsyncStorage from '@react-native-community/async-storage';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
-import SignOut from '../../components/SignOut';
+import SignOut, {ISignOutHandles} from '../../components/SignOut';
 
 import AuthContex from '../../contexts/auth';
 
@@ -62,10 +62,13 @@ interface IUserData {
 }
 
 const Profile: React.FC = () => {
+  // Ref
+  const signOutRef = useRef<ISignOutHandles>(null);
+
   // Context
   const {userData} = useContext(AuthContex);
 
-  // States
+  // State
   const [selectedImage, setSelectedImage] = useState<IImageProperties>({});
   const [usernameInput, setUsernameInput] = useState<string>('');
   const [statusInput, setStatusInput] = useState<string>('');
@@ -75,7 +78,6 @@ const Profile: React.FC = () => {
   const [oldValueStatusInput, setOldValueStatusInput] = useState<string>('');
   const [toggleModal, setToggleModal] = useState<boolean>(false);
   const [showModalOf, setShowModalOf] = useState<string>('');
-  const [openSignOutModal, setOpenSignOutModal] = useState<boolean>(false);
 
   async function handleRequestUpdateUserApi(updateData: FormData) {
     try {
@@ -197,7 +199,7 @@ const Profile: React.FC = () => {
   }
 
   function handleSignOut() {
-    return setOpenSignOutModal(true);
+    return signOutRef.current?.openModal();
   }
 
   useEffect(() => {
@@ -325,13 +327,7 @@ const Profile: React.FC = () => {
         )}
       </Wrapper>
 
-      {openSignOutModal && (
-        <SignOut
-          username={oldValueUsernameInput}
-          openSignOutModal={openSignOutModal}
-          setOpenSignOutModal={setOpenSignOutModal}
-        />
-      )}
+      <SignOut ref={signOutRef} username={oldValueUsernameInput} />
     </>
   );
 };

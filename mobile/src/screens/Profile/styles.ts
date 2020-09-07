@@ -11,6 +11,7 @@ export const Wrapper = styled.KeyboardAvoidingView.attrs(() => ({
 `;
 
 export const Header = styled.View`
+  position: relative;
   align-items: center;
   justify-content: center;
   width: 100%;
@@ -20,8 +21,7 @@ export const Header = styled.View`
 `;
 
 export const Title = styled.Text`
-  width: 80%;
-  margin-left: 10%;
+  width: 100%;
   font-size: 18px;
   color: #777;
   text-align: center;
@@ -30,9 +30,9 @@ export const Title = styled.Text`
 export const LogoutContainer = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.5,
 }))`
-  align-items: center;
-  width: 10%;
-  padding: 5px;
+  position: absolute;
+  right: 0;
+  padding: 5px 10px;
 `;
 
 export const ContainerImage = styled.ImageBackground.attrs(() => ({

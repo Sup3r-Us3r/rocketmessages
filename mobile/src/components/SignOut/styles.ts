@@ -33,7 +33,7 @@ export const ScreenBackIcon = styled(Feather).attrs(() => ({
 export const RocketMessageLogo = styled.Image.attrs(() => ({
   resizeMode: 'contain',
 }))`
-  height: 450px;
+  height: 400px;
 `;
 
 export const SignOutLabel = styled.Text`
@@ -48,6 +48,6 @@ export const SignOutLabel = styled.Text`
 export const ConfirmSignOut = styled.TouchableOpacity.attrs(() => ({
   activeOpacity: 0.3,
 }))`
-  height: 150px;
+  height: 20%;
   width: 100%;
 `;

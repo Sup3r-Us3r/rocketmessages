@@ -2,8 +2,8 @@ import { Server } from 'http';
 import socketio from 'socket.io';
 
 interface IPrivateChatOrRoomChat {
-  email?: string;
-  nickname?: string;
+  private?: string;
+  room?: string;
 }
 
 class Websocket {
@@ -17,7 +17,7 @@ class Websocket {
     io.origins('*:*');
 
     io.on('connection', socket => {
-      console.log('New websocket connection.');
+      console.log(`New websocket connection: ${socket.id}`);
 
       // Listen users joined in room
       socket.on('joinChatRoom', (nickname: string) => {
@@ -26,22 +26,25 @@ class Websocket {
       });
 
       // Join user in private room
-      socket.on('joinChatPrivate', (email: string[]) => {
-        socket.join(email);
+      socket.on('joinChatPrivate', (id: string) => {
+        console.log('EMAIL: ', id);
+        console.log('SOCKETID: ', socket.id);
+        console.log('ROOMS: ', socket.rooms);
+        socket.join(id);
       });
 
       // Listen to new message
       socket.on(
         'chatMessage',
         (privateChatOrRoomChat: IPrivateChatOrRoomChat) => {
-          if (privateChatOrRoomChat?.email) {
+          if (privateChatOrRoomChat?.private) {
             // Is private chat
-            io.sockets.in(privateChatOrRoomChat?.email).emit('message', true);
+            io.sockets.in(privateChatOrRoomChat?.private).emit('message', true);
           }
 
-          if (privateChatOrRoomChat?.nickname) {
+          if (privateChatOrRoomChat?.room) {
             // Is room chat
-            io.sockets.in(privateChatOrRoomChat?.nickname)
+            io.sockets.in(privateChatOrRoomChat?.room)
               .emit('message', true);
           }
         },

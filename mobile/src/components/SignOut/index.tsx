@@ -1,4 +1,10 @@
-import React, {useContext, Dispatch, SetStateAction} from 'react';
+import React, {
+  useState,
+  useContext,
+  useCallback,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 import Lottie from 'lottie-react-native';
 
 import AuthContext from '../../contexts/auth';
@@ -15,29 +21,44 @@ import {
   ConfirmSignOut,
 } from './styles';
 
-interface ISignOutProps {
-  username: string;
-  openSignOutModal: boolean;
-  setOpenSignOutModal: Dispatch<SetStateAction<boolean>>;
+export interface ISignOutHandles {
+  openModal: () => void;
 }
 
-const SignOut: React.FC<ISignOutProps> = ({
-  username,
-  openSignOutModal,
-  setOpenSignOutModal,
-}) => {
+interface ISignOutProps {
+  username: string;
+}
+
+const SignOut: React.ForwardRefRenderFunction<
+  ISignOutHandles,
+  ISignOutProps
+> = ({username}, ref) => {
   // Context
   const {signOut} = useContext(AuthContext);
 
+  // State
+  const [visible, setVisible] = useState<boolean>(false);
+
+  const openModal = useCallback(() => {
+    setVisible(true);
+  }, []);
+
+  // ImperativeHandle
+  useImperativeHandle(ref, () => {
+    return {
+      openModal,
+    };
+  });
+
   function handleCloseModal() {
-    setOpenSignOutModal(false);
+    setVisible(false);
   }
 
   function handleSignOut() {
     signOut();
   }
 
-  return openSignOutModal ? (
+  return visible ? (
     <Wrapper>
       <ScreenBackContainer onPress={handleCloseModal}>
         <ScreenBackIcon />
@@ -57,4 +78,4 @@ const SignOut: React.FC<ISignOutProps> = ({
   ) : null;
 };
 
-export default SignOut;
+export default forwardRef(SignOut);
