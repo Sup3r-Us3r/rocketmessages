@@ -1,8 +1,16 @@
-import React, {useState, useEffect, useContext} from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useContext,
+} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
-import ShowModalRoom from '../../components/ShowModalRoom';
+import CreateOrEditRoom, {
+  ICreateOrEditRoomHandles,
+} from '../../components/CreateOrEditRoom';
 
 import {messageDateFormatter} from '../../utils/messageDateFormatter';
 
@@ -45,22 +53,24 @@ export interface ILatestMessageOfRoom {
 }
 
 const Rooms: React.FC = () => {
+  // Navigation
+  const navigation = useNavigation();
+
   // Contex
   const {userData} = useContext(AuthContex);
 
-  // States
+  // Ref
+  const createOrEditRoomRef = useRef<ICreateOrEditRoomHandles>(null);
+
+  // State
   const [noMessage, setNoMessage] = useState<boolean>(false);
   const [latestMessageOfRoom, setLatestMessageOfRoom] = useState<
     ILatestMessageOfRoom[]
   >([]);
-  const [toggleModalRoom, setToggleModalRoom] = useState<boolean>(false);
 
-  // Navigation
-  const navigation = useNavigation();
-
-  function handleOpenModalRoom() {
-    return setToggleModalRoom(true);
-  }
+  const handleCreateRoom = useCallback(() => {
+    return createOrEditRoomRef.current?.openModal();
+  }, []);
 
   function handleNavigateToMessages(roomData: ILatestMessageOfRoom) {
     return navigation.navigate('Messages', {
@@ -159,17 +169,11 @@ const Rooms: React.FC = () => {
         </Container>
       )}
 
-      <ContainerCreateRoom onPress={handleOpenModalRoom}>
+      <ContainerCreateRoom onPress={handleCreateRoom}>
         <AntDesign name="addusergroup" color="#fff" size={27} />
       </ContainerCreateRoom>
 
-      {toggleModalRoom && (
-        <ShowModalRoom
-          toggleModalRoom={toggleModalRoom}
-          setToggleModalRoom={setToggleModalRoom}
-          whichModal="create"
-        />
-      )}
+      <CreateOrEditRoom ref={createOrEditRoomRef} whichModal="create" />
     </Wrapper>
   );
 };

@@ -12,7 +12,9 @@ import EmojiSelector, {Categories} from 'react-native-emoji-selector';
 import {Modalize} from 'react-native-modalize';
 
 import ChatDetails from '../../components/ChatDetails';
-import ShowModalRoom from '../../components/ShowModalRoom';
+import CreateOrEditRoom, {
+  ICreateOrEditRoomHandles,
+} from '../../components/CreateOrEditRoom';
 import AddUserInRoom from '../../components/AddUserInRoom';
 import LeaveRoomModal from '../../components/LeaveRoom';
 
@@ -89,6 +91,7 @@ const Messages: React.FC = () => {
   const modalizeChatDetailsRef = useRef<Modalize>(null);
   const modalizeLeaveRoomRef = useRef<Modalize>(null);
   const pageRef = useRef<number>(1);
+  const createOrEditRoomRef = useRef<ICreateOrEditRoomHandles>(null);
   // const lastPageRef = useRef<number>(1);
   // const totalPage = useRef<number>(0);
 
@@ -99,7 +102,6 @@ const Messages: React.FC = () => {
   const [showChatActions, setShowChatActions] = useState<boolean>(false);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
   const [hideMessageField, setHideMessageField] = useState<boolean>(false);
-  const [toggleModalRoom, setToggleModalRoom] = useState<boolean>(false);
   const [toggleModalAddUserInRoom, setToggleModalAddUserInRoom] = useState<
     boolean
   >(false);
@@ -129,10 +131,11 @@ const Messages: React.FC = () => {
     return modalizeChatDetailsRef.current?.open();
   }
 
-  function handleOpenModalRoom() {
+  function handleEditRoom() {
     setShowChatActions(false);
 
-    return setToggleModalRoom(true);
+    return createOrEditRoomRef.current?.openModal();
+    // return setToggleModalRoom(true);
   }
 
   function handleOpenModalAddUserInRoom() {
@@ -378,7 +381,7 @@ const Messages: React.FC = () => {
                   <ActionLabel>Adicionar usuário</ActionLabel>
                 </AddUserInRoomModal>
 
-                <UpdateRoom onPress={handleOpenModalRoom}>
+                <UpdateRoom onPress={handleEditRoom}>
                   <Feather name="edit" color="#7159c1" size={20} />
                   <ActionLabel>Editar grupo</ActionLabel>
                 </UpdateRoom>
@@ -490,14 +493,11 @@ const Messages: React.FC = () => {
         </Modalize>
 
         {/* Modal for edit room */}
-        {toggleModalRoom && (
-          <ShowModalRoom
-            toggleModalRoom={toggleModalRoom}
-            setToggleModalRoom={setToggleModalRoom}
-            whichModal="update"
-            roomData={dataReceivedFromNavigation?.roomData}
-          />
-        )}
+        <CreateOrEditRoom
+          ref={createOrEditRoomRef}
+          whichModal="update"
+          roomData={dataReceivedFromNavigation?.roomData}
+        />
 
         {/* Modal for add user in room */}
         {toggleModalAddUserInRoom && (
