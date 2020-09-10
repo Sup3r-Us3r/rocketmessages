@@ -105,6 +105,7 @@ const Messages: React.FC = () => {
   const [showChatActions, setShowChatActions] = useState<boolean>(false);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
   const [hideMessageField, setHideMessageField] = useState<boolean>(false);
+  const [status, setStatus] = useState<string>('');
 
   // Navigation
   const navigation = useNavigation();
@@ -344,6 +345,29 @@ const Messages: React.FC = () => {
     }
   }, [userData, dataReceivedFromNavigation]);
 
+  useEffect(() => {
+    function handleContactIsOnline(response: boolean) {
+      if (response) {
+        setStatus('Online');
+        console.log('Usuário online.');
+      } else {
+        setStatus('Offline');
+        console.log('Usuário offline.');
+      }
+    }
+
+    if (dataReceivedFromNavigation?.contactData) {
+      socket.emit(
+        'checkUserOnline',
+        dataReceivedFromNavigation?.contactData?.email,
+      );
+      socket.on('checkUserOnline', handleContactIsOnline);
+    }
+    return () => {
+      socket.off('checkUserOnline', handleContactIsOnline);
+    };
+  }, [dataReceivedFromNavigation]);
+
   return (
     <Wrapper>
       <Container onPress={() => setShowChatActions(false)}>
@@ -364,7 +388,11 @@ const Messages: React.FC = () => {
                 ? dataReceivedFromNavigation?.contactData?.username
                 : dataReceivedFromNavigation?.roomData?.name}
             </ChatName>
-            <ChatStatus>Online</ChatStatus>
+            <ChatStatus>
+              {dataReceivedFromNavigation?.contactData
+                ? status
+                : dataReceivedFromNavigation?.roomData?.nickname}
+            </ChatStatus>
           </ChatInfo>
           {dataReceivedFromNavigation?.roomData && (
             <ChatAction onPress={handleToggleChatActions}>

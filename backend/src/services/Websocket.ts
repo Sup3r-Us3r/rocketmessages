@@ -6,7 +6,22 @@ interface IPrivateChatOrRoomChat {
   room?: string;
 }
 
+interface IUserData {
+  socketId: string;
+  email: string;
+}
+
 class Websocket {
+  private users: IUserData[] = [];
+  
+  usersOnline(userData: IUserData) {
+    if (!this.users.find((user: IUserData) => user.email === userData.email)) {
+      this.users.push(userData);
+    }
+
+    return this.users;
+  }
+
   socketIO(httpServer: Server) {
     // socket.emit() = Emit single client
     // socket.broadcast.emit() = Emit all client except you
@@ -19,6 +34,19 @@ class Websocket {
     io.on('connection', socket => {
       console.log(`New websocket connection: ${socket.id}`);
 
+      // Emit users online
+      socket.on('userOnline', (userData: IUserData) => {
+        this.usersOnline(userData);
+      });
+
+      socket.on('checkUserOnline', (email: string) => {
+        const userOnline = this.users.some(
+          (user: IUserData) => user.email === email
+        );
+
+        io.emit('checkUserOnline', userOnline);
+      });
+
       // Listen users joined in room
       socket.on('joinChatRoom', (nickname: string) => {
         socket.join(nickname);
@@ -27,9 +55,6 @@ class Websocket {
 
       // Join user in private room
       socket.on('joinChatPrivate', (id: string) => {
-        console.log('EMAIL: ', id);
-        console.log('SOCKETID: ', socket.id);
-        console.log('ROOMS: ', socket.rooms);
         socket.join(id);
       });
 
@@ -70,7 +95,13 @@ class Websocket {
 
       // Runs when client disconnects
       socket.on('disconnect', () => {
-        io.emit('messagee', 'A user has left the chat.');
+        // this.users.splice(
+        //   this.users.findIndex(
+        //     (user: IUserData) => user.socketId === socket.id
+        //   ), 1
+        // );
+
+        // console.log('USERS2: ', this.users);
       });
     });
   }
