@@ -75,7 +75,7 @@ class Websocket {
         },
       );
 
-      // Listen handle participants in room
+      // Listen participants in room
       socket.on('handleParticipantsInRoom', () => {
         socket.emit('refreshParticipantsInroom', true);
       });
@@ -90,6 +90,23 @@ class Websocket {
       socket.on('updateLatestRoomMessage', (response: boolean) => {
         if (response) {
           socket.emit('updateLatestRoomMessage', true);
+        }
+      });
+
+      // Emit updating message in main page for two clients
+      socket.on('firstMessageUpdateForTwoClients', (privateChat: string) => {
+        io.sockets.in(privateChat).emit(
+          'firstMessageUpdateForTwoClients',
+          true
+        );
+      });
+
+      // Listen typing
+      socket.on('typing', (response: boolean) => {
+        if (response) {
+          socket.broadcast.emit('typing', true);
+        } else {
+          socket.broadcast.emit('typing', false);
         }
       });
 

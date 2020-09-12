@@ -4,6 +4,7 @@ import {useNavigation} from '@react-navigation/native';
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
+import socket from '../../services/websocket';
 import api from '../../services/api';
 
 import Toast from '../../config/toastStyles';

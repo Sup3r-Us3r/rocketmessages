@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef, useContext} from 'react';
-import {Keyboard, FlatList, ActivityIndicator} from 'react-native';
+import {FlatList, ActivityIndicator} from 'react-native';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {AxiosRequestConfig} from 'axios';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -98,9 +98,9 @@ const Messages: React.FC = () => {
   // const lastPageRef = useRef<number>(1);
   // const totalPage = useRef<number>(0);
 
-  // States
+  // State
   const [messages, setMessages] = useState<IMessages[]>([]);
-  const [loadingMessages, setLoadingMessages] = useState<boolean>(false);
+  const [loadingMessages, setLoadingMessages] = useState<boolean>(true);
   const [messageInput, setMessageInput] = useState<string>('');
   const [showChatActions, setShowChatActions] = useState<boolean>(false);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
@@ -156,6 +156,16 @@ const Messages: React.FC = () => {
     }
 
     pageRef.current = pageRef.current + 1;
+  }
+
+  function handleTypingMessage(message: string) {
+    setMessageInput(message);
+
+    return socket.emit('typing', true);
+  }
+
+  function handleStopTyping() {
+    return socket.emit('typing', false);
   }
 
   function handleRenderItem({item}: {item: IMessages}) {
@@ -221,12 +231,26 @@ const Messages: React.FC = () => {
       }
 
       setMessageInput('');
+      socket.emit('typing', false);
 
       if (userData && dataReceivedFromNavigation?.contactData) {
+        const createPrivateJoinUsers = [
+          userData?.id,
+          dataReceivedFromNavigation?.contactData?.id,
+        ]
+          .sort((a, b) => a - b)
+          .join('-');
+
+        // First message sent
+        if (messages.length === 0) {
+          socket.emit(
+            'firstMessageUpdateForTwoClients',
+            createPrivateJoinUsers,
+          );
+        }
+
         return socket.emit('chatMessage', {
-          private: [userData?.id, dataReceivedFromNavigation?.contactData?.id]
-            .sort((a, b) => a - b)
-            .join('-'),
+          private: createPrivateJoinUsers,
         });
       } else {
         return socket.emit('chatMessage', {
@@ -279,8 +303,6 @@ const Messages: React.FC = () => {
       } as AxiosRequestConfig;
 
       try {
-        setLoadingMessages(true);
-
         const allMessages = await api.get<IMessages[]>(
           requestUrl,
           requestOptions,
@@ -312,6 +334,7 @@ const Messages: React.FC = () => {
       if (response) {
         handleGetMessages();
 
+        // Update messages in main page
         if (dataReceivedFromNavigation?.contactData) {
           socket.emit('updateLatestPrivateMessage', true);
         } else {
@@ -320,10 +343,8 @@ const Messages: React.FC = () => {
       }
     }
 
-    // Websocket mobile - Listen emit from backend
     socket.on('message', handleUpdateMessages);
 
-    // Remove listen
     return () => {
       socket.off('message', handleUpdateMessages);
     };
@@ -349,10 +370,8 @@ const Messages: React.FC = () => {
     function handleContactIsOnline(response: boolean) {
       if (response) {
         setStatus('Online');
-        console.log('Usuário online.');
       } else {
         setStatus('Offline');
-        console.log('Usuário offline.');
       }
     }
 
@@ -367,6 +386,22 @@ const Messages: React.FC = () => {
       socket.off('checkUserOnline', handleContactIsOnline);
     };
   }, [dataReceivedFromNavigation]);
+
+  useEffect(() => {
+    function handleSomeoneIsTyping(response: boolean) {
+      if (response) {
+        setStatus('está digitando...');
+      } else {
+        setStatus('Online');
+      }
+    }
+
+    socket.on('typing', handleSomeoneIsTyping);
+
+    return () => {
+      socket.off('typing', handleSomeoneIsTyping);
+    };
+  }, []);
 
   return (
     <Wrapper>
@@ -458,9 +493,9 @@ const Messages: React.FC = () => {
                 placeholder="Digite uma mensagem"
                 autoCorrect={false}
                 multiline
-                onBlur={Keyboard.dismiss}
+                onBlur={handleStopTyping}
                 onSubmitEditing={() => null}
-                onChangeText={setMessageInput}
+                onChangeText={(message) => handleTypingMessage(message)}
                 value={messageInput}
               />
               {messageInput.length > 0 && (
