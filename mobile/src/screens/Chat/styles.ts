@@ -48,7 +48,7 @@ export const ContactContainer = styled.TouchableOpacity.attrs(() => ({
 }))`
   flex-direction: row;
   align-items: center;
-  padding: 10px 15px;
+  padding: 10px;
   border-radius: 7px;
 `;
 
@@ -68,9 +68,13 @@ export const ContactInfo = styled.View`
   align-items: center;
 `;
 
-export const ContactInfoUser = styled.View``;
+export const ContactInfoUser = styled.View`
+  width: 78%;
+`;
 
-export const ContactNotificationMessage = styled.View``;
+export const ContactNotificationMessage = styled.View`
+  width: 22%;
+`;
 
 export const ContactName = styled.Text`
   font-size: 16px;

@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useContext,
 } from 'react';
+import {Dimensions} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
@@ -78,23 +79,39 @@ const Rooms: React.FC = () => {
     });
   }
 
-  function handleSerializedLatestMessage(
-    latestMessageData: ILatestMessageOfRoom[],
-  ) {
-    const serialized = latestMessageData.map((item) => ({
-      id: item?.id,
-      name: item?.name,
-      nickname: item?.nickname,
-      avatar: item?.avatar,
-      message:
-        item?.message?.length < 28
-          ? item?.message
-          : item?.message?.substr(0, 28) + '...',
-      created_at: messageDateFormatter(item?.created_at),
-    }));
+  function handleScreenOrientation() {
+    const orientation = Dimensions.get('screen');
 
-    return serialized;
+    return orientation.height >= orientation.width ? 'portrait' : 'landscape';
   }
+
+  const handleSerializedLatestMessage = useCallback(
+    (latestMessageData: ILatestMessageOfRoom[]) => {
+      function handlePreviewMessage(message: string) {
+        if (handleScreenOrientation() === 'portrait') {
+          return message?.length < 25
+            ? message
+            : message?.substr(0, 25) + '...';
+        } else {
+          return message?.length < 70
+            ? message
+            : message?.substr(0, 70) + '...';
+        }
+      }
+
+      const serialized = latestMessageData.map((item) => ({
+        id: item?.id,
+        name: item?.name,
+        nickname: item?.nickname,
+        avatar: item?.avatar,
+        message: handlePreviewMessage(item?.message),
+        created_at: messageDateFormatter(item?.created_at),
+      }));
+
+      return serialized;
+    },
+    [],
+  );
 
   useEffect(() => {
     async function handleGetLatestMessage() {
@@ -134,7 +151,7 @@ const Rooms: React.FC = () => {
     return () => {
       socket.off('updateLatestRoomMessage', handleUpdateLatestMessage);
     };
-  }, [userData]);
+  }, [userData, handleSerializedLatestMessage]);
 
   return (
     <Wrapper>

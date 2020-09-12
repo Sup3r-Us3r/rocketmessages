@@ -48,7 +48,7 @@ export const RoomContainer = styled.TouchableOpacity.attrs(() => ({
 }))`
   flex-direction: row;
   align-items: center;
-  padding: 10px 15px;
+  padding: 10px;
   border-radius: 7px;
 `;
 
@@ -68,9 +68,13 @@ export const RoomInfoData = styled.View`
   align-items: center;
 `;
 
-export const RoomInfo = styled.View``;
+export const RoomInfo = styled.View`
+  width: 78%;
+`;
 
-export const RoomNotificationMessage = styled.View``;
+export const RoomNotificationMessage = styled.View`
+  width: 22%;
+`;
 
 export const RoomName = styled.Text`
   font-size: 16px;

@@ -1,4 +1,5 @@
-import React, {useState, useEffect, useContext} from 'react';
+import React, {useState, useEffect, useCallback, useContext} from 'react';
+import {Dimensions} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
 import {messageDateFormatter} from '../../utils/messageDateFormatter';
@@ -55,31 +56,47 @@ const Chat: React.FC = () => {
   // Navigation
   const navigation = useNavigation();
 
+  function handleScreenOrientation() {
+    const orientation = Dimensions.get('screen');
+
+    return orientation.height >= orientation.width ? 'portrait' : 'landscape';
+  }
+
   function handleNavigateToMessages(contactData: ILatestMessageOfContact) {
     return navigation.navigate('Messages', {
       contactData,
     });
   }
 
-  function handleSerializedLatestMessage(
-    latestMessageData: ILatestMessageOfContact[],
-  ) {
-    const serialized = latestMessageData.map((item) => ({
-      id: item?.id,
-      username: item?.username,
-      email: item?.email,
-      photo: item?.photo,
-      status: item?.status,
-      image: item?.image,
-      message:
-        item.message.length < 28
-          ? item?.message
-          : item?.message.substr(0, 28) + '...',
-      created_at: messageDateFormatter(item?.created_at),
-    }));
+  const handleSerializedLatestMessage = useCallback(
+    (latestMessageData: ILatestMessageOfContact[]) => {
+      function handlePreviewMessage(message: string) {
+        if (handleScreenOrientation() === 'portrait') {
+          return message?.length < 25
+            ? message
+            : message?.substr(0, 25) + '...';
+        } else {
+          return message?.length < 70
+            ? message
+            : message?.substr(0, 70) + '...';
+        }
+      }
 
-    return serialized;
-  }
+      const serialized = latestMessageData.map((item) => ({
+        id: item?.id,
+        username: item?.username,
+        email: item?.email,
+        photo: item?.photo,
+        status: item?.status,
+        image: item?.image,
+        message: handlePreviewMessage(item?.message),
+        created_at: messageDateFormatter(item?.created_at),
+      }));
+
+      return serialized;
+    },
+    [],
+  );
 
   useEffect(() => {
     async function handleGetLatestMessage() {
@@ -119,7 +136,7 @@ const Chat: React.FC = () => {
     return () => {
       socket.off('updateLatestPrivateMessage', handleUpdateLatestMessage);
     };
-  }, [userData]);
+  }, [userData, handleSerializedLatestMessage]);
 
   return (
     <Wrapper>
