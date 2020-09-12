@@ -1,5 +1,8 @@
 import styled from 'styled-components/native';
-import {Platform} from 'react-native';
+import {Platform, Dimensions} from 'react-native';
+
+// Set 10% of the screen height for padding
+const padding = (10 / 100) * Math.round(Dimensions.get('screen').height);
 
 export const Wrapper = styled.KeyboardAvoidingView.attrs(() => ({
   behavior: Platform.OS === 'android' ? undefined : 'padding',
@@ -22,7 +25,7 @@ export const Container = styled.View`
   margin: 0 auto;
   align-items: center;
   justify-content: center;
-  padding: 0 0 150px 0;
+  padding: 0 0 ${String(padding) + 'px'} 0;
 `;
 
 export const WelcomeMessage = styled.Text`

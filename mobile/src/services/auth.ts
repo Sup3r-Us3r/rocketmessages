@@ -58,7 +58,9 @@ export async function signUp(userSentData: IUserSentData) {
     const validation = await handleFieldsValidation(userSentData);
 
     if (!validation) {
-      return Toast.error('Preenchimento incorreto.');
+      Toast.error('Preenchimento incorreto.');
+
+      return false;
     }
 
     const create = await api.post('/createuser', userSentData);
@@ -67,7 +69,7 @@ export async function signUp(userSentData: IUserSentData) {
       return Toast.error('Erro ao fazer cadastro.');
     }
 
-    return create;
+    return Toast.success('Conta criada com sucesso.');
   } catch (err) {
     const {error} = err.response.data;
 

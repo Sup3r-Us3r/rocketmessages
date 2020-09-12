@@ -1,5 +1,5 @@
 import React, {useState, useContext} from 'react';
-import {Keyboard} from 'react-native';
+import {Keyboard, Dimensions} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Lottie from 'lottie-react-native';
 
@@ -75,6 +75,15 @@ const Auth = () => {
     return navigation.navigate('ForgotPassword');
   }
 
+  function handleBestHeightForImage() {
+    const percentage = 30;
+
+    const height =
+      (percentage / 100) * Math.round(Dimensions.get('screen').height);
+
+    return height;
+  }
+
   return (
     <Wrapper>
       <>
@@ -86,7 +95,7 @@ const Auth = () => {
               loop
               resizeMode="contain"
               // eslint-disable-next-line react-native/no-inline-styles
-              style={{height: 300, width: 300}}
+              style={{height: handleBestHeightForImage(), width: 300}}
             />
 
             <WelcomeMessage>Rocket Messages</WelcomeMessage>

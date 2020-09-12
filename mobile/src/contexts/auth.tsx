@@ -1,8 +1,6 @@
 import React, {createContext, useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 
-import Toast from '../config/toastStyles';
-
 import * as auth from '../services/auth';
 
 import {ISignInResponse} from '../services/auth';
@@ -32,7 +30,7 @@ export const AuthProvider: React.FC = ({children}) => {
   async function signIn(
     userSentData: IUserSentData,
   ): Promise<ISignInResponse | any> {
-    const response = await auth.signIn(userSentData);
+    const response: ISignInResponse = await auth.signIn(userSentData);
 
     if (response?.username) {
       setUserData(response);
@@ -47,9 +45,7 @@ export const AuthProvider: React.FC = ({children}) => {
   async function signUp(userSentData: IUserSentData) {
     const response = await auth.signUp(userSentData);
 
-    if (response) {
-      return Toast.success('Conta criada com sucesso.');
-    }
+    return response;
   }
 
   async function signOut() {

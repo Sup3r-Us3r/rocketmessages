@@ -5943,11 +5943,6 @@ react-native-iphone-x-helper@1.2.1, react-native-iphone-x-helper@^1.2.1:
   resolved "https://registry.yarnpkg.com/react-native-iphone-x-helper/-/react-native-iphone-x-helper-1.2.1.tgz#645e2ffbbb49e80844bb4cbbe34a126fda1e6772"
   integrity sha512-/VbpIEp8tSNNHIvstuA3Swx610whci1Zpc9mqNkqn14DkMbw+ORviln2u0XyHG1kPvvwTNGZY6QpeFwxYaSdbQ==
 
-react-native-linear-gradient@^2.5.6:
-  version "2.5.6"
-  resolved "https://registry.yarnpkg.com/react-native-linear-gradient/-/react-native-linear-gradient-2.5.6.tgz#96215cbc5ec7a01247a20890888aa75b834d44a0"
-  integrity sha512-HDwEaXcQIuXXCV70O+bK1rizFong3wj+5Q/jSyifKFLg0VWF95xh8XQgfzXwtq0NggL9vNjPKXa016KuFu+VFg==
-
 react-native-modalize@^2.0.5:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/react-native-modalize/-/react-native-modalize-2.0.5.tgz#1a9df6864850e93a5c7b0c9fb1a0ded30057f8a0"
@@ -5984,11 +5979,6 @@ react-native-screens@^2.8.0:
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/react-native-screens/-/react-native-screens-2.8.0.tgz#9f989096fc5ccf248e0dfa93a74f1a64057e15f1"
   integrity sha512-fUCIQLZX+5XB0ypWX038P3zso54IFFjTsQUZJWEsjC3pp5rPItAt5SzqtJn+uVjcJaczZ+dpIuvj6IFLqkWLZQ==
-
-react-native-shimmer-placeholder@^2.0.6:
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/react-native-shimmer-placeholder/-/react-native-shimmer-placeholder-2.0.6.tgz#a6626d955945edb1aa01f8863f3e039a738d53d1"
-  integrity sha512-eq0Jxi/j/WseijfSeNjoAsaz1164XUCDvKpG/+My+c5YeVMfjTnl9SwoVAIr9uOpuDXXia67j8xME+eFJZvBXw==
 
 react-native-tab-view@^2.14.4:
   version "2.14.4"

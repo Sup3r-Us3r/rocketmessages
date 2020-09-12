@@ -30,7 +30,7 @@ export const ForgotPasswordLabel = styled.Text`
   margin: 15px 0;
   font-size: 16px;
   text-align: center;
-  color: #ddd;
+  color: #ccc;
 `;
 
 interface IEmailInputProps {
@@ -40,7 +40,7 @@ interface IEmailInputProps {
 export const EmailInput = styled.TextInput`
   font-size: 18px;
   color: ${({loading}: IEmailInputProps) => (loading ? '#999' : '#333')};
-  padding: 20px 10px 10px 10px;
+  padding: 10px 10px 10px 10px;
   border-bottom-width: 2px;
   border-bottom-color: ${({loading}: IEmailInputProps) =>
     loading ? '#999' : '#7159c1'};
