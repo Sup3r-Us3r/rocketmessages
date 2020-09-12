@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useCallback, useContext} from 'react';
 import {Dimensions} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 
 import {messageDateFormatter} from '../../utils/messageDateFormatter';
 
@@ -154,6 +155,7 @@ const Chat: React.FC = () => {
                 key={Number(item?.id)}
                 onPress={() => handleNavigateToMessages(item)}>
                 <ContactImage source={{uri: String(item?.photo)}} />
+
                 <ContactInfo>
                   <ContactInfoUser>
                     <ContactName>{item?.username}</ContactName>

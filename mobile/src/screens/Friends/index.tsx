@@ -41,7 +41,7 @@ interface IContactData {
 }
 
 const Friends: React.FC = () => {
-  // States
+  // State
   const [typing, setTyping] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState<string>('');
   const [searchResult, setSearchResult] = useState<IContactData[]>([]);

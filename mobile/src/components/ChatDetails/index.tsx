@@ -8,8 +8,6 @@ import AuthContext from '../../contexts/auth';
 
 import api from '../../services/api';
 
-import UseAxios from '../../hooks/useAxios';
-
 import Toast from '../../config/toastStyles';
 
 import {
@@ -123,34 +121,27 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
   useEffect(() => {
     async function handleGetParticipants() {
       try {
-        // const users = await api.get<IParticipants[]>('/usersinroom', {
-        //   params: {
-        //     nickname: chatData?.roomData?.nickname,
-        //     user_id: userData?.id,
-        //   },
-        // });
-
-        const {data, error} = UseAxios<IParticipants[]>('/usersinroom', {
+        const users = await api.get<IParticipants[]>('/usersinroom', {
           params: {
             nickname: chatData?.roomData?.nickname,
             user_id: userData?.id,
           },
         });
 
-        if (!data) {
+        if (!users) {
           return Toast.error('Erro ao listar participantes.');
         }
 
         // I'm admin?
         const isAdmin = Boolean(
-          data.find((user) => user?.id === userData?.id)?.user_admin,
+          users.data.find((user) => user?.id === userData?.id)?.user_admin,
         );
 
         if (isAdmin) {
           setAdmin(true);
         }
 
-        return setParticipants(data);
+        return setParticipants(users.data);
       } catch (err) {
         const {error} = err.response.data;
 
