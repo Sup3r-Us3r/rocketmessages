@@ -146,10 +146,10 @@ const Rooms: React.FC = () => {
       }
     }
 
-    socket.on('updateLatestRoomMessage', handleUpdateLatestMessage);
+    socket.on('myRoomsRefresh', handleUpdateLatestMessage);
 
     return () => {
-      socket.off('updateLatestRoomMessage', handleUpdateLatestMessage);
+      socket.off('myRoomsRefresh', handleUpdateLatestMessage);
     };
   }, [userData, handleSerializedLatestMessage]);
 

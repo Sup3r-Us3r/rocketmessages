@@ -26,6 +26,7 @@ import AuthContext from '../../contexts/auth';
 
 import socket from '../../services/websocket';
 import api from '../../services/api';
+import {handlePrivateJoinUsers} from '../../services/refreshData';
 
 import Toast from '../../config/toastStyles';
 
@@ -234,23 +235,13 @@ const Messages: React.FC = () => {
       socket.emit('typing', false);
 
       if (userData && dataReceivedFromNavigation?.contactData) {
-        const createPrivateJoinUsers = [
+        const idsJoined = [
           userData?.id,
           dataReceivedFromNavigation?.contactData?.id,
-        ]
-          .sort((a, b) => a - b)
-          .join('-');
-
-        // First message sent
-        if (messages.length === 0) {
-          socket.emit(
-            'firstMessageUpdateForTwoClients',
-            createPrivateJoinUsers,
-          );
-        }
+        ];
 
         return socket.emit('chatMessage', {
-          private: createPrivateJoinUsers,
+          private: idsJoined,
         });
       } else {
         return socket.emit('chatMessage', {
@@ -330,34 +321,25 @@ const Messages: React.FC = () => {
 
     handleGetMessages();
 
-    function handleUpdateMessages(response: boolean) {
-      if (response) {
+    function handleUpdateMessages(response: number[]) {
+      if (userData && response.includes(userData?.id)) {
         handleGetMessages();
-
-        // Update messages in main page
-        if (dataReceivedFromNavigation?.contactData) {
-          socket.emit('updateLatestPrivateMessage', true);
-        } else {
-          socket.emit('updateLatestRoomMessage', true);
-        }
       }
     }
 
-    socket.on('message', handleUpdateMessages);
+    socket.on('messageRefresh', handleUpdateMessages);
 
     return () => {
-      socket.off('message', handleUpdateMessages);
+      socket.off('messageRefresh', handleUpdateMessages);
     };
   }, [userData, dataReceivedFromNavigation]);
 
   useEffect(() => {
     if (userData && dataReceivedFromNavigation?.contactData) {
-      socket.emit(
-        'joinChatPrivate',
-        [userData?.id, dataReceivedFromNavigation?.contactData?.id]
-          .sort((a, b) => a - b)
-          .join('-'),
-      );
+      handlePrivateJoinUsers(
+        userData?.id,
+        dataReceivedFromNavigation?.contactData?.id,
+      ).emit();
     } else {
       socket.emit(
         'joinChatRoom',

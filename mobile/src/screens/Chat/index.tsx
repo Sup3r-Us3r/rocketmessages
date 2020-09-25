@@ -125,18 +125,16 @@ const Chat: React.FC = () => {
 
     handleGetLatestMessage();
 
-    function handleUpdateLatestMessage(response: boolean) {
-      if (response) {
+    function handleUpdateLatestMessage(response: number[]) {
+      if (userData && response.includes(userData?.id)) {
         handleGetLatestMessage();
       }
     }
 
-    socket.on('updateLatestPrivateMessage', handleUpdateLatestMessage);
-    socket.on('firstMessageUpdateForTwoClients', handleUpdateLatestMessage);
+    socket.on('messageRefresh', handleUpdateLatestMessage);
 
     return () => {
-      socket.off('updateLatestPrivateMessage', handleUpdateLatestMessage);
-      socket.off('firstMessageUpdateForTwoClients', handleUpdateLatestMessage);
+      socket.off('messageRefresh', handleUpdateLatestMessage);
     };
   }, [userData, handleSerializedLatestMessage]);
 

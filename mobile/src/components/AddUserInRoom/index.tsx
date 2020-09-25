@@ -109,7 +109,6 @@ const AddUserInRoom: React.RefForwardingComponent<
 
       Toast.success(`${userAdded} adicionado ao grupo.`);
 
-      // Emit for websocket backend - Join user in room
       return socket.emit('joinRoomChat', nickname);
     } catch (err) {
       const {error} = err.response.data;
@@ -198,10 +197,10 @@ const AddUserInRoom: React.RefForwardingComponent<
       }
     }
 
-    socket.on('updateUsersInRoom', handleUpdateUsersInRoom);
+    socket.on('listUsersToAddRefresh', handleUpdateUsersInRoom);
 
     return () => {
-      socket.off('updateUsersInRoom', handleUpdateUsersInRoom);
+      socket.off('listUsersToAddRefresh', handleUpdateUsersInRoom);
     };
   }, [userData, nickname]);
 

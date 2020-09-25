@@ -2,7 +2,7 @@ import { Server } from 'http';
 import socketio from 'socket.io';
 
 interface IPrivateChatOrRoomChat {
-  private?: string;
+  private?: number[];
   room?: string;
 }
 
@@ -50,7 +50,7 @@ class Websocket {
       // Listen users joined in room
       socket.on('joinChatRoom', (nickname: string) => {
         socket.join(nickname);
-        socket.emit('updateUsersInRoom', nickname);
+        socket.emit('listUsersToAddRefresh', nickname);
       });
 
       // Join user in private room
@@ -64,41 +64,26 @@ class Websocket {
         (privateChatOrRoomChat: IPrivateChatOrRoomChat) => {
           if (privateChatOrRoomChat?.private) {
             // Is private chat
-            io.sockets.in(privateChatOrRoomChat?.private).emit('message', true);
+            io.emit('messageRefresh', privateChatOrRoomChat?.private);
           }
 
           if (privateChatOrRoomChat?.room) {
             // Is room chat
             io.sockets.in(privateChatOrRoomChat?.room)
-              .emit('message', true);
+              .emit('messageRefresh', true);
           }
         },
       );
 
+      socket.on('myRoomsRefresh', (response: boolean) => {
+        if (response) {
+          socket.emit('myRoomsRefresh', true);
+        }
+      });
+
       // Listen participants in room
       socket.on('handleParticipantsInRoom', () => {
         socket.emit('refreshParticipantsInroom', true);
-      });
-
-      // Listen updating and emit update for main page
-      socket.on('updateLatestPrivateMessage', (response: boolean) => {
-        if (response) {
-          socket.emit('updateLatestPrivateMessage', true);
-        }
-      });
-
-      socket.on('updateLatestRoomMessage', (response: boolean) => {
-        if (response) {
-          socket.emit('updateLatestRoomMessage', true);
-        }
-      });
-
-      // Emit updating message in main page for two clients
-      socket.on('firstMessageUpdateForTwoClients', (privateChat: string) => {
-        io.sockets.in(privateChat).emit(
-          'firstMessageUpdateForTwoClients',
-          true
-        );
       });
 
       // Listen typing

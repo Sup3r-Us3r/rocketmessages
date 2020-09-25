@@ -69,7 +69,9 @@ export async function signUp(userSentData: IUserSentData) {
       return Toast.error('Erro ao fazer cadastro.');
     }
 
-    return Toast.success('Conta criada com sucesso.');
+    Toast.success('Conta criada com sucesso.');
+
+    return true;
   } catch (err) {
     const {error} = err.response.data;
 
