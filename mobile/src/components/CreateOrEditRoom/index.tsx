@@ -7,7 +7,10 @@ import React, {
   forwardRef,
 } from 'react';
 import {Animated, Easing} from 'react-native';
+import {useDispatch} from 'react-redux';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
+import {updateRoomMainPageRequest} from '../../store/modules/refreshRoom/actions';
 
 // Import exported interface
 import {ILatestMessageOfRoom} from '../../screens/Rooms';
@@ -71,6 +74,9 @@ const CreateOrEditRoom: React.ForwardRefRenderFunction<
   ICreateOrEditRoomHandles,
   ICreateOrEditRoomProps
 > = ({whichModal, roomData}, ref) => {
+  // Redux
+  const dispatch = useDispatch();
+
   // Context
   const {userData} = useContext(AuthContext);
 
@@ -215,11 +221,11 @@ const CreateOrEditRoom: React.ForwardRefRenderFunction<
     if (validation) {
       await handleRequestCreateOrUpdateRoomApi(formData);
 
+      dispatch(updateRoomMainPageRequest(nicknameInput));
+
       setVisible(false);
       setNameInput('');
       setNicknameInput('');
-
-      return socket.emit('myRoomsRefresh', true);
     }
   }
 

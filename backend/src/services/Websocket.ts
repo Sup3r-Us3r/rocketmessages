@@ -78,17 +78,6 @@ class Websocket {
         },
       );
 
-      socket.on('myRoomsRefresh', (response: boolean) => {
-        if (response) {
-          socket.emit('myRoomsRefresh', {room: true});
-        }
-      });
-
-      // Listen participants in room
-      socket.on('handleParticipantsInRoom', () => {
-        socket.emit('refreshParticipantsInroom', true);
-      });
-
       // Listen typing
       socket.on('typing', (response: boolean) => {
         if (response) {

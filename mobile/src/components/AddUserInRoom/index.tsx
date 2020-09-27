@@ -7,6 +7,9 @@ import React, {
   useImperativeHandle,
 } from 'react';
 import {Animated, Easing} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
+
+import {updateParticipantsInRoomRequest} from '../../store/modules/refreshRoom/actions';
 
 import AuthContext from '../../contexts/auth';
 
@@ -58,6 +61,12 @@ const AddUserInRoom: React.ForwardRefRenderFunction<
   IAddUserInRoomHandles,
   IAddUserInRoomProps
 > = ({roomId, nickname}, ref) => {
+  // Redux
+  const dispatch = useDispatch();
+  const updateParticipant = useSelector(
+    (state: any) => state.refreshRoom.updateParticipant,
+  );
+
   // Context
   const {userData} = useContext(AuthContext);
 
@@ -108,6 +117,10 @@ const AddUserInRoom: React.ForwardRefRenderFunction<
       }
 
       Toast.success(`${userAdded} adicionado ao grupo.`);
+
+      dispatch(
+        updateParticipantsInRoomRequest(`${userAdded}-${Math.random()}`),
+      );
 
       return socket.emit('joinChatRoom', nickname);
     } catch (err) {
@@ -189,22 +202,7 @@ const AddUserInRoom: React.ForwardRefRenderFunction<
     }
 
     handleGetFrequentContacts();
-
-    // Listen update users in room
-    function handleUpdateUsersInRoom(response: boolean) {
-      if (response) {
-        handleGetFrequentContacts();
-      }
-    }
-
-    socket.on('refreshParticipantsInroom', handleUpdateUsersInRoom);
-    socket.on('listUsersToAddRefresh', handleUpdateUsersInRoom);
-
-    return () => {
-      socket.off('refreshParticipantsInroom', handleUpdateUsersInRoom);
-      socket.off('listUsersToAddRefresh', handleUpdateUsersInRoom);
-    };
-  }, [userData, nickname]);
+  }, [userData, nickname, updateParticipant]);
 
   useEffect(() => {
     if (visible) {

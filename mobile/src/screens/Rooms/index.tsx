@@ -6,6 +6,7 @@ import React, {
   useContext,
 } from 'react';
 import {Dimensions} from 'react-native';
+import {useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
@@ -54,6 +55,10 @@ export interface ILatestMessageOfRoom {
 }
 
 const Rooms: React.FC = () => {
+  // Redux
+  const newRoom = useSelector((state: any) => state.refreshRoom.newRoom);
+  console.log('STATE1: ', newRoom);
+
   // Navigation
   const navigation = useNavigation();
 
@@ -99,7 +104,14 @@ const Rooms: React.FC = () => {
         }
       }
 
-      const serialized = latestMessageData.map((item) => ({
+      const sortDescendingDate = latestMessageData
+        .sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+        )
+        .reverse();
+
+      const serialized = sortDescendingDate.map((item) => ({
         id: item?.id,
         name: item?.name,
         nickname: item?.nickname,
@@ -114,6 +126,8 @@ const Rooms: React.FC = () => {
   );
 
   useEffect(() => {
+    console.log('STATE2: ', newRoom);
+
     async function handleGetLatestMessage() {
       try {
         const message = await api.get<ILatestMessageOfRoom[]>(
@@ -140,23 +154,24 @@ const Rooms: React.FC = () => {
 
     handleGetLatestMessage();
 
-    function handleUpdateLatestMessage(response: {
-      private?: number[];
-      room?: string;
-    }) {
-      if (userData && response?.room) {
-        handleGetLatestMessage();
-      }
-    }
+    // function handleUpdateLatestMessage(response: {
+    //   private?: number[];
+    //   room?: string;
+    // }) {
+    //   if (userData && response?.room) {
+    //     handleGetLatestMessage();
+    //   }
+    // }
 
-    socket.on('myRoomsRefresh', handleUpdateLatestMessage);
-    socket.on('messageRefresh', handleUpdateLatestMessage);
+    // socket.on('myRoomsRefresh', handleUpdateLatestMessage);
+    // socket.on('messageRefresh', handleUpdateLatestMessage);
 
-    return () => {
-      socket.off('myRoomsRefresh', handleUpdateLatestMessage);
-      socket.off('messageRefresh', handleUpdateLatestMessage);
-    };
-  }, [userData, handleSerializedLatestMessage]);
+    // return () => {
+    //   socket.off('myRoomsRefresh', handleUpdateLatestMessage);
+    //   socket.off('messageRefresh', handleUpdateLatestMessage);
+    // };
+    console.log('STATE3: ', newRoom);
+  }, [userData, handleSerializedLatestMessage, newRoom]);
 
   return (
     <Wrapper>

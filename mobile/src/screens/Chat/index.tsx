@@ -1,10 +1,13 @@
 import React, {useState, useEffect, useCallback, useContext} from 'react';
 import {Dimensions} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 
-import {messageDateFormatter} from '../../utils/messageDateFormatter';
+import {messagePrivateRefreshRequest} from '../../store/modules/refreshPrivate/actions';
 
 import AuthContex from '../../contexts/auth';
+
+import {messageDateFormatter} from '../../utils/messageDateFormatter';
 
 import socket from '../../services/websocket';
 import api from '../../services/api';
@@ -44,6 +47,12 @@ export interface ILatestMessageOfContact {
 }
 
 const Chat: React.FC = () => {
+  // Redux
+  const dispatch = useDispatch();
+  const newContact = useSelector(
+    (state: any) => state.refreshPrivate.newContact,
+  );
+
   // Contex
   const {userData} = useContext(AuthContex);
 
@@ -82,7 +91,14 @@ const Chat: React.FC = () => {
         }
       }
 
-      const serialized = latestMessageData.map((item) => ({
+      const sortDescendingDate = latestMessageData
+        .sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+        )
+        .reverse();
+
+      const serialized = sortDescendingDate.map((item) => ({
         id: item?.id,
         username: item?.username,
         email: item?.email,
@@ -125,21 +141,38 @@ const Chat: React.FC = () => {
 
     handleGetLatestMessage();
 
-    function handleUpdateLatestMessage(response: {
+    // function handleUpdateLatestMessage(response: {
+    //   private?: number[];
+    //   room?: string;
+    // }) {
+    //   if (userData && response?.private?.includes(userData?.id)) {
+    //     handleGetLatestMessage();
+    //   }
+    // }
+
+    // socket.on('messageRefresh', handleUpdateLatestMessage);
+
+    // return () => {
+    //   socket.off('messageRefresh', handleUpdateLatestMessage);
+    // };
+  }, [userData, handleSerializedLatestMessage, newContact]);
+
+  useEffect(() => {
+    function handleMessageRefresh(response: {
       private?: number[];
       room?: string;
     }) {
       if (userData && response?.private?.includes(userData?.id)) {
-        handleGetLatestMessage();
+        dispatch(messagePrivateRefreshRequest());
       }
     }
 
-    socket.on('messageRefresh', handleUpdateLatestMessage);
+    socket.on('messageRefresh', handleMessageRefresh);
 
     return () => {
-      socket.off('messageRefresh', handleUpdateLatestMessage);
+      socket.off('messageRefresh', handleMessageRefresh);
     };
-  }, [userData, handleSerializedLatestMessage]);
+  }, [userData, dispatch]);
 
   return (
     <Wrapper>

@@ -1,7 +1,9 @@
+import Reactotron from 'reactotron-react-native';
 import {produce} from 'immer';
 
 const INITIAL_STATE = {
-  loading: true,
+  newRoom: '',
+  updateParticipant: '',
 };
 
 export default function refreshRoom(
@@ -11,9 +13,19 @@ export default function refreshRoom(
   return produce(state, (draft) => {
     switch (action.type) {
       case '@refreshRoom/UPDATE_ROOM_MAIN_PAGE_REQUEST': {
-        const {} = action.payload;
+        const {nicknameRoom} = action.payload as {nicknameRoom: string};
 
-        draft.loading = false;
+        Reactotron.log!(nicknameRoom);
+
+        draft.newRoom = nicknameRoom;
+
+        Reactotron.log!(draft.newRoom);
+        break;
+      }
+      case '@refreshRoom/UPDATE_PARTICIPANTS_IN_ROOM_REQUEST': {
+        const {participant} = action.payload as {participant: string};
+
+        draft.updateParticipant = participant;
         break;
       }
       default:

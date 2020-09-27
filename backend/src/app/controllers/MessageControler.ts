@@ -107,11 +107,11 @@ export default new class MessageController {
       ))
       .where('RN', 1);
 
-    if (!messages) {
-      return res.status(500).json({ error: 'Error on listing messages.' });
-    }
+      if (!messages) {
+        return res.status(500).json({ error: 'Error on listing messages.' });
+      }
 
-    return res.json(messages);
+      return res.json(messages);
     } catch (err) {
       return res.status(500).json({ error: 'Error on listing messages.' });
     }

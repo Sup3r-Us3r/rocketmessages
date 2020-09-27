@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useRef, useContext} from 'react';
 import {FlatList, ActivityIndicator} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {AxiosRequestConfig} from 'axios';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -20,9 +21,11 @@ import AddUserInRoom, {
 } from '../../components/AddUserInRoom';
 import LeaveRoomModal from '../../components/LeaveRoom';
 
-import {handleTwoDigitsFormat} from '../../utils/messageDateFormatter';
+import {updatePrivateMainPageRequest} from '../../store/modules/refreshPrivate/actions';
 
 import AuthContext from '../../contexts/auth';
+
+import {handleTwoDigitsFormat} from '../../utils/messageDateFormatter';
 
 import socket from '../../services/websocket';
 import api from '../../services/api';
@@ -86,6 +89,15 @@ interface IDataReceivedFromNavigation {
 }
 
 const Messages: React.FC = () => {
+  // Redux
+  const dispatch = useDispatch();
+  const updateParticipant = useSelector(
+    (state: any) => state.refreshRoom.updateParticipant,
+  );
+  const newMessage = useSelector(
+    (state: any) => state.refreshPrivate.newMessage,
+  );
+
   // Context
   const {userData} = useContext(AuthContext);
 
@@ -235,6 +247,15 @@ const Messages: React.FC = () => {
       socket.emit('typing', false);
 
       if (userData && dataReceivedFromNavigation?.contactData) {
+        // First message for user
+        if (messages.length === 0) {
+          dispatch(
+            updatePrivateMainPageRequest(
+              dataReceivedFromNavigation?.contactData?.username,
+            ),
+          );
+        }
+
         const idsJoined = [
           userData?.id,
           dataReceivedFromNavigation?.contactData?.id,
@@ -320,29 +341,29 @@ const Messages: React.FC = () => {
     }
 
     handleGetMessages();
+  }, [userData, dataReceivedFromNavigation, updateParticipant, newMessage]);
 
-    function handleUpdateMessages(response: {
-      private?: number[];
-      room?: string;
-    }) {
-      if (userData && response?.private?.includes(userData?.id)) {
-        handleGetMessages();
-      }
+  // useEffect(() => {
+  //   function handleMessageRefresh(response: {
+  //     private?: number[];
+  //     room?: string;
+  //   }) {
+  //     if (userData && response?.private?.includes(userData?.id)) {
+  //     }
 
-      if (
-        userData &&
-        response?.room === dataReceivedFromNavigation?.roomData?.nickname
-      ) {
-        handleGetMessages();
-      }
-    }
+  //     if (
+  //       userData &&
+  //       response?.room === dataReceivedFromNavigation?.roomData?.nickname
+  //     ) {
+  //     }
+  //   }
 
-    socket.on('messageRefresh', handleUpdateMessages);
+  //   socket.on('messageRefresh', handleMessageRefresh);
 
-    return () => {
-      socket.off('messageRefresh', handleUpdateMessages);
-    };
-  }, [userData, dataReceivedFromNavigation]);
+  //   return () => {
+  //     socket.off('messageRefresh', handleMessageRefresh);
+  //   };
+  // }, [userData, dataReceivedFromNavigation]);
 
   useEffect(() => {
     if (userData && dataReceivedFromNavigation?.contactData) {

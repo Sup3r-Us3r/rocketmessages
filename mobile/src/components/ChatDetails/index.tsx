@@ -1,4 +1,7 @@
 import React, {useState, useEffect, useContext} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+
+import {updateParticipantsInRoomRequest} from '../../store/modules/refreshRoom/actions';
 
 // import exported interface
 import {ILatestMessageOfContact} from '../../screens/Chat';
@@ -33,7 +36,6 @@ import {
   ParticipantActionRemove,
   ParticipantActionRemoveIcon,
 } from './styles';
-import socket from '../../services/websocket';
 
 interface IDataReceivedFromNavigation {
   contactData?: ILatestMessageOfContact;
@@ -53,7 +55,13 @@ interface IParticipants {
 }
 
 const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
-  // context
+  // Redux
+  const dispatch = useDispatch();
+  const updateParticipant = useSelector(
+    (state: any) => state.refreshRoom.updateParticipant,
+  );
+
+  // Context
   const {userData} = useContext(AuthContext);
 
   // States
@@ -90,7 +98,9 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
           : `${whoIs} não é um administrador.`,
       );
 
-      return socket.emit('handleParticipantsInRoom');
+      return dispatch(
+        updateParticipantsInRoomRequest(`${whoIs}-${Math.random()}`),
+      );
     } catch (err) {
       const {error} = err.response.data;
 
@@ -126,8 +136,9 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
 
       Toast.success(`${userRemoved} removido com sucesso.`);
 
-      socket.emit('refreshParticipantsInroom', true);
-      return socket.emit('handleParticipantsInRoom');
+      return dispatch(
+        updateParticipantsInRoomRequest(`${userRemoved}-${Math.random()}`),
+      );
     } catch (err) {
       const {error} = err.response.data;
 
@@ -169,19 +180,7 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
     if (chatData?.roomData?.nickname) {
       handleGetParticipants();
     }
-
-    function handleRefreshParticipants(response: boolean) {
-      if (response) {
-        handleGetParticipants();
-      }
-    }
-
-    socket.on('refreshParticipantsInroom', handleRefreshParticipants);
-
-    return () => {
-      socket.off('refreshParticipantsInroom', handleRefreshParticipants);
-    };
-  }, [chatData, userData]);
+  }, [chatData, userData, updateParticipant]);
 
   return (
     <Wrapper>

@@ -6,7 +6,7 @@ export default function persistReducers(reducers: any) {
   const persistedReducer = persistReducer(
     {
       key: 'rocketMessages',
-      whitelist: ['refreshRoom'],
+      whitelist: ['refreshPrivate', 'refreshRoom'],
       storage: AsyncStorage,
     },
     reducers,
