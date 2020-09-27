@@ -321,8 +321,18 @@ const Messages: React.FC = () => {
 
     handleGetMessages();
 
-    function handleUpdateMessages(response: number[]) {
-      if (userData && response.includes(userData?.id)) {
+    function handleUpdateMessages(response: {
+      private?: number[];
+      room?: string;
+    }) {
+      if (userData && response?.private?.includes(userData?.id)) {
+        handleGetMessages();
+      }
+
+      if (
+        userData &&
+        response?.room === dataReceivedFromNavigation?.roomData?.nickname
+      ) {
         handleGetMessages();
       }
     }

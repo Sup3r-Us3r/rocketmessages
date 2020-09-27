@@ -54,7 +54,7 @@ interface IFrequentContacts {
   status: string;
 }
 
-const AddUserInRoom: React.RefForwardingComponent<
+const AddUserInRoom: React.ForwardRefRenderFunction<
   IAddUserInRoomHandles,
   IAddUserInRoomProps
 > = ({roomId, nickname}, ref) => {
@@ -100,7 +100,7 @@ const AddUserInRoom: React.RefForwardingComponent<
         from: userId,
         to_room: roomId,
         to_user: null,
-        message: `${userAdded} foi adicionado ao grupo.`,
+        message: `${userAdded} foi adicionado ao grupo`,
       });
 
       if (!sendMessageNewUser) {
@@ -109,7 +109,7 @@ const AddUserInRoom: React.RefForwardingComponent<
 
       Toast.success(`${userAdded} adicionado ao grupo.`);
 
-      return socket.emit('joinRoomChat', nickname);
+      return socket.emit('joinChatRoom', nickname);
     } catch (err) {
       const {error} = err.response.data;
 
@@ -191,15 +191,17 @@ const AddUserInRoom: React.RefForwardingComponent<
     handleGetFrequentContacts();
 
     // Listen update users in room
-    function handleUpdateUsersInRoom(roomNickname: string) {
-      if (roomNickname === nickname) {
+    function handleUpdateUsersInRoom(response: boolean) {
+      if (response) {
         handleGetFrequentContacts();
       }
     }
 
+    socket.on('refreshParticipantsInroom', handleUpdateUsersInRoom);
     socket.on('listUsersToAddRefresh', handleUpdateUsersInRoom);
 
     return () => {
+      socket.off('refreshParticipantsInroom', handleUpdateUsersInRoom);
       socket.off('listUsersToAddRefresh', handleUpdateUsersInRoom);
     };
   }, [userData, nickname]);

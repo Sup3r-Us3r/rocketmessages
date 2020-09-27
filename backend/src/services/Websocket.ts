@@ -50,7 +50,7 @@ class Websocket {
       // Listen users joined in room
       socket.on('joinChatRoom', (nickname: string) => {
         socket.join(nickname);
-        socket.emit('listUsersToAddRefresh', nickname);
+        socket.emit('listUsersToAddRefresh', true);
       });
 
       // Join user in private room
@@ -64,20 +64,23 @@ class Websocket {
         (privateChatOrRoomChat: IPrivateChatOrRoomChat) => {
           if (privateChatOrRoomChat?.private) {
             // Is private chat
-            io.emit('messageRefresh', privateChatOrRoomChat?.private);
+            io.emit('messageRefresh', {
+              private: privateChatOrRoomChat?.private
+            });
           }
 
           if (privateChatOrRoomChat?.room) {
             // Is room chat
-            io.sockets.in(privateChatOrRoomChat?.room)
-              .emit('messageRefresh', true);
+            io.emit('messageRefresh', {
+              room: true
+            });
           }
         },
       );
 
       socket.on('myRoomsRefresh', (response: boolean) => {
         if (response) {
-          socket.emit('myRoomsRefresh', true);
+          socket.emit('myRoomsRefresh', {room: true});
         }
       });
 

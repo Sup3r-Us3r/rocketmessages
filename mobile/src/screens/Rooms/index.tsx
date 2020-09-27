@@ -140,16 +140,21 @@ const Rooms: React.FC = () => {
 
     handleGetLatestMessage();
 
-    function handleUpdateLatestMessage(response: boolean) {
-      if (response) {
+    function handleUpdateLatestMessage(response: {
+      private?: number[];
+      room?: string;
+    }) {
+      if (userData && response?.room) {
         handleGetLatestMessage();
       }
     }
 
     socket.on('myRoomsRefresh', handleUpdateLatestMessage);
+    socket.on('messageRefresh', handleUpdateLatestMessage);
 
     return () => {
       socket.off('myRoomsRefresh', handleUpdateLatestMessage);
+      socket.off('messageRefresh', handleUpdateLatestMessage);
     };
   }, [userData, handleSerializedLatestMessage]);
 

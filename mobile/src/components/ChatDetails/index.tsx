@@ -108,8 +108,25 @@ const ChatDetails: React.FC<IChatDetailsProps> = ({chatData}) => {
         return Toast.error('Erro ao remover usuário do grupo.');
       }
 
-      Toast.success('Usuário removido com sucesso.');
+      const userRemoved = participants.find(
+        (user: IParticipants) => user.id === userId,
+      )?.username;
 
+      const sendMessageUserRemoved = await api.post('/message', {
+        bot: true,
+        from: userId,
+        to_room: chatData?.roomData?.id,
+        to_user: null,
+        message: `${userRemoved} foi removido do grupo`,
+      });
+
+      if (!sendMessageUserRemoved) {
+        return Toast.error('Erro ao enviar mensagem de usuário removido.');
+      }
+
+      Toast.success(`${userRemoved} removido com sucesso.`);
+
+      socket.emit('refreshParticipantsInroom', true);
       return socket.emit('handleParticipantsInRoom');
     } catch (err) {
       const {error} = err.response.data;

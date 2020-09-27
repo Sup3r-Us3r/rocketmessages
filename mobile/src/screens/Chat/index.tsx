@@ -125,8 +125,11 @@ const Chat: React.FC = () => {
 
     handleGetLatestMessage();
 
-    function handleUpdateLatestMessage(response: number[]) {
-      if (userData && response.includes(userData?.id)) {
+    function handleUpdateLatestMessage(response: {
+      private?: number[];
+      room?: string;
+    }) {
+      if (userData && response?.private?.includes(userData?.id)) {
         handleGetLatestMessage();
       }
     }

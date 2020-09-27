@@ -67,7 +67,7 @@ interface IRoomInputs {
   nickname: string;
 }
 
-const CreateOrEditRoom: React.RefForwardingComponent<
+const CreateOrEditRoom: React.ForwardRefRenderFunction<
   ICreateOrEditRoomHandles,
   ICreateOrEditRoomProps
 > = ({whichModal, roomData}, ref) => {
@@ -214,9 +214,13 @@ const CreateOrEditRoom: React.RefForwardingComponent<
 
     if (validation) {
       await handleRequestCreateOrUpdateRoomApi(formData);
-    }
 
-    return socket.emit('myRoomsRefresh', nicknameInput);
+      setVisible(false);
+      setNameInput('');
+      setNicknameInput('');
+
+      return socket.emit('myRoomsRefresh', true);
+    }
   }
 
   function handleModalAnimationFadeOut() {
